@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <title>Employee - Bamee 5 Num</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+
+</head>
+<body class="bg-gray-100">
+
+<header class="bg-white shadow py-4 px-6 flex justify-between items-center">
+    <h1 class="text-xl font-bold text-orange-600">Bamee 5 Num</h1>
+    <div id="navButtons" class="space-x-4">
+        <a href="/" class="text-gray-700 hover:text-orange-600">เข้าสู่ระบบ</a>
+    </div>
+    <div id="userNav" class="hidden flex items-center space-x-4">
+        <span id="welcomeText" class="font-semibold text-gray-700"></span>
+        <button id="logoutBtn" class="text-red-500 hover:text-red-700">Logout</button>
+    </div>
+</header>
+
+<div class="max-w-6xl mx-auto p-8 space-y-6">
+    <div>
+        <h2 class="text-2xl font-bold text-gray-800 mb-4">📦 จัดการออเดอร์</h2>
+        <div id="employeeOrders" class="bg-white p-6 rounded-lg shadow">
+            <!-- รายการออเดอร์ -->
+            <p class="text-gray-500">กำลังโหลดออเดอร์...</p>
+        </div>
+    </div>
+
+    <div>
+        <h2 class="text-2xl font-bold text-gray-800 mb-4">📝 จัดการการจอง</h2>
+        <div id="employeeReservations" class="bg-white p-6 rounded-lg shadow">
+            <!-- รายการการจอง -->
+            <p class="text-gray-500">กำลังโหลดการจอง...</p>
+        </div>
+    </div>
+</div>
+
+<script type="module" src="/js/db.js"></script>
+<script type="module" src="/js/landing.js"></script>
+<script type="module" src="/js/customer.js"></script>
+
+</body>
+</html>

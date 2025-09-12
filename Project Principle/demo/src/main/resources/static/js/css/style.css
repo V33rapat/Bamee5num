@@ -1,0 +1,93 @@
+/* style.css (plain CSS) */
+
+/* General body background and font */
+body {
+    font-family: 'Inter', sans-serif;
+    background: linear-gradient(to bottom right, #fff7ed, #ffe4e1); /* from-orange-50 to-red-50 */
+    min-height: 100vh;
+}
+
+/* Fade-in animation for dashboards */
+.fade-in {
+    opacity: 0;
+    animation: fadeIn 0.8s forwards;
+}
+
+@keyframes fadeIn {
+    to {
+        opacity: 1;
+    }
+}
+
+/* Slide-up animation for modals */
+.slide-up {
+    transform: translateY(30px);
+    opacity: 0;
+    animation: slideUp 0.5s forwards;
+}
+
+@keyframes slideUp {
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+/* Buttons */
+button {
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+/* Manager tabs active state */
+.manager-tab.active {
+    border-bottom: 2px solid #f97316; /* Tailwind orange-500 */
+    color: #f97316;
+}
+
+/* Cart badge */
+#cartCount {
+    font-size: 0.75rem;
+    line-height: 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Notification styling */
+#notifications div {
+    background-color: #f97316; /* Tailwind orange-500 */
+    color: white;
+    padding: 0.5rem 1rem;
+    border-radius: 0.5rem;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+    animation: slideIn 0.5s forwards;
+}
+
+@keyframes slideIn {
+    from { transform: translateX(100%); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
+}
+
+/* Inputs and selects */
+input, select, textarea {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid #d1d5db; /* gray-300 */
+    border-radius: 0.5rem;
+    outline: none;
+    transition: all 0.3s ease;
+}
+
+input:focus, select:focus, textarea:focus {
+    border-color: transparent;
+    box-shadow: 0 0 0 2px #f97316; /* orange-500 ring */
+}
+
+/* Card style */
+.card {
+    background-color: white;
+    padding: 1.5rem;
+    border-radius: 1rem;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+}
