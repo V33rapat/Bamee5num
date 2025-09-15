@@ -23,22 +23,22 @@
 
 ## Tasks
 
-- [ ] 1.0 Clean Up Legacy Frontend Code
-  - [ ] 1.1 Remove or update shared cart array in db.js since backend now handles cart storage
-  - [ ] 1.2 Review and remove localStorage cart functions that are no longer needed
-  - [ ] 1.3 Update logout function in db.js to not clear cart (since it's now persisted in database)
+- [x] 1.0 Clean Up Legacy Frontend Code
+  - [x] 1.1 Remove or update shared cart array in db.js since backend now handles cart storage
+  - [x] 1.2 Review and remove localStorage cart functions that are no longer needed
+  - [x] 1.3 Update logout function in db.js to not clear cart (since it's now persisted in database)
 
-- [ ] 2.0 Enhance Backend Cart Service
-  - [ ] 2.1 Remove hardcoded test data from CartService constructor
-  - [ ] 2.2 Integrate CartService with CartController (controller currently bypasses service)
-  - [ ] 2.3 Add business logic methods in CartService for cart operations
-  - [ ] 2.4 Add cart clearing functionality (clear all items for a customer)
+- [x] 2.0 Enhance Backend Cart Service
+  - [x] 2.1 Remove hardcoded test data from CartService constructor
+  - [x] 2.2 Integrate CartService with CartController (controller currently bypasses service)
+  - [x] 2.3 Add business logic methods in CartService for cart operations
+  - [x] 2.4 Add cart clearing functionality (clear all items for a customer)
 
-- [ ] 3.0 Improve Cart Quantity Management
-  - [ ] 3.1 Add quantity increment/decrement endpoints in CartController
-  - [ ] 3.2 Update frontend to show quantity controls in cart UI
-  - [ ] 3.3 Modify addToCart logic to increase quantity if item already exists instead of creating duplicate entries
-  - [ ] 3.4 Add quantity validation (minimum 1, maximum reasonable limit)
+- [x] 3.0 Improve Cart Quantity Management
+  - [x] 3.1 Add quantity increment/decrement endpoints in CartController
+  - [x] 3.2 Update frontend to show quantity controls in cart UI
+  - [x] 3.3 Modify addToCart logic to increase quantity if item already exists instead of creating duplicate entries
+  - [x] 3.4 Add quantity validation (minimum 1, maximum reasonable limit)
 
 - [ ] 4.0 Add Session Management and Security
   - [ ] 4.1 Implement proper session handling in CartController to verify customer identity
