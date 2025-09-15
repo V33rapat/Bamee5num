@@ -1,5 +1,5 @@
 // customer.js
-import { menuItems, cart, currentUser } from "./db.js";
+import { menuItems, currentUser } from "./db.js";
 
 document.addEventListener("DOMContentLoaded", () => {
     setupCustomerDashboard();
@@ -39,7 +39,7 @@ export function setupCustomerDashboard() {
         btn.addEventListener("click", () => {
             const id = parseInt(btn.dataset.id);
             const item = menuItems.find(i => i.id === id);
-            if (item) addToCart(item);
+            if (item) addToCart(item, user.id);
         });
     });
 
@@ -48,7 +48,10 @@ export function setupCustomerDashboard() {
     const cartSidebar = document.getElementById("cartSidebar");
     const closeCart = document.getElementById("closeCart");
 
-    cartBtn.addEventListener("click", () => cartSidebar.classList.remove("translate-x-full"));
+    cartBtn.addEventListener("click", () => {
+        cartSidebar.classList.remove("translate-x-full");
+        loadCart(user.id);
+    });
     closeCart.addEventListener("click", () => cartSidebar.classList.add("translate-x-full"));
 
     // Logout
@@ -57,20 +60,53 @@ export function setupCustomerDashboard() {
         window.location.href = "/";
     });
 
-    // โหลดตะกร้าจาก localStorage
-    const storedCart = JSON.parse(localStorage.getItem("cart")) || [];
-    storedCart.forEach(item => cart.push(item));
-    updateCartUI();
+    // โหลด cart ตอนเริ่ม
+    loadCart(user.id);
 }
 
-function addToCart(item) {
-    cart.push(item);
-    localStorage.setItem("cart", JSON.stringify(cart));
-    updateCartUI();
-    showNotification(`${item.name} ถูกเพิ่มในตะกร้า`);
+// ======== Cart Functions (Server Integration) ========
+async function getCart(userId) {
+    try {
+        const res = await fetch(`http://localhost:8080/cart/${userId}`);
+        if (!res.ok) throw new Error("โหลด cart ไม่สำเร็จ");
+        return await res.json();
+    } catch (err) {
+        console.error(err);
+        return [];
+    }
 }
 
-function updateCartUI() {
+async function addToCart(item, userId) {
+    try {
+        const res = await fetch("http://localhost:8080/cart/add", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ userId, name: item.name, price: item.price })
+        });
+        if (!res.ok) throw new Error("เพิ่มสินค้าไม่สำเร็จ");
+        showNotification(`${item.name} ถูกเพิ่มในตะกร้า`);
+        loadCart(userId);
+    } catch (err) {
+        console.error(err);
+        alert("เกิดข้อผิดพลาดในการเพิ่มสินค้า");
+    }
+}
+
+async function removeFromCart(cartItemId, userId) {
+    try {
+        const res = await fetch(`http://localhost:8080/cart/remove/${cartItemId}`, {
+            method: "DELETE"
+        });
+        if (!res.ok) throw new Error("ลบสินค้าไม่สำเร็จ");
+        loadCart(userId);
+    } catch (err) {
+        console.error(err);
+        alert("เกิดข้อผิดพลาดในการลบสินค้า");
+    }
+}
+
+async function loadCart(userId) {
+    const cart = await getCart(userId);
     const cartCount = document.getElementById("cartCount");
     const cartItemsDiv = document.getElementById("cartItems");
     const emptyCart = document.getElementById("emptyCart");
@@ -92,8 +128,9 @@ function updateCartUI() {
     } else {
         emptyCart.classList.add("hidden");
         cartFooter.classList.remove("hidden");
+
         let total = 0;
-        cart.forEach((item, index) => {
+        cart.forEach(item => {
             total += item.price;
             const div = document.createElement("div");
             div.className = "flex justify-between items-center border-b pb-2";
@@ -101,30 +138,29 @@ function updateCartUI() {
                 <span>${item.name}</span>
                 <div class="flex items-center space-x-2">
                     <span>฿${item.price}</span>
-                    <button class="text-red-500 remove-item" data-index="${index}">ลบ</button>
+                    <button class="text-red-500 remove-item" data-id="${item.id}">ลบ</button>
                 </div>
             `;
             cartItemsDiv.appendChild(div);
         });
         cartTotal.textContent = `฿${total}`;
 
-        // ลบสินค้า
+        // Event ลบสินค้า
         document.querySelectorAll(".remove-item").forEach(btn => {
             btn.addEventListener("click", () => {
-                const index = parseInt(btn.dataset.index);
-                cart.splice(index, 1);
-                localStorage.setItem("cart", JSON.stringify(cart));
-                updateCartUI();
+                const cartItemId = parseInt(btn.dataset.id);
+                removeFromCart(cartItemId, userId);
             });
         });
     }
 }
 
+// ======== Notification ========
 function showNotification(message) {
     const notifications = document.getElementById("notifications");
     const div = document.createElement("div");
     div.textContent = message;
-    div.className = "bg-orange-500 text-white p-2 rounded shadow";
+    div.className = "bg-orange-500 text-white p-2 rounded shadow mb-2";
     notifications.appendChild(div);
     setTimeout(() => div.remove(), 3000);
 }
