@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/customer")
+@RequestMapping("/api/customer")
 public class CustomerController {
 
     private final CartService cartService;
@@ -16,7 +16,7 @@ public class CustomerController {
         this.cartService = cartService;
     }
 
-    @GetMapping
+    @GetMapping("")
     public List<CartItem> getCustomerCart(@RequestParam int id) {
         return cartService.getCartByCustomerId(id);
     }

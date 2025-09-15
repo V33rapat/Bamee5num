@@ -81,7 +81,7 @@ async function addToCart(item, userId) {
         const res = await fetch("http://localhost:8080/cart/add", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ userId, name: item.name, price: item.price })
+            body: JSON.stringify({ customerId: userId, name: item.name, price: item.price, quantity: 1 })
         });
         if (!res.ok) throw new Error("เพิ่มสินค้าไม่สำเร็จ");
         showNotification(`${item.name} ถูกเพิ่มในตะกร้า`);
@@ -89,6 +89,48 @@ async function addToCart(item, userId) {
     } catch (err) {
         console.error(err);
         alert("เกิดข้อผิดพลาดในการเพิ่มสินค้า");
+    }
+}
+
+async function incrementQuantity(itemId, userId) {
+    try {
+        const res = await fetch(`http://localhost:8080/cart/increment/${itemId}`, {
+            method: "PUT"
+        });
+        if (!res.ok) {
+            const errorText = await res.text();
+            if (errorText.includes("exceed 99")) {
+                showNotification("ไม่สามารถเพิ่มจำนวนได้ เนื่องจากถึงขด จำกัดแล้ว (99)");
+            } else {
+                throw new Error("เพิ่มจำนวนไม่สำเร็จ");
+            }
+        } else {
+            loadCart(userId);
+        }
+    } catch (err) {
+        console.error(err);
+        showNotification("เกิดข้อผิดพลาดในการเพิ่มจำนวน");
+    }
+}
+
+async function decrementQuantity(itemId, userId) {
+    try {
+        const res = await fetch(`http://localhost:8080/cart/decrement/${itemId}`, {
+            method: "PUT"
+        });
+        if (!res.ok) {
+            const errorText = await res.text();
+            if (errorText.includes("less than 1")) {
+                showNotification("ไม่สามารถลดจำนวนได้ เนื่องจากมีเพียง 1 ชิ้น");
+            } else {
+                throw new Error("ลดจำนวนไม่สำเร็จ");
+            }
+        } else {
+            loadCart(userId);
+        }
+    } catch (err) {
+        console.error(err);
+        showNotification("เกิดข้อผิดพลาดในการลดจำนวน");
     }
 }
 
@@ -116,7 +158,9 @@ async function loadCart(userId) {
     cartItemsDiv.innerHTML = "";
 
     if (cart.length > 0) {
-        cartCount.textContent = cart.length;
+        // Calculate total item count (sum of all quantities)
+        const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
+        cartCount.textContent = totalItems;
         cartCount.classList.remove("hidden");
     } else {
         cartCount.classList.add("hidden");
@@ -131,14 +175,27 @@ async function loadCart(userId) {
 
         let total = 0;
         cart.forEach(item => {
-            total += item.price;
+            const itemTotal = item.price * item.quantity;
+            total += itemTotal;
             const div = document.createElement("div");
-            div.className = "flex justify-between items-center border-b pb-2";
+            div.className = "border-b pb-3 mb-3";
             div.innerHTML = `
-                <span>${item.name}</span>
-                <div class="flex items-center space-x-2">
-                    <span>฿${item.price}</span>
-                    <button class="text-red-500 remove-item" data-id="${item.id}">ลบ</button>
+                <div class="flex justify-between items-start mb-2">
+                    <span class="font-medium">${item.name}</span>
+                    <button class="text-red-500 hover:text-red-700 remove-item" data-id="${item.id}">×</button>
+                </div>
+                <div class="flex justify-between items-center">
+                    <div class="flex items-center space-x-2">
+                        <button class="bg-gray-200 hover:bg-gray-300 text-gray-700 w-8 h-8 rounded-full decrease-qty"
+                                data-id="${item.id}" ${item.quantity <= 1 ? 'disabled' : ''}>-</button>
+                        <span class="px-3 py-1 bg-gray-100 rounded min-w-12 text-center">${item.quantity}</span>
+                        <button class="bg-gray-200 hover:bg-gray-300 text-gray-700 w-8 h-8 rounded-full increase-qty"
+                                data-id="${item.id}">+</button>
+                    </div>
+                    <div class="text-right">
+                        <div class="text-sm text-gray-500">฿${item.price} × ${item.quantity}</div>
+                        <div class="font-semibold">฿${itemTotal}</div>
+                    </div>
                 </div>
             `;
             cartItemsDiv.appendChild(div);
@@ -150,6 +207,22 @@ async function loadCart(userId) {
             btn.addEventListener("click", () => {
                 const cartItemId = parseInt(btn.dataset.id);
                 removeFromCart(cartItemId, userId);
+            });
+        });
+
+        // Event เพิ่มจำนวน
+        document.querySelectorAll(".increase-qty").forEach(btn => {
+            btn.addEventListener("click", () => {
+                const cartItemId = parseInt(btn.dataset.id);
+                incrementQuantity(cartItemId, userId);
+            });
+        });
+
+        // Event ลดจำนวน
+        document.querySelectorAll(".decrease-qty").forEach(btn => {
+            btn.addEventListener("click", () => {
+                const cartItemId = parseInt(btn.dataset.id);
+                decrementQuantity(cartItemId, userId);
             });
         });
     }
