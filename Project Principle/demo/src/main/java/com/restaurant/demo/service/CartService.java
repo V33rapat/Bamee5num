@@ -1,36 +1,41 @@
 package com.restaurant.demo.service;
 
 import com.restaurant.demo.model.CartItem;
+import com.restaurant.demo.repository.CartItemRepository;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @Service
 public class CartService {
 
-    private final List<CartItem> cartItems = new ArrayList<>();
+    private final CartItemRepository cartItemRepository;
 
-    public CartService() {
-        // ตัวอย่างข้อมูล
-        cartItems.add(new CartItem(1, "บะหมี่หมูแดง", 50, 2));
-        cartItems.add(new CartItem(1, "น้ำอัดลม", 20, 1));
-        cartItems.add(new CartItem(2, "ขนมหวาน", 30, 3));
+    public CartService(CartItemRepository cartItemRepository) {
+        this.cartItemRepository = cartItemRepository;
     }
 
     public List<CartItem> getCartByCustomerId(int customerId) {
-        List<CartItem> result = new ArrayList<>();
-        for (CartItem item : cartItems) {
-            if (item.getCustomerId() == customerId) {
-                result.add(item);
-            }
-        }
-        return result;
+        return cartItemRepository.findByCustomerId(customerId);
+    }
+
+    public List<CartItem> getAllCartItems() {
+        return cartItemRepository.findAll();
     }
 
     public CartItem addToCart(int customerId, String name, int price, int quantity) {
         CartItem newItem = new CartItem(customerId, name, price, quantity);
-        cartItems.add(newItem);
-        return newItem;
+        return cartItemRepository.save(newItem);
+    }
+
+    public CartItem addToCart(CartItem cartItem) {
+        if (cartItem.getAddedAt() == null) {
+            cartItem.setAddedAt(java.time.LocalDateTime.now());
+        }
+        return cartItemRepository.save(cartItem);
+    }
+
+    public void removeFromCart(int id) {
+        cartItemRepository.deleteById(id);
     }
 }

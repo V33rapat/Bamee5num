@@ -25,11 +25,11 @@
         <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
             <div class="bg-blue-500 text-white p-6 rounded-lg">
                 <p>ออเดอร์วันนี้</p>
-                <p class="text-2xl font-bold">id="todayOrders">0</p>
+                <p id="todayOrders" class="text-2xl font-bold">0</p>
             </div>
             <div class="bg-green-500 text-white p-6 rounded-lg">
                 <p>รายได้วันนี้</p>
-                <p class="text-2xl font-bold">id="todayRevenue">฿0</p>
+                <p id="todayRevenue" class="text-2xl font-bold">฿0</p>
             </div>
         </div>
         
@@ -50,17 +50,17 @@
                 <div id="menuManagementList" class="space-y-4"></div>
             </div>
 
-            <!-- แก้ให้สามารถเปลี่ยนไปหน้าจัดการพนักงานได้ -->
             <div id="employeeManagement" class="manager-content hidden">
                 <div class="flex justify-between items-center mb-6">
                     <h4 class="text-xl font-semibold">จัดการพนักงาน</h4>
                     <button id="addEmployeeBtn" class="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600">
                         <i class="fas fa-user-plus mr-2"></i>เพิ่มพนักงาน
                     </button>
-            </div>
+                </div>
                 <div id="employeeList" class="space-y-4"></div>
             </div>
         </div>
+    </div>
 
     <div id="addMenuModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center hidden">
         <div class="bg-white rounded-xl p-8 max-w-md w-full mx-4">
@@ -82,6 +82,21 @@
             </form>
         </div>
     </div>
+
+    <div id="employeeModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center hidden">
+        <div class="bg-white rounded-xl p-8 max-w-md w-full mx-4">
+            <h3 id="employeeModalTitle" class="text-2xl font-bold mb-6">เพิ่มพนักงาน</h3>
+            <form id="employeeForm" class="space-y-4">
+                <input type="text" id="employeeName" placeholder="ชื่อพนักงาน" class="w-full p-3 border rounded-lg" required>
+                <input type="text" id="employeePosition" placeholder="ตำแหน่ง" class="w-full p-3 border rounded-lg">
+                <div class="flex space-x-4">
+                    <button type="button" id="cancelEmployee" class="flex-1 bg-gray-300 text-gray-700 py-3 rounded-lg">ยกเลิก</button>
+                    <button type="submit" class="flex-1 bg-blue-500 text-white py-3 rounded-lg">บันทึก</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <script type="module" src="/js/manager.js"></script>
 </body>
 </html>
