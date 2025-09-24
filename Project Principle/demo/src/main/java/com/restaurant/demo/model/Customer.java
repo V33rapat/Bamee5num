@@ -33,7 +33,7 @@ public class Customer {
     private String email;
 
     @NotBlank(message = "Phone number is required")
-    @Pattern(regexp = "^\\+?[1-9]\\d{1,14}$", message = "Please provide a valid phone number")
+    @Pattern(regexp = "^(\\+66|0)[0-9\\s\\-\\(\\)]{8,14}$", message = "Please provide a valid phone number (Thai format: 0XX-XXX-XXXX or +66XX-XXX-XXXX)")
     @Column(name = "phone", nullable = false, length = 15)
     private String phone;
 

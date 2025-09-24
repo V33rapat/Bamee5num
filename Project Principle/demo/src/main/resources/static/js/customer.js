@@ -67,7 +67,7 @@ export function setupCustomerDashboard() {
 // ======== Cart Functions (Server Integration) ========
 async function getCart(userId) {
     try {
-        const res = await fetch(`http://localhost:8080/cart/${userId}`);
+        const res = await fetch(`/api/cart/customer/${userId}`);
         if (!res.ok) throw new Error("โหลด cart ไม่สำเร็จ");
         return await res.json();
     } catch (err) {
@@ -78,10 +78,15 @@ async function getCart(userId) {
 
 async function addToCart(item, userId) {
     try {
-        const res = await fetch("http://localhost:8080/cart/add", {
+        const res = await fetch("/api/cart/add", {
             method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ customerId: userId, name: item.name, price: item.price, quantity: 1 })
+            headers: { "Content-Type": "application/x-www-form-urlencoded" },
+            body: new URLSearchParams({
+                customerId: userId,
+                itemName: item.name,
+                itemPrice: item.price,
+                quantity: 1
+            })
         });
         if (!res.ok) throw new Error("เพิ่มสินค้าไม่สำเร็จ");
         showNotification(`${item.name} ถูกเพิ่มในตะกร้า`);
@@ -94,13 +99,29 @@ async function addToCart(item, userId) {
 
 async function incrementQuantity(itemId, userId) {
     try {
-        const res = await fetch(`http://localhost:8080/cart/increment/${itemId}`, {
-            method: "PUT"
+        // First get the current item to know its current quantity
+        const currentCart = await getCart(userId);
+        const currentItem = currentCart.find(item => item.id === itemId);
+        if (!currentItem) throw new Error("ไม่พบรายการในตะกร้า");
+
+        const newQuantity = currentItem.quantity + 1;
+        if (newQuantity > 99) {
+            showNotification("ไม่สามารถเพิ่มจำนวนได้ เนื่องจากถึงขีดจำกัดแล้ว (99)");
+            return;
+        }
+
+        const res = await fetch(`/api/cart/update/${itemId}`, {
+            method: "PUT",
+            headers: { "Content-Type": "application/x-www-form-urlencoded" },
+            body: new URLSearchParams({
+                customerId: userId,
+                quantity: newQuantity
+            })
         });
         if (!res.ok) {
             const errorText = await res.text();
-            if (errorText.includes("exceed 99")) {
-                showNotification("ไม่สามารถเพิ่มจำนวนได้ เนื่องจากถึงขด จำกัดแล้ว (99)");
+            if (errorText.includes("exceed")) {
+                showNotification("ไม่สามารถเพิ่มจำนวนได้ เนื่องจากถึงขีดจำกัดแล้ว (99)");
             } else {
                 throw new Error("เพิ่มจำนวนไม่สำเร็จ");
             }
@@ -115,8 +136,24 @@ async function incrementQuantity(itemId, userId) {
 
 async function decrementQuantity(itemId, userId) {
     try {
-        const res = await fetch(`http://localhost:8080/cart/decrement/${itemId}`, {
-            method: "PUT"
+        // First get the current item to know its current quantity
+        const currentCart = await getCart(userId);
+        const currentItem = currentCart.find(item => item.id === itemId);
+        if (!currentItem) throw new Error("ไม่พบรายการในตะกร้า");
+
+        const newQuantity = currentItem.quantity - 1;
+        if (newQuantity < 1) {
+            showNotification("ไม่สามารถลดจำนวนได้ เนื่องจากมีเพียง 1 ชิ้น");
+            return;
+        }
+
+        const res = await fetch(`/api/cart/update/${itemId}`, {
+            method: "PUT",
+            headers: { "Content-Type": "application/x-www-form-urlencoded" },
+            body: new URLSearchParams({
+                customerId: userId,
+                quantity: newQuantity
+            })
         });
         if (!res.ok) {
             const errorText = await res.text();
@@ -136,8 +173,12 @@ async function decrementQuantity(itemId, userId) {
 
 async function removeFromCart(cartItemId, userId) {
     try {
-        const res = await fetch(`http://localhost:8080/cart/remove/${cartItemId}`, {
-            method: "DELETE"
+        const res = await fetch(`/api/cart/remove/${cartItemId}`, {
+            method: "DELETE",
+            headers: { "Content-Type": "application/x-www-form-urlencoded" },
+            body: new URLSearchParams({
+                customerId: userId
+            })
         });
         if (!res.ok) throw new Error("ลบสินค้าไม่สำเร็จ");
         loadCart(userId);
@@ -175,13 +216,13 @@ async function loadCart(userId) {
 
         let total = 0;
         cart.forEach(item => {
-            const itemTotal = item.price * item.quantity;
+            const itemTotal = item.itemPrice * item.quantity;
             total += itemTotal;
             const div = document.createElement("div");
             div.className = "border-b pb-3 mb-3";
             div.innerHTML = `
                 <div class="flex justify-between items-start mb-2">
-                    <span class="font-medium">${item.name}</span>
+                    <span class="font-medium">${item.itemName}</span>
                     <button class="text-red-500 hover:text-red-700 remove-item" data-id="${item.id}">×</button>
                 </div>
                 <div class="flex justify-between items-center">
@@ -193,7 +234,7 @@ async function loadCart(userId) {
                                 data-id="${item.id}">+</button>
                     </div>
                     <div class="text-right">
-                        <div class="text-sm text-gray-500">฿${item.price} × ${item.quantity}</div>
+                        <div class="text-sm text-gray-500">฿${item.itemPrice} × ${item.quantity}</div>
                         <div class="font-semibold">฿${itemTotal}</div>
                     </div>
                 </div>
