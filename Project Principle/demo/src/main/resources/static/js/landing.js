@@ -81,7 +81,7 @@ export function setupLanding() {
             }
             window.localStorage.setItem("currentUser", JSON.stringify(user));
             switch(user.role) {
-                case "customer": window.location.href = "/customer"; break;
+                case "customer": window.location.href = "/customer-page"; break;
                 case "employee": window.location.href = "/employee"; break;
                 case "manager": window.location.href = "/manager"; break;
             }
