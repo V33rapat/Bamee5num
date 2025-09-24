@@ -1,68 +1,47 @@
 package com.restaurant.demo.dto;
 
+import jakarta.validation.constraints.*;
+
 import java.time.LocalDateTime;
 
 public class AuthResponseDto {
 
-    private boolean success;
-    private String message;
+    @NotBlank(message = "Token is required")
+    private String token;
+
+    @NotNull(message = "Customer ID is required")
+    @Positive(message = "Customer ID must be positive")
     private Long customerId;
+
+    @NotBlank(message = "Username is required")
     private String username;
+
+    @NotBlank(message = "Email is required")
+    @Email(message = "Email must be valid")
     private String email;
-    private String name;
-    private String phone;
-    private LocalDateTime timestamp;
 
-    // Constructors
-    public AuthResponseDto() {
-        this.timestamp = LocalDateTime.now();
-    }
+    @NotNull(message = "Login timestamp is required")
+    private LocalDateTime loginTime;
 
-    public AuthResponseDto(boolean success, String message) {
-        this.success = success;
-        this.message = message;
-        this.timestamp = LocalDateTime.now();
-    }
+    // Default constructor
+    public AuthResponseDto() {}
 
-    public AuthResponseDto(boolean success, String message, Long customerId, String username, String email, String name, String phone) {
-        this.success = success;
-        this.message = message;
+    // Constructor with all fields
+    public AuthResponseDto(String token, Long customerId, String username, String email, LocalDateTime loginTime) {
+        this.token = token;
         this.customerId = customerId;
         this.username = username;
         this.email = email;
-        this.name = name;
-        this.phone = phone;
-        this.timestamp = LocalDateTime.now();
-    }
-
-    // Static factory methods for common responses
-    public static AuthResponseDto success(String message) {
-        return new AuthResponseDto(true, message);
-    }
-
-    public static AuthResponseDto success(String message, Long customerId, String username, String email, String name, String phone) {
-        return new AuthResponseDto(true, message, customerId, username, email, name, phone);
-    }
-
-    public static AuthResponseDto error(String message) {
-        return new AuthResponseDto(false, message);
+        this.loginTime = loginTime;
     }
 
     // Getters and Setters
-    public boolean isSuccess() {
-        return success;
+    public String getToken() {
+        return token;
     }
 
-    public void setSuccess(boolean success) {
-        this.success = success;
-    }
-
-    public String getMessage() {
-        return message;
-    }
-
-    public void setMessage(String message) {
-        this.message = message;
+    public void setToken(String token) {
+        this.token = token;
     }
 
     public Long getCustomerId() {
@@ -89,27 +68,11 @@ public class AuthResponseDto {
         this.email = email;
     }
 
-    public String getName() {
-        return name;
+    public LocalDateTime getLoginTime() {
+        return loginTime;
     }
 
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public String getPhone() {
-        return phone;
-    }
-
-    public void setPhone(String phone) {
-        this.phone = phone;
-    }
-
-    public LocalDateTime getTimestamp() {
-        return timestamp;
-    }
-
-    public void setTimestamp(LocalDateTime timestamp) {
-        this.timestamp = timestamp;
+    public void setLoginTime(LocalDateTime loginTime) {
+        this.loginTime = loginTime;
     }
 }

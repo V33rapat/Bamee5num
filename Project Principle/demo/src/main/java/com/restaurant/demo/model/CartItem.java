@@ -1,12 +1,11 @@
 package com.restaurant.demo.model;
 
 import jakarta.persistence.*;
-import jakarta.validation.constraints.Min;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Entity
@@ -17,48 +16,65 @@ public class CartItem {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @NotNull(message = "Customer is required")
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "customer_id", nullable = false)
-    @NotNull(message = "Customer is required")
     private Customer customer;
 
     @NotBlank(message = "Item name is required")
-    @Column(name = "item_name", nullable = false)
-    private String name;
+    @Size(min = 1, max = 100, message = "Item name must be between 1 and 100 characters")
+    @Column(name = "item_name", nullable = false, length = 100)
+    private String itemName;
 
-    @Min(value = 0, message = "Price must be non-negative")
-    @Column(name = "item_price", nullable = false)
-    private int price;
+    @NotNull(message = "Item price is required")
+    @DecimalMin(value = "0.01", message = "Item price must be greater than 0")
+    @DecimalMax(value = "9999.99", message = "Item price must not exceed 9999.99")
+    @Digits(integer = 4, fraction = 2, message = "Item price must have at most 4 integer digits and 2 decimal places")
+    @Column(name = "item_price", nullable = false, precision = 6, scale = 2)
+    private BigDecimal itemPrice;
 
+    @NotNull(message = "Quantity is required")
     @Min(value = 1, message = "Quantity must be at least 1")
-    @Column(nullable = false)
-    private int quantity;
+    @Max(value = 100, message = "Quantity must not exceed 100")
+    @Column(name = "quantity", nullable = false)
+    private Integer quantity;
 
     @CreationTimestamp
-    @Column(name = "created_at", updatable = false)
+    @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
     @UpdateTimestamp
-    @Column(name = "updated_at")
+    @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt;
 
-    // Constructors
+    // Default constructor
     public CartItem() {}
 
-    public CartItem(Customer customer, String name, int price, int quantity) {
+    // Constructor with required fields
+    public CartItem(Customer customer, String itemName, BigDecimal itemPrice, Integer quantity) {
         this.customer = customer;
-        this.name = name;
-        this.price = price;
+        this.itemName = itemName;
+        this.itemPrice = itemPrice;
         this.quantity = quantity;
     }
 
-    // Legacy constructor for backward compatibility (deprecated)
-    @Deprecated
-    public CartItem(int customerId, String name, int price, int quantity) {
-        this.name = name;
-        this.price = price;
-        this.quantity = quantity;
-        // Note: customerId is ignored, use setCustomer() method instead
+    @PrePersist
+    protected void onCreate() {
+        createdAt = LocalDateTime.now();
+        updatedAt = LocalDateTime.now();
+    }
+
+    @PreUpdate
+    protected void onUpdate() {
+        updatedAt = LocalDateTime.now();
+    }
+
+    // Calculated field for total price
+    public BigDecimal getTotalPrice() {
+        if (itemPrice != null && quantity != null) {
+            return itemPrice.multiply(BigDecimal.valueOf(quantity));
+        }
+        return BigDecimal.ZERO;
     }
 
     // Getters and Setters
@@ -78,39 +94,27 @@ public class CartItem {
         this.customer = customer;
     }
 
-    // Backward compatibility method (deprecated)
-    @Deprecated
-    public int getCustomerId() {
-        return customer != null ? customer.getId().intValue() : 0;
+    public String getItemName() {
+        return itemName;
     }
 
-    @Deprecated
-    public void setCustomerId(int customerId) {
-        // This method is deprecated, use setCustomer() instead
-        // Implementation left empty to avoid breaking existing code
+    public void setItemName(String itemName) {
+        this.itemName = itemName;
     }
 
-    public String getName() {
-        return name;
+    public BigDecimal getItemPrice() {
+        return itemPrice;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public void setItemPrice(BigDecimal itemPrice) {
+        this.itemPrice = itemPrice;
     }
 
-    public int getPrice() {
-        return price;
-    }
-
-    public void setPrice(int price) {
-        this.price = price;
-    }
-
-    public int getQuantity() {
+    public Integer getQuantity() {
         return quantity;
     }
 
-    public void setQuantity(int quantity) {
+    public void setQuantity(Integer quantity) {
         this.quantity = quantity;
     }
 
@@ -128,22 +132,5 @@ public class CartItem {
 
     public void setUpdatedAt(LocalDateTime updatedAt) {
         this.updatedAt = updatedAt;
-    }
-
-    public int getTotalPrice() {
-        return price * quantity;
-    }
-
-    @Override
-    public String toString() {
-        return "CartItem{" +
-                "id=" + id +
-                ", customer=" + (customer != null ? customer.getUsername() : "null") +
-                ", name='" + name + '\'' +
-                ", price=" + price +
-                ", quantity=" + quantity +
-                ", createdAt=" + createdAt +
-                ", updatedAt=" + updatedAt +
-                '}';
     }
 }

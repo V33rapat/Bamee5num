@@ -1,189 +1,125 @@
 package com.restaurant.demo.controller;
 
 import com.restaurant.demo.model.CartItem;
-import com.restaurant.demo.model.Customer;
 import com.restaurant.demo.service.CartService;
-import com.restaurant.demo.service.CustomerService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.*;
+import java.math.BigDecimal;
 import java.util.List;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/cart")
-@CrossOrigin(origins = "*")
+@Validated
+@CrossOrigin(origins = "*", maxAge = 3600)
 public class CartController {
 
     @Autowired
     private CartService cartService;
 
-    @Autowired
-    private CustomerService customerService;
-
-    // GET: Get cart for authenticated customer
-    @GetMapping("/{customerId}")
-    public ResponseEntity<List<CartItem>> getCart(@PathVariable Long customerId) {
-        try {
-            Optional<Customer> customerOpt = customerService.findCustomerById(customerId);
-            if (customerOpt.isEmpty()) {
-                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-            }
-
-            List<CartItem> cartItems = cartService.getCartByCustomer(customerOpt.get());
-            return ResponseEntity.ok(cartItems);
-        } catch (RuntimeException e) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-        }
-    }
-
-    // POST: Add item to cart for authenticated customer
+    /**
+     * Add item to cart
+     */
     @PostMapping("/add")
-    public ResponseEntity<CartItem> addToCart(@RequestBody AddToCartRequest request) {
-        try {
-            Optional<Customer> customerOpt = customerService.findCustomerById(request.getCustomerId());
-            if (customerOpt.isEmpty()) {
-                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-            }
+    public ResponseEntity<CartItem> addToCart(
+            @RequestParam @NotNull(message = "Customer ID is required")
+            @Positive(message = "Customer ID must be positive") Long customerId,
+            @RequestParam @NotBlank(message = "Item name is required")
+            @Size(min = 1, max = 100, message = "Item name must be between 1 and 100 characters") String itemName,
+            @RequestParam @NotNull(message = "Item price is required")
+            @DecimalMin(value = "0.01", message = "Item price must be greater than 0")
+            @DecimalMax(value = "9999.99", message = "Item price must not exceed 9999.99") BigDecimal itemPrice,
+            @RequestParam @NotNull(message = "Quantity is required")
+            @Min(value = 1, message = "Quantity must be at least 1")
+            @Max(value = 100, message = "Quantity must not exceed 100") Integer quantity) {
 
-            CartItem cartItem = cartService.addToCart(
-                customerOpt.get(),
-                request.getName(),
-                request.getPrice(),
-                request.getQuantity()
-            );
-            return ResponseEntity.status(HttpStatus.CREATED).body(cartItem);
-        } catch (RuntimeException e) {
-            return ResponseEntity.badRequest().build();
-        }
+        CartItem cartItem = cartService.addToCart(customerId, itemName, itemPrice, quantity);
+        return new ResponseEntity<>(cartItem, HttpStatus.CREATED);
     }
 
-    // PUT: Increment quantity of cart item
-    @PutMapping("/increment/{itemId}")
-    public ResponseEntity<CartItem> incrementQuantity(@PathVariable Long itemId, @RequestParam Long customerId) {
-        try {
-            Optional<Customer> customerOpt = customerService.findCustomerById(customerId);
-            if (customerOpt.isEmpty()) {
-                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-            }
+    /**
+     * Update cart item quantity
+     */
+    @PutMapping("/update/{cartItemId}")
+    public ResponseEntity<CartItem> updateCartItem(
+            @PathVariable @NotNull(message = "Cart item ID is required")
+            @Positive(message = "Cart item ID must be positive") Long cartItemId,
+            @RequestParam @NotNull(message = "Customer ID is required")
+            @Positive(message = "Customer ID must be positive") Long customerId,
+            @RequestParam @NotNull(message = "Quantity is required")
+            @Min(value = 1, message = "Quantity must be at least 1")
+            @Max(value = 100, message = "Quantity must not exceed 100") Integer quantity) {
 
-            CartItem updatedItem = cartService.incrementQuantity(itemId, customerOpt.get());
-            return ResponseEntity.ok(updatedItem);
-        } catch (RuntimeException e) {
-            return ResponseEntity.notFound().build();
-        }
+        CartItem cartItem = cartService.updateCartItemQuantity(cartItemId, customerId, quantity);
+        return new ResponseEntity<>(cartItem, HttpStatus.OK);
     }
 
-    // PUT: Decrement quantity of cart item
-    @PutMapping("/decrement/{itemId}")
-    public ResponseEntity<CartItem> decrementQuantity(@PathVariable Long itemId, @RequestParam Long customerId) {
-        try {
-            Optional<Customer> customerOpt = customerService.findCustomerById(customerId);
-            if (customerOpt.isEmpty()) {
-                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-            }
+    /**
+     * Remove item from cart
+     */
+    @DeleteMapping("/remove/{cartItemId}")
+    public ResponseEntity<Void> removeFromCart(
+            @PathVariable @NotNull(message = "Cart item ID is required")
+            @Positive(message = "Cart item ID must be positive") Long cartItemId,
+            @RequestParam @NotNull(message = "Customer ID is required")
+            @Positive(message = "Customer ID must be positive") Long customerId) {
 
-            CartItem updatedItem = cartService.decrementQuantity(itemId, customerOpt.get());
-            return ResponseEntity.ok(updatedItem);
-        } catch (RuntimeException e) {
-            return ResponseEntity.notFound().build();
-        }
+        cartService.removeFromCart(cartItemId, customerId);
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
-    // PUT: Update quantity of cart item directly
-    @PutMapping("/update-quantity/{itemId}")
-    public ResponseEntity<CartItem> updateQuantity(@PathVariable Long itemId, @RequestBody UpdateQuantityRequest request) {
-        try {
-            Optional<Customer> customerOpt = customerService.findCustomerById(request.getCustomerId());
-            if (customerOpt.isEmpty()) {
-                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-            }
+    /**
+     * Get all cart items for a customer
+     */
+    @GetMapping("/customer/{customerId}")
+    public ResponseEntity<List<CartItem>> getCartItems(
+            @PathVariable @NotNull(message = "Customer ID is required")
+            @Positive(message = "Customer ID must be positive") Long customerId) {
 
-            CartItem updatedItem = cartService.updateQuantity(itemId, request.getQuantity(), customerOpt.get());
-            return ResponseEntity.ok(updatedItem);
-        } catch (RuntimeException e) {
-            return ResponseEntity.badRequest().build();
-        }
+        List<CartItem> cartItems = cartService.getCartItems(customerId);
+        return new ResponseEntity<>(cartItems, HttpStatus.OK);
     }
 
-    // DELETE: Remove item from cart
-    @DeleteMapping("/remove/{itemId}")
-    public ResponseEntity<Void> removeFromCart(@PathVariable Long itemId, @RequestParam Long customerId) {
-        try {
-            Optional<Customer> customerOpt = customerService.findCustomerById(customerId);
-            if (customerOpt.isEmpty()) {
-                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-            }
+    /**
+     * Get cart item by ID
+     */
+    @GetMapping("/{cartItemId}")
+    public ResponseEntity<CartItem> getCartItem(
+            @PathVariable @NotNull(message = "Cart item ID is required")
+            @Positive(message = "Cart item ID must be positive") Long cartItemId,
+            @RequestParam @NotNull(message = "Customer ID is required")
+            @Positive(message = "Customer ID must be positive") Long customerId) {
 
-            cartService.removeFromCart(itemId, customerOpt.get());
-            return ResponseEntity.noContent().build();
-        } catch (RuntimeException e) {
-            return ResponseEntity.notFound().build();
-        }
+        CartItem cartItem = cartService.getCartItem(cartItemId, customerId);
+        return new ResponseEntity<>(cartItem, HttpStatus.OK);
     }
 
-    // DELETE: Clear entire cart for customer
+    /**
+     * Clear all cart items for a customer
+     */
     @DeleteMapping("/clear/{customerId}")
-    public ResponseEntity<Void> clearCart(@PathVariable Long customerId) {
-        try {
-            Optional<Customer> customerOpt = customerService.findCustomerById(customerId);
-            if (customerOpt.isEmpty()) {
-                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-            }
+    public ResponseEntity<Void> clearCart(
+            @PathVariable @NotNull(message = "Customer ID is required")
+            @Positive(message = "Customer ID must be positive") Long customerId) {
 
-            cartService.clearCart(customerOpt.get());
-            return ResponseEntity.noContent().build();
-        } catch (RuntimeException e) {
-            return ResponseEntity.notFound().build();
-        }
+        cartService.clearCart(customerId);
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
-    // Inner classes for request DTOs
-    public static class AddToCartRequest {
-        private Long customerId;
-        private String name;
-        private int price;
-        private int quantity;
+    /**
+     * Get cart total for a customer
+     */
+    @GetMapping("/total/{customerId}")
+    public ResponseEntity<BigDecimal> getCartTotal(
+            @PathVariable @NotNull(message = "Customer ID is required")
+            @Positive(message = "Customer ID must be positive") Long customerId) {
 
-        // Constructors
-        public AddToCartRequest() {}
-
-        public AddToCartRequest(Long customerId, String name, int price, int quantity) {
-            this.customerId = customerId;
-            this.name = name;
-            this.price = price;
-            this.quantity = quantity;
-        }
-
-        // Getters and Setters
-        public Long getCustomerId() { return customerId; }
-        public void setCustomerId(Long customerId) { this.customerId = customerId; }
-        public String getName() { return name; }
-        public void setName(String name) { this.name = name; }
-        public int getPrice() { return price; }
-        public void setPrice(int price) { this.price = price; }
-        public int getQuantity() { return quantity; }
-        public void setQuantity(int quantity) { this.quantity = quantity; }
-    }
-
-    public static class UpdateQuantityRequest {
-        private Long customerId;
-        private int quantity;
-
-        // Constructors
-        public UpdateQuantityRequest() {}
-
-        public UpdateQuantityRequest(Long customerId, int quantity) {
-            this.customerId = customerId;
-            this.quantity = quantity;
-        }
-
-        // Getters and Setters
-        public Long getCustomerId() { return customerId; }
-        public void setCustomerId(Long customerId) { this.customerId = customerId; }
-        public int getQuantity() { return quantity; }
-        public void setQuantity(int quantity) { this.quantity = quantity; }
+        BigDecimal total = cartService.calculateCartTotal(customerId);
+        return new ResponseEntity<>(total, HttpStatus.OK);
     }
 }

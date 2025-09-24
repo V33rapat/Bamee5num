@@ -7,6 +7,7 @@ import com.restaurant.demo.repository.CustomerRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 
@@ -19,6 +20,55 @@ public class CartService {
     @Autowired
     private CustomerRepository customerRepository;
 
+    // Helper method to get customer by ID
+    private Customer getCustomerById(Long customerId) {
+        if (customerId == null) {
+            throw new RuntimeException("Customer ID is required");
+        }
+        return customerRepository.findById(customerId)
+                .orElseThrow(() -> new RuntimeException("Customer not found with ID: " + customerId));
+    }
+
+    // Public methods that accept customerId
+    public CartItem addToCart(Long customerId, String itemName, BigDecimal itemPrice, Integer quantity) {
+        Customer customer = getCustomerById(customerId);
+        return addToCart(customer, itemName, itemPrice, quantity);
+    }
+
+    public CartItem updateCartItemQuantity(Long cartItemId, Long customerId, Integer quantity) {
+        Customer customer = getCustomerById(customerId);
+        return updateQuantity(cartItemId, quantity, customer);
+    }
+
+    public void removeFromCart(Long cartItemId, Long customerId) {
+        Customer customer = getCustomerById(customerId);
+        removeFromCart(cartItemId, customer);
+    }
+
+    public List<CartItem> getCartItems(Long customerId) {
+        Customer customer = getCustomerById(customerId);
+        return getCartByCustomer(customer);
+    }
+
+    public CartItem getCartItem(Long cartItemId, Long customerId) {
+        Customer customer = getCustomerById(customerId);
+        return getCartItem(cartItemId, customer).orElse(null);
+    }
+
+    public void clearCart(Long customerId) {
+        Customer customer = getCustomerById(customerId);
+        clearCart(customer);
+    }
+
+    public BigDecimal calculateCartTotal(Long customerId) {
+        Customer customer = getCustomerById(customerId);
+        List<CartItem> items = getCartByCustomer(customer);
+        return items.stream()
+                .map(item -> item.getItemPrice().multiply(BigDecimal.valueOf(item.getQuantity())))
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+    }
+
+    // Existing methods that work with Customer objects
     public List<CartItem> getCartByCustomer(Customer customer) {
         if (customer == null) {
             throw new RuntimeException("Customer authentication required");
@@ -26,7 +76,7 @@ public class CartService {
         return cartItemRepository.findByCustomer(customer);
     }
 
-    public CartItem addToCart(Customer customer, String name, int price, int quantity) {
+    public CartItem addToCart(Customer customer, String name, BigDecimal price, int quantity) {
         if (customer == null) {
             throw new RuntimeException("Customer authentication required");
         }
@@ -40,7 +90,7 @@ public class CartService {
         }
 
         // Check if item already exists in cart
-        Optional<CartItem> existingItem = cartItemRepository.findByCustomerAndName(customer, name);
+        Optional<CartItem> existingItem = cartItemRepository.findByCustomerAndItemName(customer, name);
 
         if (existingItem.isPresent()) {
             // Item exists, increase quantity

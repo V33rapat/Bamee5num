@@ -2,40 +2,61 @@ package com.restaurant.demo.dto;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 
 public class CustomerRegistrationDto {
 
+    @NotBlank(message = "Name is required")
+    @Size(min = 2, max = 50, message = "Name must be between 2 and 50 characters")
+    @Pattern(regexp = "^[a-zA-Z\\s]+$", message = "Name can only contain letters and spaces")
+    private String name;
+
     @NotBlank(message = "Username is required")
-    @Size(min = 3, max = 50, message = "Username must be between 3 and 50 characters")
+    @Size(min = 3, max = 20, message = "Username must be between 3 and 20 characters")
+    @Pattern(regexp = "^[a-zA-Z0-9_]+$", message = "Username can only contain letters, numbers, and underscores")
     private String username;
 
     @NotBlank(message = "Email is required")
-    @Email(message = "Email should be valid")
+    @Email(message = "Please provide a valid email address")
+    @Size(max = 100, message = "Email must not exceed 100 characters")
     private String email;
 
-    @NotBlank(message = "Password is required")
-    @Size(min = 6, message = "Password must be at least 6 characters")
-    private String password;
-
-    @Size(max = 100, message = "Name must not exceed 100 characters")
-    private String name;
-
-    @Size(max = 20, message = "Phone must not exceed 20 characters")
+    @NotBlank(message = "Phone number is required")
+    @Pattern(regexp = "^\\+?[1-9]\\d{1,14}$", message = "Please provide a valid phone number")
     private String phone;
 
-    // Constructors
+    @NotBlank(message = "Password is required")
+    @Size(min = 8, max = 100, message = "Password must be between 8 and 100 characters")
+    @Pattern(regexp = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]+$",
+             message = "Password must contain at least one lowercase letter, one uppercase letter, one digit, and one special character")
+    private String password;
+
+    @NotBlank(message = "Password confirmation is required")
+    private String confirmPassword;
+
+    // Default constructor
     public CustomerRegistrationDto() {}
 
-    public CustomerRegistrationDto(String username, String email, String password, String name, String phone) {
+    // Constructor with all fields
+    public CustomerRegistrationDto(String name, String username, String email, String phone, String password, String confirmPassword) {
+        this.name = name;
         this.username = username;
         this.email = email;
-        this.password = password;
-        this.name = name;
         this.phone = phone;
+        this.password = password;
+        this.confirmPassword = confirmPassword;
     }
 
     // Getters and Setters
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
     public String getUsername() {
         return username;
     }
@@ -52,6 +73,14 @@ public class CustomerRegistrationDto {
         this.email = email;
     }
 
+    public String getPhone() {
+        return phone;
+    }
+
+    public void setPhone(String phone) {
+        this.phone = phone;
+    }
+
     public String getPassword() {
         return password;
     }
@@ -60,19 +89,11 @@ public class CustomerRegistrationDto {
         this.password = password;
     }
 
-    public String getName() {
-        return name;
+    public String getConfirmPassword() {
+        return confirmPassword;
     }
 
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public String getPhone() {
-        return phone;
-    }
-
-    public void setPhone(String phone) {
-        this.phone = phone;
+    public void setConfirmPassword(String confirmPassword) {
+        this.confirmPassword = confirmPassword;
     }
 }

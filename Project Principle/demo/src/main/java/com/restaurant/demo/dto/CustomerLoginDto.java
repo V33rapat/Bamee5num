@@ -1,18 +1,22 @@
 package com.restaurant.demo.dto;
 
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 
 public class CustomerLoginDto {
 
     @NotBlank(message = "Username or email is required")
+    @Size(min = 3, max = 100, message = "Username or email must be between 3 and 100 characters")
     private String usernameOrEmail;
 
     @NotBlank(message = "Password is required")
+    @Size(min = 1, max = 100, message = "Password must not exceed 100 characters")
     private String password;
 
-    // Constructors
+    // Default constructor
     public CustomerLoginDto() {}
 
+    // Constructor with all fields
     public CustomerLoginDto(String usernameOrEmail, String password) {
         this.usernameOrEmail = usernameOrEmail;
         this.password = password;

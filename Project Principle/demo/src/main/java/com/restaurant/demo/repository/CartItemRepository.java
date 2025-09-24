@@ -9,7 +9,7 @@ import java.util.Optional;
 
 public interface CartItemRepository extends JpaRepository<CartItem, Long> {
     List<CartItem> findByCustomer(Customer customer);
-    Optional<CartItem> findByCustomerAndName(Customer customer, String name);
+    Optional<CartItem> findByCustomerAndItemName(Customer customer, String itemName);
 
     // Deprecated methods for backward compatibility
     @Deprecated
@@ -21,6 +21,6 @@ public interface CartItemRepository extends JpaRepository<CartItem, Long> {
     @Deprecated
     default Optional<CartItem> findByCustomerIdAndName(int customerId, String name) {
         // This method is deprecated and should not be used
-        throw new UnsupportedOperationException("Use findByCustomerAndName(Customer customer, String name) instead");
+        throw new UnsupportedOperationException("Use findByCustomerAndItemName(Customer customer, String itemName) instead");
     }
 }
