@@ -23,6 +23,7 @@ public class MenuItemController {
         this.menuItemService = menuItemService;
     }
 
+    // Customer เห็นเมนูที่แสดงในระบบ (active=true)
     @GetMapping
     public List<MenuItem> getActiveMenuItems() {
         return menuItemService.getActiveMenuItems();

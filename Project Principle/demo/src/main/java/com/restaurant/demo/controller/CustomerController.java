@@ -16,11 +16,13 @@ public class CustomerController {
         this.cartService = cartService;
     }
 
+    // Customer ดูตะกร้าสินค้าของตัวเอง
     @GetMapping
     public List<CartItem> getCustomerCart(@RequestParam int id) {
         return cartService.getCartByCustomerId(id);
     }
 
+    // Customer เพิ่มสินค้าในตะกร้า
     @PostMapping("/add")
     public CartItem addToCart(@RequestParam int customerId,
                               @RequestParam String name,
