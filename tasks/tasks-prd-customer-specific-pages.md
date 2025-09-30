@@ -49,15 +49,16 @@
   - [x] 3.4 Add error message display when customer is null or invalid
   - [x] 3.5 Test template rendering with both valid and invalid customer data
 
-- [ ] 4.0 Implement Session Validation and Security
-  - [ ] 4.1 Add session validation logic at the start of `customerPage()` method
-  - [ ] 4.2 Retrieve customer ID from session: `Long sessionCustomerId = (Long) session.getAttribute("customerId")`
-  - [ ] 4.3 Compare session customer ID with URL path variable customer ID
-  - [ ] 4.4 If session is null or IDs don't match, redirect to `/login?error=unauthorized`
-  - [ ] 4.5 Add logout endpoint that clears session and redirects to index
-  - [ ] 4.6 Update logout button in `customer.js` to call logout endpoint and clear `localStorage`
-  - [ ] 4.7 Add CSRF protection considerations for logout action
-  - [ ] 4.8 Test unauthorized access attempts (manual URL manipulation)
+- [x] 4.0 Implement Session Validation and Security
+  - [x] 4.1 Add session validation logic at the start of `customerPage()` method
+  - [x] 4.2 Retrieve customer ID from session: `Long sessionCustomerId = (Long) session.getAttribute("customerId")`
+  - [x] 4.3 Compare session customer ID with URL path variable customer ID
+  - [x] 4.4 If session is null or IDs don't match, redirect to `/login?error=unauthorized`
+  - [x] 4.5 Add logout endpoint that clears session and redirects to index
+  - [x] 4.6 Update logout button in `customer.js` to call logout endpoint and clear `localStorage`
+  - [x] 4.7 Add CSRF protection considerations for logout action
+  - [x] 4.8 Test unauthorized access attempts (manual URL manipulation)
+
 
 - [ ] 5.0 Create Comprehensive Test Suite
   - [ ] 5.1 Create `PageControllerTest.java` unit test class with `@WebMvcTest(PageController.class)` annotation

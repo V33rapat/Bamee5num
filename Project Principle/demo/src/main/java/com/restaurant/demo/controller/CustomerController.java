@@ -9,6 +9,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
@@ -18,8 +20,10 @@ import jakarta.validation.constraints.Positive;
 @RestController
 @RequestMapping("/api/customers")
 @Validated
-@CrossOrigin(origins = "*", maxAge = 3600)
+@CrossOrigin(origins = "http://localhost:8080", allowCredentials = "true", maxAge = 3600)
 public class CustomerController {
+
+    private static final Logger logger = LoggerFactory.getLogger(CustomerController.class);
 
     @Autowired
     private CustomerService customerService;
@@ -44,11 +48,16 @@ public class CustomerController {
      */
     @PostMapping("/login")
     public ResponseEntity<AuthResponseDto> loginCustomer(@Valid @RequestBody CustomerLoginDto loginDto, HttpSession session) {
+        logger.info("Login attempt for user: {}, sessionId: {}", loginDto.getUsernameOrEmail(), session.getId());
+        
         AuthResponseDto response = customerService.loginCustomer(loginDto);
         
         // Store customer ID in HTTP session for server-side validation
         session.setAttribute("customerId", response.getCustomerId());
         session.setAttribute("username", response.getUsername());
+        
+        logger.info("Login successful - customerId: {}, username: {}, sessionId: {}", 
+            response.getCustomerId(), response.getUsername(), session.getId());
         
         return new ResponseEntity<>(response, HttpStatus.OK);
     }

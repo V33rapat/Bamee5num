@@ -72,6 +72,7 @@ async function loginCustomer(username, password) {
             headers: {
                 "Content-Type": "application/json"
             },
+            credentials: "include", // Include cookies/session in request
             body: JSON.stringify({
                 username: username,
                 password: password
@@ -89,6 +90,8 @@ async function loginCustomer(username, password) {
 
         const authResponse = await response.json();
         
+        console.log("Login response:", authResponse);
+        
         // Store session data in localStorage including customer ID, username, and token
         const sessionData = {
             token: authResponse.token,
@@ -98,10 +101,21 @@ async function loginCustomer(username, password) {
             loginTime: authResponse.loginTime
         };
         
-        window.localStorage.setItem("currentUser", JSON.stringify(sessionData));
+        console.log("Storing session data:", sessionData);
         
-        // Redirect to /customer/{customerId} instead of /customer-page
-        window.location.href = `/customer/${authResponse.customerId}`;
+        // Set localStorage synchronously
+        localStorage.setItem("currentUser", JSON.stringify(sessionData));
+        
+        // Verify it was stored
+        const storedData = localStorage.getItem("currentUser");
+        console.log("Verified stored data:", storedData);
+        
+        console.log("About to redirect to:", `/customer/${authResponse.customerId}`);
+        
+        // Small delay to ensure localStorage is persisted before redirect
+        setTimeout(() => {
+            window.location.href = `/customer/${authResponse.customerId}`;
+        }, 100);
         
     } catch (error) {
         console.error("Login error:", error);
@@ -117,6 +131,7 @@ async function registerCustomer(username, password, fullName, email, phone) {
             headers: {
                 "Content-Type": "application/json"
             },
+            credentials: "include", // Include cookies/session in request
             body: JSON.stringify({
                 username: username,
                 password: password,
@@ -147,13 +162,16 @@ async function registerCustomer(username, password, fullName, email, phone) {
             loginTime: authResponse.loginTime
         };
         
-        window.localStorage.setItem("currentUser", JSON.stringify(sessionData));
+        // Set localStorage synchronously
+        localStorage.setItem("currentUser", JSON.stringify(sessionData));
         
         alert("สมัครสมาชิกเรียบร้อย!");
         closeAuthModal();
         
-        // Redirect to customer page with their ID
-        window.location.href = `/customer/${authResponse.customerId}`;
+        // Small delay to ensure localStorage is persisted before redirect
+        setTimeout(() => {
+            window.location.href = `/customer/${authResponse.customerId}`;
+        }, 100);
         
     } catch (error) {
         console.error("Registration error:", error);

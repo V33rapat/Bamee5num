@@ -10,12 +10,16 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import jakarta.servlet.http.HttpSession;
 import java.util.Optional;
 
 @Controller
 public class PageController {
+
+    private static final Logger logger = LoggerFactory.getLogger(PageController.class);
 
     @Autowired
     private CustomerService customerService;
@@ -90,12 +94,17 @@ public class PageController {
      */
     @GetMapping("/customer/{customerId}")
     public String customerPage(@PathVariable Long customerId, Model model, HttpSession session) {
+        logger.info("Customer page requested for customerId: {}, sessionId: {}", customerId, session.getId());
+        
         // Session validation: Check if session contains customer ID
         Long sessionCustomerId = (Long) session.getAttribute("customerId");
+        logger.info("Session customerId: {}", sessionCustomerId);
         
-        // If no session exists or customer ID doesn't match, redirect to login with error
+        // If no session exists or customer ID doesn't match, redirect to home page with error
         if (sessionCustomerId == null || !sessionCustomerId.equals(customerId)) {
-            return "redirect:/login?error=unauthorized";
+            logger.warn("Session validation failed - sessionCustomerId: {}, requestedCustomerId: {}", 
+                sessionCustomerId, customerId);
+            return "redirect:/?error=unauthorized";
         }
         
         // Fetch customer data from database using customer service
@@ -103,8 +112,11 @@ public class PageController {
         
         // Handle case when customer is not found in database
         if (customerOpt.isEmpty()) {
-            return "redirect:/login?error=notfound";
+            logger.warn("Customer not found in database for customerId: {}", customerId);
+            return "redirect:/?error=notfound";
         }
+        
+        logger.info("Customer page loaded successfully for customer: {}", customerOpt.get().getName());
         
         // Add customer object to model for Thymeleaf template rendering
         model.addAttribute("customer", customerOpt.get());
@@ -121,5 +133,22 @@ public class PageController {
     @GetMapping("/manager")
     public String manager() {
         return "manager";
+    }
+
+    /**
+     * Logout endpoint that clears the HttpSession and redirects to index page
+     * 
+     * @param session HttpSession to be invalidated
+     * @return Redirect to index page
+     */
+    @PostMapping("/logout")
+    public String logout(HttpSession session) {
+        // Invalidate the current session to clear all session attributes
+        if (session != null) {
+            session.invalidate();
+        }
+        
+        // Redirect to index page after logout
+        return "redirect:/";
     }
 }

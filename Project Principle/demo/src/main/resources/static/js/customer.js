@@ -6,24 +6,20 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 export function setupCustomerDashboard() {
-    // Extract customer ID from URL path: /customer/{customerId}
-    const pathParts = window.location.pathname.split('/');
-    const customerId = pathParts[pathParts.length - 1];
+    // Read customer ID from DOM (set by Thymeleaf server-side rendering)
+    // Server-side session validation already happened in PageController
+    const customerIdElement = document.getElementById("customerId");
+    const customerId = customerIdElement ? parseInt(customerIdElement.value) : null;
     
+    // If customer ID is not present in DOM, server didn't render it (no valid session)
     if (!customerId || isNaN(customerId)) {
-        alert("ไม่พบข้อมูลลูกค้า กรุณาเข้าสู่ระบบใหม่");
-        window.location.href = "/";
+        // Server should have already redirected, but as a fallback:
+        console.warn("No customer ID found in DOM - server session validation failed");
+        window.location.href = "/login";
         return;
     }
-
-    // Get session data from localStorage for validation
-    const sessionData = JSON.parse(localStorage.getItem("currentUser"));
     
-    if (!sessionData || !sessionData.customerId || sessionData.customerId != customerId) {
-        alert("กรุณาเข้าสู่ระบบ!");
-        window.location.href = "/";
-        return;
-    }
+    console.log("Customer ID from DOM:", customerId, "Type:", typeof customerId);
 
     // Load customer profile data from API to get the actual name
     loadCustomerProfile(customerId);
@@ -67,10 +63,38 @@ export function setupCustomerDashboard() {
     });
     closeCart.addEventListener("click", () => cartSidebar.classList.add("translate-x-full"));
 
-    // Logout
-    document.getElementById("logoutBtn").addEventListener("click", () => {
-        localStorage.removeItem("currentUser");
-        window.location.href = "/";
+    // Logout - Call server-side logout endpoint to clear session
+    document.getElementById("logoutBtn").addEventListener("click", async () => {
+        try {
+            // Get CSRF token from meta tags (set by Thymeleaf in customer.html)
+            const csrfToken = document.querySelector('meta[name="_csrf"]')?.content;
+            const csrfHeader = document.querySelector('meta[name="_csrf_header"]')?.content;
+            
+            // Create form data for POST request
+            const formData = new FormData();
+            
+            // Send POST request to logout endpoint with CSRF token
+            const response = await fetch('/logout', {
+                method: 'POST',
+                headers: {
+                    [csrfHeader]: csrfToken
+                },
+                body: formData
+            });
+            
+            // Clear localStorage to remove any legacy data (from old API login flow)
+            // NOTE: We don't use localStorage for session validation anymore,
+            // but clear it here to maintain cleanup consistency
+            localStorage.removeItem("currentUser");
+            
+            // Redirect to index page (server will also redirect, but this ensures it happens)
+            window.location.href = "/";
+        } catch (error) {
+            console.error("Logout error:", error);
+            // Even if server request fails, clear localStorage and redirect
+            localStorage.removeItem("currentUser");
+            window.location.href = "/";
+        }
     });
 
     // โหลด cart ตอนเริ่ม
@@ -78,6 +102,8 @@ export function setupCustomerDashboard() {
 }
 
 // ======== Load Customer Profile ========
+// Note: This function is now optional since Thymeleaf already renders the welcome text
+// It can be used for dynamic updates if needed
 async function loadCustomerProfile(customerId) {
     try {
         const response = await fetch(`/api/customers/${customerId}`);
@@ -90,11 +116,8 @@ async function loadCustomerProfile(customerId) {
         document.getElementById("welcomeText").textContent = `สวัสดี, ${customerData.username}`;
     } catch (error) {
         console.error("Error loading customer profile:", error);
-        // Fallback to username from session if API fails
-        const sessionData = JSON.parse(localStorage.getItem("currentUser"));
-        if (sessionData && sessionData.username) {
-            document.getElementById("welcomeText").textContent = `สวัสดี, ${sessionData.username}`;
-        }
+        // Keep the Thymeleaf-rendered welcome text as is
+        // No localStorage fallback - server has already validated and rendered customer data
     }
 }
 

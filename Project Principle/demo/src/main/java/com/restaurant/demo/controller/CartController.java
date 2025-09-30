@@ -16,7 +16,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/cart")
 @Validated
-@CrossOrigin(origins = "*", maxAge = 3600)
+@CrossOrigin(origins = "http://localhost:8080", allowCredentials = "true", maxAge = 3600)
 public class CartController {
 
     @Autowired
