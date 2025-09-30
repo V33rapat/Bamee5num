@@ -33,21 +33,21 @@
   - [x] 1.6 Handle case when customer is not found (return appropriate error view or redirect)
   - [x] 1.7 Return "customer" view name for Thymeleaf rendering
 
-- [ ] 2.0 Update Frontend for Dynamic Customer ID Routing
-  - [ ] 2.1 Modify `landing.js` login success handler to redirect to `/customer/{customerId}` instead of `/customer-page`
-  - [ ] 2.2 Update login handler to extract customer ID from API response (`AuthResponseDto.customerId`)
-  - [ ] 2.3 Store session data in `localStorage` including customer ID, username, and token
-  - [ ] 2.4 Modify `customer.js` to extract customer ID from URL path using `window.location.pathname.split('/')`
-  - [ ] 2.5 Remove hardcoded customer ID references in `customer.js`
-  - [ ] 2.6 Update cart API calls to use dynamic customer ID extracted from URL
-  - [ ] 2.7 Update profile data fetching to use dynamic customer ID
+- [x] 2.0 Update Frontend for Dynamic Customer ID Routing
+  - [x] 2.1 Modify `landing.js` login success handler to redirect to `/customer/{customerId}` instead of `/customer-page`
+  - [x] 2.2 Update login handler to extract customer ID from API response (`AuthResponseDto.customerId`)
+  - [x] 2.3 Store session data in `localStorage` including customer ID, username, and token
+  - [x] 2.4 Modify `customer.js` to extract customer ID from URL path using `window.location.pathname.split('/')`
+  - [x] 2.5 Remove hardcoded customer ID references in `customer.js`
+  - [x] 2.6 Update cart API calls to use dynamic customer ID extracted from URL
+  - [x] 2.7 Update profile data fetching to use dynamic customer ID
 
-- [ ] 3.0 Modify Customer Page Template for Personalized Display
-  - [ ] 3.1 Replace hardcoded welcome text in `customer.html` with Thymeleaf expression: `th:text="'สวัสดี, ' + ${customer.name}"`
-  - [ ] 3.2 Add hidden input or data attribute for customer ID: `<input type="hidden" id="customerId" th:value="${customer.id}">`
-  - [ ] 3.3 Add null check for customer object in template (use `th:if="${customer != null}"`)
-  - [ ] 3.4 Add error message display when customer is null or invalid
-  - [ ] 3.5 Test template rendering with both valid and invalid customer data
+- [x] 3.0 Modify Customer Page Template for Personalized Display
+  - [x] 3.1 Replace hardcoded welcome text in `customer.html` with Thymeleaf expression: `th:text="'สวัสดี, ' + ${customer.name}"`
+  - [x] 3.2 Add hidden input or data attribute for customer ID: `<input type="hidden" id="customerId" th:value="${customer.id}">`
+  - [x] 3.3 Add null check for customer object in template (use `th:if="${customer != null}"`)
+  - [x] 3.4 Add error message display when customer is null or invalid
+  - [x] 3.5 Test template rendering with both valid and invalid customer data
 
 - [ ] 4.0 Implement Session Validation and Security
   - [ ] 4.1 Add session validation logic at the start of `customerPage()` method

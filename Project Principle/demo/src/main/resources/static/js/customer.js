@@ -1,21 +1,34 @@
 // customer.js
-import { menuItems, currentUser } from "./db.js";
+import { menuItems } from "./db.js";
 
 document.addEventListener("DOMContentLoaded", () => {
     setupCustomerDashboard();
 });
 
 export function setupCustomerDashboard() {
-    const user = JSON.parse(localStorage.getItem("currentUser")) || currentUser;
+    // Extract customer ID from URL path: /customer/{customerId}
+    const pathParts = window.location.pathname.split('/');
+    const customerId = pathParts[pathParts.length - 1];
+    
+    if (!customerId || isNaN(customerId)) {
+        alert("ไม่พบข้อมูลลูกค้า กรุณาเข้าสู่ระบบใหม่");
+        window.location.href = "/";
+        return;
+    }
 
-    if (!user || user.role !== "customer") {
+    // Get session data from localStorage for validation
+    const sessionData = JSON.parse(localStorage.getItem("currentUser"));
+    
+    if (!sessionData || !sessionData.customerId || sessionData.customerId != customerId) {
         alert("กรุณาเข้าสู่ระบบ!");
         window.location.href = "/";
         return;
     }
 
+    // Load customer profile data from API to get the actual name
+    loadCustomerProfile(customerId);
+
     // Navbar
-    document.getElementById("welcomeText").textContent = `สวัสดี, ${user.fullName}`;
     document.getElementById("userNav").classList.remove("hidden");
     document.getElementById("navButtons").classList.add("hidden");
 
@@ -39,7 +52,7 @@ export function setupCustomerDashboard() {
         btn.addEventListener("click", () => {
             const id = parseInt(btn.dataset.id);
             const item = menuItems.find(i => i.id === id);
-            if (item) addToCart(item, user.id);
+            if (item) addToCart(item, customerId);
         });
     });
 
@@ -50,7 +63,7 @@ export function setupCustomerDashboard() {
 
     cartBtn.addEventListener("click", () => {
         cartSidebar.classList.remove("translate-x-full");
-        loadCart(user.id);
+        loadCart(customerId);
     });
     closeCart.addEventListener("click", () => cartSidebar.classList.add("translate-x-full"));
 
@@ -61,7 +74,28 @@ export function setupCustomerDashboard() {
     });
 
     // โหลด cart ตอนเริ่ม
-    loadCart(user.id);
+    loadCart(customerId);
+}
+
+// ======== Load Customer Profile ========
+async function loadCustomerProfile(customerId) {
+    try {
+        const response = await fetch(`/api/customers/${customerId}`);
+        if (!response.ok) {
+            throw new Error("ไม่สามารถโหลดข้อมูลลูกค้าได้");
+        }
+        const customerData = await response.json();
+        
+        // Update welcome text with customer's actual name
+        document.getElementById("welcomeText").textContent = `สวัสดี, ${customerData.username}`;
+    } catch (error) {
+        console.error("Error loading customer profile:", error);
+        // Fallback to username from session if API fails
+        const sessionData = JSON.parse(localStorage.getItem("currentUser"));
+        if (sessionData && sessionData.username) {
+            document.getElementById("welcomeText").textContent = `สวัสดี, ${sessionData.username}`;
+        }
+    }
 }
 
 // ======== Cart Functions (Server Integration) ========
