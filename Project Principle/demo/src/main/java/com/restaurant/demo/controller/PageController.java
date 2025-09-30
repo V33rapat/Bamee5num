@@ -1,13 +1,18 @@
 package com.restaurant.demo.controller;
 
 import com.restaurant.demo.dto.CustomerRegistrationDto;
+import com.restaurant.demo.model.Customer;
 import com.restaurant.demo.service.CustomerService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+
+import jakarta.servlet.http.HttpSession;
+import java.util.Optional;
 
 @Controller
 public class PageController {
@@ -71,6 +76,40 @@ public class PageController {
 
     @GetMapping("/customer-page")
     public String customer() {
+        return "customer";
+    }
+
+    /**
+     * Customer-specific page endpoint with session validation
+     * Displays personalized customer page based on customer ID in URL
+     * 
+     * @param customerId The customer ID from URL path variable
+     * @param model Model to pass data to Thymeleaf template
+     * @param session HttpSession for server-side session validation
+     * @return View name for Thymeleaf or redirect to login on error
+     */
+    @GetMapping("/customer/{customerId}")
+    public String customerPage(@PathVariable Long customerId, Model model, HttpSession session) {
+        // Session validation: Check if session contains customer ID
+        Long sessionCustomerId = (Long) session.getAttribute("customerId");
+        
+        // If no session exists or customer ID doesn't match, redirect to login with error
+        if (sessionCustomerId == null || !sessionCustomerId.equals(customerId)) {
+            return "redirect:/login?error=unauthorized";
+        }
+        
+        // Fetch customer data from database using customer service
+        Optional<Customer> customerOpt = customerService.findCustomerById(customerId);
+        
+        // Handle case when customer is not found in database
+        if (customerOpt.isEmpty()) {
+            return "redirect:/login?error=notfound";
+        }
+        
+        // Add customer object to model for Thymeleaf template rendering
+        model.addAttribute("customer", customerOpt.get());
+        
+        // Return "customer" view name for Thymeleaf rendering
         return "customer";
     }
 

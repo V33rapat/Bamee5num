@@ -10,6 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Positive;
@@ -39,10 +40,16 @@ public class CustomerController {
 
     /**
      * Authenticate customer login
+     * Stores customer ID in HTTP session for server-side validation
      */
     @PostMapping("/login")
-    public ResponseEntity<AuthResponseDto> loginCustomer(@Valid @RequestBody CustomerLoginDto loginDto) {
+    public ResponseEntity<AuthResponseDto> loginCustomer(@Valid @RequestBody CustomerLoginDto loginDto, HttpSession session) {
         AuthResponseDto response = customerService.loginCustomer(loginDto);
+        
+        // Store customer ID in HTTP session for server-side validation
+        session.setAttribute("customerId", response.getCustomerId());
+        session.setAttribute("username", response.getUsername());
+        
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
