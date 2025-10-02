@@ -68,6 +68,11 @@ public class CartService {
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
     }
 
+    // Method for Manager features - get all cart items across all customers
+    public List<CartItem> getAllCartItems() {
+        return cartItemRepository.findAll();
+    }
+
     // Existing methods that work with Customer objects
     public List<CartItem> getCartByCustomer(Customer customer) {
         if (customer == null) {

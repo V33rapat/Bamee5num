@@ -96,7 +96,7 @@ public class ManagerApiController {
 
     @GetMapping("/carts/{userId}")
     public List<CartItem> getCartForUser(@PathVariable int userId) {
-        return cartService.getCartByCustomerId(userId);
+        return cartService.getCartItems(Long.valueOf(userId));
     }
 
     @GetMapping("/reports/sales")

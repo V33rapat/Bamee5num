@@ -133,4 +133,17 @@ public class CartItem {
     public void setUpdatedAt(LocalDateTime updatedAt) {
         this.updatedAt = updatedAt;
     }
+
+    // Compatibility methods for Manager features (from main branch)
+    public LocalDateTime getAddedAt() {
+        return this.createdAt;
+    }
+
+    public Long getCustomerId() {
+        return this.customer != null ? this.customer.getId() : null;
+    }
+
+    public double getPrice() {
+        return this.itemPrice != null ? this.itemPrice.doubleValue() : 0.0;
+    }
 }

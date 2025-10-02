@@ -42,7 +42,7 @@ public class Manager extends Employee {
     public SalesReport viewSalesReport(List<CartItem> cartItems, List<User> users) {
         LocalDate today = LocalDate.now();
 
-        Map<Integer, List<CartItem>> todayCartByCustomer = cartItems.stream()
+        Map<Long, List<CartItem>> todayCartByCustomer = cartItems.stream()
                 .filter(item -> item.getAddedAt() != null && today.equals(item.getAddedAt().toLocalDate()))
                 .collect(Collectors.groupingBy(CartItem::getCustomerId));
 

@@ -50,7 +50,7 @@ public class DataService {
     }
 
     public List<CartItem> getCartForUser(int userId) {
-        return cartService.getCartByCustomerId(userId);
+        return cartService.getCartItems(Long.valueOf(userId));
     }
 
     public List<CartItem> getAllCartItems() {
