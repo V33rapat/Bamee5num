@@ -64,30 +64,30 @@
 
 ## Tasks
 
-- [ ] 1.0 Prepare for Merge
-  - [ ] 1.1 Ensure all changes in main are committed
-  - [ ] 1.2 Create backup branch: `git branch backup-main-before-merge`
-  - [ ] 1.3 Verify clean working directory: `git status`
-  - [ ] 1.4 Fetch latest from feature branch: `git fetch origin feature/seperate-customer-cart`
-  - [ ] 1.5 Document current main branch commit hash for rollback reference
+- [x] 1.0 Prepare for Merge
+  - [x] 1.1 Ensure all changes in main are committed
+  - [x] 1.2 Create backup branch: `git branch backup-main-before-merge`
+  - [x] 1.3 Verify clean working directory: `git status`
+  - [x] 1.4 Fetch latest from feature branch: `git fetch origin feature/seperate-customer-cart`
+  - [x] 1.5 Document current main branch commit hash for rollback reference
 
-- [ ] 2.0 Initiate Merge and Identify Conflicts
-  - [ ] 2.1 Start merge: `git merge origin/feature/seperate-customer-cart --no-commit --no-ff`
-  - [ ] 2.2 Review conflict summary: `git status`
-  - [ ] 2.3 List all conflicted files: `git diff --name-only --diff-filter=U`
-  - [ ] 2.4 Create merge conflict resolution log file for tracking decisions
+- [x] 2.0 Initiate Merge and Identify Conflicts
+  - [x] 2.1 Start merge: `git merge origin/feature/seperate-customer-cart --no-commit --no-ff`
+  - [x] 2.2 Review conflict summary: `git status`
+  - [x] 2.3 List all conflicted files: `git diff --name-only --diff-filter=U`
+  - [x] 2.4 Create merge conflict resolution log file for tracking decisions
 
-- [ ] 3.0 Resolve pom.xml Conflicts
-  - [ ] 3.1 Open `Project Principle/demo/pom.xml` and locate conflict markers
-  - [ ] 3.2 Set Spring Boot version to 3.5.6 (from main - newer version)
-  - [ ] 3.3 Merge dependencies: Include spring-boot-starter-validation (feature)
-  - [ ] 3.4 Merge dependencies: Include spring-boot-starter-security (feature)
-  - [ ] 3.5 Merge dependencies: Include mysql-connector-j 9.4.0 (feature)
-  - [ ] 3.6 Merge dependencies: Include spring-boot-devtools (main)
-  - [ ] 3.7 Ensure maven plugin has groupId specified (feature branch addition)
-  - [ ] 3.8 Remove all conflict markers from pom.xml
-  - [ ] 3.9 Validate XML syntax and structure
-  - [ ] 3.10 Test: Run `mvn clean compile` to verify pom.xml is valid
+- [x] 3.0 Resolve pom.xml Conflicts
+  - [x] 3.1 Open `Project Principle/demo/pom.xml` and locate conflict markers
+  - [x] 3.2 Set Spring Boot version to 3.5.6 (from main - newer version)
+  - [x] 3.3 Merge dependencies: Include spring-boot-starter-validation (feature)
+  - [x] 3.4 Merge dependencies: Include spring-boot-starter-security (feature)
+  - [x] 3.5 Merge dependencies: Include mysql-connector-j 9.4.0 (feature)
+  - [x] 3.6 Merge dependencies: Include spring-boot-devtools (main)
+  - [x] 3.7 Ensure maven plugin has groupId specified (feature branch addition)
+  - [x] 3.8 Remove all conflict markers from pom.xml
+  - [x] 3.9 Validate XML syntax and structure
+  - [x] 3.10 Test: Run `mvn clean compile` to verify pom.xml is valid
 
 - [ ] 4.0 Resolve CartController Conflicts
   - [ ] 4.1 Open `Project Principle/demo/src/main/java/com/restaurant/demo/controller/CartController.java`
