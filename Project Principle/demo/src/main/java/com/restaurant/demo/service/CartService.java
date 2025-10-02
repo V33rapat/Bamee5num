@@ -17,6 +17,7 @@ import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 
+// จัดการตะกร้าสินค้า
 @Service
 public class CartService {
 

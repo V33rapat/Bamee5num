@@ -64,7 +64,8 @@ public class Manager extends Employee {
         double avgRating = 0;
         return new SalesReport(orderCount, revenue, newCustomers, avgRating);
     }
-
+    
+    // helper class -> sales report data
     public static class SalesReport {
         public final int orderCount;
         public final double revenue;

@@ -14,6 +14,7 @@ public class MenuItem {
     private String name;
     private double price;
     private String description;
+    
     //รองรับคำสั่งค้นหา: ใน MenuItemRepo มีเมธอด findByActiveTrue()
     //ถ้า active = false เมนูนั้นจะไม่แสดงในหน้าร้าน
     private boolean active = true;
