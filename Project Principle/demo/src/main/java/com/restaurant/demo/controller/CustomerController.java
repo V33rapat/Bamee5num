@@ -42,6 +42,20 @@ public class CustomerController {
         return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
 
+    // Customer ดูตะกร้าสินค้าของตัวเอง
+    @GetMapping
+    public List<CartItem> getCustomerCart(@RequestParam int id) {
+        return cartService.getCartByCustomerId(id);
+    }
+
+    // Customer เพิ่มสินค้าในตะกร้า
+    @PostMapping("/add")
+    public CartItem addToCart(@RequestParam int customerId,
+                              @RequestParam String name,
+                              @RequestParam int price,
+                              @RequestParam int quantity) {
+        return cartService.addToCart(customerId, name, price, quantity);
+
     /**
      * Authenticate customer login
      * Stores customer ID in HTTP session for server-side validation
@@ -128,5 +142,6 @@ public class CustomerController {
 
         boolean isValid = customerService.isValidPassword(password);
         return new ResponseEntity<>(isValid, HttpStatus.OK);
+
     }
 }

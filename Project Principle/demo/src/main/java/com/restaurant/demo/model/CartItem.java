@@ -1,11 +1,20 @@
 package com.restaurant.demo.model;
 
+<<<<<<< HEAD
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.PrePersist;
+
+=======
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.math.BigDecimal;
+>>>>>>> feature/seperate-customer-cart
 import java.time.LocalDateTime;
 
 @Entity
@@ -16,6 +25,16 @@ public class CartItem {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+<<<<<<< HEAD
+    private int customerId;
+    private String name;
+    private int price;
+    private int quantity;
+    private LocalDateTime addedAt;
+
+    public CartItem() {
+    }
+=======
     @NotNull(message = "Customer is required")
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "customer_id", nullable = false)
@@ -49,6 +68,7 @@ public class CartItem {
 
     // Default constructor
     public CartItem() {}
+>>>>>>> feature/seperate-customer-cart
 
     // Constructor with required fields
     public CartItem(Customer customer, String itemName, BigDecimal itemPrice, Integer quantity) {
@@ -56,8 +76,74 @@ public class CartItem {
         this.itemName = itemName;
         this.itemPrice = itemPrice;
         this.quantity = quantity;
+        this.addedAt = LocalDateTime.now();
     }
 
+<<<<<<< HEAD
+    public CartItem(int customerId, String name, int price, int quantity) {
+        this.customerId = customerId;
+        this.name = name;
+        this.price = price;
+        this.quantity = quantity;
+        this.addedAt = LocalDateTime.now();
+    }
+
+    @PrePersist
+    public void prePersist() {
+        if (addedAt == null) {
+            addedAt = LocalDateTime.now();
+        }
+    }
+
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
+
+    public int getCustomerId() {
+        return customerId;
+    }
+
+    public void setCustomerId(int customerId) {
+        this.customerId = customerId;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public int getPrice() {
+        return price;
+    }
+
+    public void setPrice(int price) {
+        this.price = price;
+    }
+
+    public int getQuantity() {
+        return quantity;
+    }
+
+    public void setQuantity(int quantity) {
+        this.quantity = quantity;
+    }
+
+    public LocalDateTime getAddedAt() {
+        return addedAt;
+    }
+
+    public void setAddedAt(LocalDateTime addedAt) {
+        this.addedAt = addedAt;
+    }
+}
+=======
     @PrePersist
     protected void onCreate() {
         createdAt = LocalDateTime.now();
@@ -134,3 +220,4 @@ public class CartItem {
         this.updatedAt = updatedAt;
     }
 }
+>>>>>>> feature/seperate-customer-cart
