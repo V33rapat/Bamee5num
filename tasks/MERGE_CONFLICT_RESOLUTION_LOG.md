@@ -200,8 +200,67 @@ The merge from `feature/seperate-customer-cart` into `main` was previously attem
 7. ✅ Verify all new files from main branch are present
 8. ✅ Resolve frontend JavaScript conflicts (all clean, no conflicts found)
 9. ✅ Resolve template file conflicts (manager.html clean, no conflicts found)
-10. ⏳ Compile and test full application
-11. ⏳ Commit resolved conflicts
+10. ✅ Verify all conflict markers removed (completed via git grep searches)
+11. ⏳ Compile and test full application
+12. ⏳ Commit resolved conflicts
+
+---
+
+## Conflict Marker Verification
+
+**Date:** October 3, 2025  
+**Status:** ✅ Complete - No conflict markers found
+
+**Verification Results:**
+- ✅ `git grep -n "<<<<<<< HEAD"` - No results
+- ✅ `git grep -n "======="` - Only comment separators in JS files (not conflict markers)
+- ✅ `git grep -n ">>>>>>>"` - No results
+- ✅ Manually checked all previously conflicted files:
+  - CartController.java: 0 conflict markers
+  - CartService.java: 0 conflict markers
+  - CartItem.java: 0 conflict markers
+  - application.properties: 0 conflict markers
+  - CustomerController.java: 0 conflict markers
+  - pom.xml: 0 conflict markers
+- ✅ Git status: Working tree clean, no active conflicts
+
+---
+
+## Database Schema Verification (Task 15.0)
+
+**Date:** October 3, 2025  
+**Status:** ✅ Complete
+
+### Changes Made:
+
+1. **Verified existing tables:**
+   - ✅ `customers` table - Matches Customer entity perfectly
+   - ⚠️ `cart_items` table - Fixed item_name (VARCHAR 255→100) and item_price (DECIMAL 10,2→6,2)
+
+2. **Added missing tables:**
+   - ✅ `employees` table - For Employee entity (JOINED inheritance base table)
+   - ✅ `managers` table - For Manager entity (extends employees)
+   - ✅ `menu_items` table - For MenuItem entity with active flag support
+
+3. **Foreign key relationships verified:**
+   - ✅ cart_items.customer_id → customers.id (CASCADE DELETE)
+   - ✅ managers.id → employees.id (CASCADE DELETE, JOINED inheritance)
+
+4. **Sample data added:**
+   - 2 sample customers
+   - 3 sample employees (1 manager, 2 regular employees)
+   - 5 sample menu items (Thai restaurant dishes)
+
+### Database Schema Summary:
+
+**Total tables: 5**
+- `customers` (BIGINT id, name, username, email, phone, password_hash, timestamps)
+- `cart_items` (BIGINT id, customer_id FK, item_name, item_price DECIMAL(6,2), quantity, timestamps)
+- `employees` (INT id, name, position) - Base table for JOINED inheritance
+- `managers` (INT id FK) - Extends employees
+- `menu_items` (BIGINT id, category, name, price, description, active flag)
+
+**Note:** User.java is NOT a JPA entity, just a DTO for in-memory management, so no `users` table needed.
 
 ---
 
@@ -215,3 +274,4 @@ The merge from `feature/seperate-customer-cart` into `main` was previously attem
 ---
 
 **Last Updated:** October 3, 2025
+
