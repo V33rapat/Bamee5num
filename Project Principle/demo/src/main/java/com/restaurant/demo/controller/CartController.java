@@ -2,16 +2,12 @@ package com.restaurant.demo.controller;
 
 import com.restaurant.demo.model.CartItem;
 import com.restaurant.demo.service.CartService;
-<<<<<<< HEAD
-=======
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
->>>>>>> feature/seperate-customer-cart
 import org.springframework.web.bind.annotation.*;
 
-import jakarta.validation.Valid;
 import jakarta.validation.constraints.*;
 import java.math.BigDecimal;
 import java.util.List;
@@ -22,27 +18,6 @@ import java.util.List;
 @CrossOrigin(origins = "http://localhost:8080", allowCredentials = "true", maxAge = 3600)
 public class CartController {
 
-<<<<<<< HEAD
-    private final CartService cartService;
-
-    public CartController(CartService cartService) {
-        this.cartService = cartService;
-    }
-
-    @GetMapping("/{userId}")
-    public List<CartItem> getCart(@PathVariable int userId) {
-        return cartService.getCartByCustomerId(userId);
-    }
-
-    @PostMapping("/add")
-    public CartItem addToCart(@RequestBody CartItem cartItem) {
-        return cartService.addToCart(cartItem);
-    }
-
-    @DeleteMapping("/remove/{id}")
-    public void removeFromCart(@PathVariable int id) {
-        cartService.removeFromCart(id);
-=======
     @Autowired
     private CartService cartService;
 
@@ -145,6 +120,5 @@ public class CartController {
 
         BigDecimal total = cartService.calculateCartTotal(customerId);
         return new ResponseEntity<>(total, HttpStatus.OK);
->>>>>>> feature/seperate-customer-cart
     }
 }

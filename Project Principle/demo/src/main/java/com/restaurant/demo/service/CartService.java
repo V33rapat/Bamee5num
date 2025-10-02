@@ -1,11 +1,6 @@
 package com.restaurant.demo.service;
 
 import com.restaurant.demo.model.CartItem;
-<<<<<<< HEAD
-import com.restaurant.demo.repository.CartItemRepository;
-import org.springframework.stereotype.Service;
-
-=======
 import com.restaurant.demo.model.Customer;
 import com.restaurant.demo.repository.CartItemRepository;
 import com.restaurant.demo.repository.CustomerRepository;
@@ -13,28 +8,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
->>>>>>> feature/seperate-customer-cart
 import java.util.List;
 import java.util.Optional;
 
-// จัดการตะกร้าสินค้า
 @Service
 public class CartService {
 
-<<<<<<< HEAD
-    private final CartItemRepository cartItemRepository;
-
-    public CartService(CartItemRepository cartItemRepository) {
-        this.cartItemRepository = cartItemRepository;
-    }
-
-    public List<CartItem> getCartByCustomerId(int customerId) {
-        return cartItemRepository.findByCustomerId(customerId);
-    }
-
-    public List<CartItem> getAllCartItems() {
-        return cartItemRepository.findAll();
-=======
     @Autowired
     private CartItemRepository cartItemRepository;
 
@@ -256,7 +235,6 @@ public class CartService {
             }
         }
         return optionalItem;
->>>>>>> feature/seperate-customer-cart
     }
 
     public CartItem updateCartItem(CartItem cartItem, Customer authenticatedCustomer) {
@@ -286,10 +264,6 @@ public class CartService {
 
     @Deprecated
     public CartItem addToCart(int customerId, String name, int price, int quantity) {
-<<<<<<< HEAD
-        CartItem newItem = new CartItem(customerId, name, price, quantity);
-        return cartItemRepository.save(newItem);
-=======
         throw new UnsupportedOperationException("Use addToCart(Customer customer, String name, int price, int quantity) instead");
     }
 
@@ -321,17 +295,5 @@ public class CartService {
     @Deprecated
     public Optional<CartItem> getCartItem(int itemId) {
         throw new UnsupportedOperationException("Use getCartItem(Long itemId, Customer authenticatedCustomer) instead");
->>>>>>> feature/seperate-customer-cart
-    }
-
-    public CartItem addToCart(CartItem cartItem) {
-        if (cartItem.getAddedAt() == null) {
-            cartItem.setAddedAt(java.time.LocalDateTime.now());
-        }
-        return cartItemRepository.save(cartItem);
-    }
-
-    public void removeFromCart(int id) {
-        cartItemRepository.deleteById(id);
     }
 }

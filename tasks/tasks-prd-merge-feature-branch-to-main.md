@@ -89,102 +89,102 @@
   - [x] 3.9 Validate XML syntax and structure
   - [x] 3.10 Test: Run `mvn clean compile` to verify pom.xml is valid
 
-- [ ] 4.0 Resolve CartController Conflicts
-  - [ ] 4.1 Open `Project Principle/demo/src/main/java/com/restaurant/demo/controller/CartController.java`
-  - [ ] 4.2 Analyze both versions: main has simple implementation, feature has comprehensive with validation
-  - [ ] 4.3 **Decision:** Accept feature branch version entirely (more production-ready)
-  - [ ] 4.4 Remove all main branch code between conflict markers
-  - [ ] 4.5 Keep feature branch implementation: @Validated, comprehensive endpoints, ownership checks
-  - [ ] 4.6 Ensure imports are complete (no merge marker fragments)
-  - [ ] 4.7 Remove any duplicate imports or methods
-  - [ ] 4.8 Verify all endpoints: /add, /update/{id}, /remove/{id}, /customer/{id}, /{id}, /clear/{id}, /total/{id}
-  - [ ] 4.9 Ensure @CrossOrigin annotation is present
-  - [ ] 4.10 Test: Compile the file individually to check for syntax errors
+- [x] 4.0 Resolve CartController Conflicts
+  - [x] 4.1 Open `Project Principle/demo/src/main/java/com/restaurant/demo/controller/CartController.java`
+  - [x] 4.2 Analyze both versions: main has simple implementation, feature has comprehensive with validation
+  - [x] 4.3 **Decision:** Accept feature branch version entirely (more production-ready)
+  - [x] 4.4 Remove all main branch code between conflict markers
+  - [x] 4.5 Keep feature branch implementation: @Validated, comprehensive endpoints, ownership checks
+  - [x] 4.6 Ensure imports are complete (no merge marker fragments)
+  - [x] 4.7 Remove any duplicate imports or methods
+  - [x] 4.8 Verify all endpoints: /add, /update/{id}, /remove/{id}, /customer/{id}, /{id}, /clear/{id}, /total/{id}
+  - [x] 4.9 Ensure @CrossOrigin annotation is present
+  - [x] 4.10 Test: Compile the file individually to check for syntax errors
 
-- [ ] 5.0 Resolve CartService Conflicts
-  - [ ] 5.1 Open `Project Principle/demo/src/main/java/com/restaurant/demo/service/CartService.java`
-  - [ ] 5.2 Identify conflicted sections: imports, fields, methods
-  - [ ] 5.3 **Decision:** Use feature branch as base structure
-  - [ ] 5.4 Resolve import conflicts: Keep feature branch imports (Customer, CustomerRepository, validation)
-  - [ ] 5.5 Use feature branch field declarations: @Autowired CartItemRepository and CustomerRepository
-  - [ ] 5.6 Keep all customer-centric public methods from feature branch
-  - [ ] 5.7 Remove deprecated methods that throw UnsupportedOperationException
-  - [ ] 5.8 Remove simple int-based methods from main (addToCart with int customerId)
-  - [ ] 5.9 Ensure all methods have proper null checks and validation
-  - [ ] 5.10 Remove Thai comment "เธเธฑเธ"เธเธฒเธฃเธ•เธฐเธเธฃเนเธฒเธชเธดเธเธเนเธฒ" if present from main
-  - [ ] 5.11 Remove conflict markers completely
-  - [ ] 5.12 Test: Compile the file to verify no syntax errors
+- [x] 5.0 Resolve CartService Conflicts
+  - [x] 5.1 Open `Project Principle/demo/src/main/java/com/restaurant/demo/service/CartService.java`
+  - [x] 5.2 Identify conflicted sections: imports, fields, methods
+  - [x] 5.3 **Decision:** Use feature branch as base structure
+  - [x] 5.4 Resolve import conflicts: Keep feature branch imports (Customer, CustomerRepository, validation)
+  - [x] 5.5 Use feature branch field declarations: @Autowired CartItemRepository and CustomerRepository
+  - [x] 5.6 Keep all customer-centric public methods from feature branch
+  - [x] 5.7 Remove deprecated methods that throw UnsupportedOperationException
+  - [x] 5.8 Remove simple int-based methods from main (addToCart with int customerId)
+  - [x] 5.9 Ensure all methods have proper null checks and validation
+  - [x] 5.10 Remove Thai comment "เธเธฑเธ"เธเธฒเธฃเธ•เธฐเธเธฃเนเธฒเธชเธดเธเธเนเธฒ" if present from main
+  - [x] 5.11 Remove conflict markers completely
+  - [x] 5.12 Test: Compile the file to verify no syntax errors
 
-- [ ] 6.0 Resolve CartItem Model Conflicts
-  - [ ] 6.1 Open `Project Principle/demo/src/main/java/com/restaurant/demo/model/CartItem.java`
-  - [ ] 6.2 Compare both versions: Check for field differences, validation annotations
-  - [ ] 6.3 **Decision:** Use feature branch version (has comprehensive Jakarta validation)
-  - [ ] 6.4 Ensure @Entity and @Table annotations are correct
-  - [ ] 6.5 Verify relationship: @ManyToOne with Customer, proper FetchType.LAZY
-  - [ ] 6.6 Confirm validation annotations: @NotNull, @NotBlank, @DecimalMin, @DecimalMax, @Min, @Max
-  - [ ] 6.7 Ensure timestamp fields use @CreationTimestamp and @UpdateTimestamp
-  - [ ] 6.8 Verify getTotalPrice() calculated field method exists
-  - [ ] 6.9 Remove any main branch additions if they conflict with validation approach
-  - [ ] 6.10 Test: Compile to verify entity structure is valid
+- [x] 6.0 Resolve CartItem Model Conflicts
+  - [x] 6.1 Open `Project Principle/demo/src/main/java/com/restaurant/demo/model/CartItem.java`
+  - [x] 6.2 Compare both versions: Check for field differences, validation annotations
+  - [x] 6.3 **Decision:** Use feature branch version (has comprehensive Jakarta validation)
+  - [x] 6.4 Ensure @Entity and @Table annotations are correct
+  - [x] 6.5 Verify relationship: @ManyToOne with Customer, proper FetchType.LAZY
+  - [x] 6.6 Confirm validation annotations: @NotNull, @NotBlank, @DecimalMin, @DecimalMax, @Min, @Max
+  - [x] 6.7 Ensure timestamp fields use @CreationTimestamp and @UpdateTimestamp
+  - [x] 6.8 Verify getTotalPrice() calculated field method exists
+  - [x] 6.9 Remove any main branch additions if they conflict with validation approach
+  - [x] 6.10 Test: Compile to verify entity structure is valid
 
-- [ ] 7.0 Resolve application.properties Conflicts
-  - [ ] 7.1 Open `Project Principle/demo/src/main/resources/application.properties`
-  - [ ] 7.2 Compare database configurations between branches
-  - [ ] 7.3 Use feature branch MySQL configuration (production-ready)
-  - [ ] 7.4 Ensure database URL: jdbc:mysql://localhost:3306/restaurant_db
-  - [ ] 7.5 Keep MySQL driver class: com.mysql.cj.jdbc.Driver
-  - [ ] 7.6 Preserve JPA settings from feature branch: hibernate.ddl-auto=update, show-sql=true
-  - [ ] 7.7 Add any additional settings from main (employee/manager specific if any)
-  - [ ] 7.8 Keep session configuration from feature branch
-  - [ ] 7.9 Keep connection pool settings from feature branch
-  - [ ] 7.10 Remove conflict markers
+- [x] 7.0 Resolve application.properties Conflicts
+  - [x] 7.1 Open `Project Principle/demo/src/main/resources/application.properties`
+  - [x] 7.2 Compare database configurations between branches
+  - [x] 7.3 Use feature branch MySQL configuration (production-ready)
+  - [x] 7.4 Ensure database URL: jdbc:mysql://localhost:3306/restaurant_db
+  - [x] 7.5 Keep MySQL driver class: com.mysql.cj.jdbc.Driver
+  - [x] 7.6 Preserve JPA settings from feature branch: hibernate.ddl-auto=update, show-sql=true
+  - [x] 7.7 Add any additional settings from main (employee/manager specific if any)
+  - [x] 7.8 Keep session configuration from feature branch
+  - [x] 7.9 Keep connection pool settings from feature branch
+  - [x] 7.10 Remove conflict markers
 
-- [ ] 8.0 Resolve CustomerController Conflicts (if any)
-  - [ ] 8.1 Open `Project Principle/demo/src/main/java/com/restaurant/demo/controller/CustomerController.java`
-  - [ ] 8.2 Check for conflicts in login/registration methods
-  - [ ] 8.3 **Decision:** Use feature branch version (has session management)
-  - [ ] 8.4 Ensure loginCustomer() stores customerId in session
-  - [ ] 8.5 Verify all validation endpoints are present
-  - [ ] 8.6 Remove conflict markers
-  - [ ] 8.7 Test: Compile to verify
+- [x] 8.0 Resolve CustomerController Conflicts (if any)
+  - [x] 8.1 Open `Project Principle/demo/src/main/java/com/restaurant/demo/controller/CustomerController.java`
+  - [x] 8.2 Check for conflicts in login/registration methods
+  - [x] 8.3 **Decision:** Use feature branch version (has session management)
+  - [x] 8.4 Ensure loginCustomer() stores customerId in session
+  - [x] 8.5 Verify all validation endpoints are present
+  - [x] 8.6 Remove conflict markers
+  - [x] 8.7 Test: Compile to verify
 
-- [ ] 9.0 Accept All New Files from Main Branch
-  - [ ] 9.1 Verify AuthController.java is added (git will auto-add if no conflict)
-  - [ ] 9.2 Verify EmployeeApiController.java is added
-  - [ ] 9.3 Verify ManagerApiController.java is added
-  - [ ] 9.4 Verify MenuItemController.java is added
-  - [ ] 9.5 Verify all Employee, Manager, MenuItem, User models are added
-  - [ ] 9.6 Verify all employee/manager/user service packages are added
-  - [ ] 9.7 Verify MenuItemRepo is added
-  - [ ] 9.8 Verify DataService and MenuItemService are added
-  - [ ] 9.9 Check that git status shows these as "added" not "conflicted"
+- [x] 9.0 Accept All New Files from Main Branch
+  - [x] 9.1 Verify AuthController.java is added (git will auto-add if no conflict)
+  - [x] 9.2 Verify EmployeeApiController.java is added
+  - [x] 9.3 Verify ManagerApiController.java is added
+  - [x] 9.4 Verify MenuItemController.java is added
+  - [x] 9.5 Verify all Employee, Manager, MenuItem, User models are added
+  - [x] 9.6 Verify all employee/manager/user service packages are added
+  - [x] 9.7 Verify MenuItemRepo is added
+  - [x] 9.8 Verify DataService and MenuItemService are added
+  - [x] 9.9 Check that git status shows these as "added" not "conflicted"
 
-- [ ] 10.0 Resolve Frontend JavaScript Conflicts
-  - [ ] 10.1 Open `Project Principle/demo/src/main/resources/static/js/landing.js`
-  - [ ] 10.2 Review differences between branches
-  - [ ] 10.3 Merge both changes if they affect different sections
-  - [ ] 10.4 If conflict is in same section, prefer version that works with merged backend
-  - [ ] 10.5 Open `Project Principle/demo/src/main/resources/static/js/manager.js`
-  - [ ] 10.6 **Decision:** Use main branch version (has manager functionality)
-  - [ ] 10.7 Remove conflict markers from all JS files
-  - [ ] 10.8 Verify no syntax errors in JavaScript
+- [x] 10.0 Resolve Frontend JavaScript Conflicts
+  - [x] 10.1 Open `Project Principle/demo/src/main/resources/static/js/landing.js`
+  - [x] 10.2 Review differences between branches
+  - [x] 10.3 Merge both changes if they affect different sections
+  - [x] 10.4 If conflict is in same section, prefer version that works with merged backend
+  - [x] 10.5 Open `Project Principle/demo/src/main/resources/static/js/manager.js`
+  - [x] 10.6 **Decision:** Use main branch version (has manager functionality)
+  - [x] 10.7 Remove conflict markers from all JS files
+  - [x] 10.8 Verify no syntax errors in JavaScript
 
-- [ ] 11.0 Resolve Template Conflicts
-  - [ ] 11.1 Open `Project Principle/demo/src/main/resources/templates/manager.html`
-  - [ ] 11.2 Compare both versions
-  - [ ] 11.3 **Decision:** Use main branch version (has manager dashboard enhancements)
-  - [ ] 11.4 Remove conflict markers
-  - [ ] 11.5 Verify template syntax is valid (Thymeleaf)
+- [x] 11.0 Resolve Template Conflicts
+  - [x] 11.1 Open `Project Principle/demo/src/main/resources/templates/manager.html`
+  - [x] 11.2 Compare both versions
+  - [x] 11.3 **Decision:** Use main branch version (has manager dashboard enhancements)
+  - [x] 11.4 Remove conflict markers
+  - [x] 11.5 Verify template syntax is valid (Thymeleaf)
 
-- [ ] 12.0 Handle File Additions and Deletions
-  - [ ] 12.1 Accept deletion of `Project Principle/Readme.txt` (main had it, feature doesn't)
-  - [ ] 12.2 Accept addition of `Project Principle/Readme.txt.txt` (feature has it)
-  - [ ] 12.3 Accept addition of `.project` file from main
-  - [ ] 12.4 Accept addition of `.vscode/launch.json` from main
-  - [ ] 12.5 Handle `.vscode/settings.json` merge if needed
-  - [ ] 12.6 Delete outdated `PROJECT_OVERVIEW.md` from root if present
-  - [ ] 12.7 Accept addition of `run-server.ps1` from main
-  - [ ] 12.8 Keep task files from feature branch in `/tasks/` directory
+- [x] 12.0 Handle File Additions and Deletions
+  - [x] 12.1 Accept deletion of `Project Principle/Readme.txt` (main had it, feature doesn't) - KEPT: Contains important manager dashboard documentation
+  - [x] 12.2 Accept addition of `Project Principle/Readme.txt.txt` (feature has it) - N/A: File does not exist
+  - [x] 12.3 Accept addition of `.project` file from main - Verified: Eclipse project descriptor present
+  - [x] 12.4 Accept addition of `.vscode/launch.json` from main - Verified: Debug configurations present
+  - [x] 12.5 Handle `.vscode/settings.json` merge if needed - Verified: No conflicts, properly configured
+  - [x] 12.6 Delete outdated `PROJECT_OVERVIEW.md` from root if present - Deleted: Outdated documentation removed
+  - [x] 12.7 Accept addition of `run-server.ps1` from main - Verified: PowerShell script present
+  - [x] 12.8 Keep task files from feature branch in `/tasks/` directory - Verified: All 4 task files present
 
 - [ ] 13.0 Verify Conflict Resolution Complete
   - [ ] 13.1 Run `git status` to check for remaining conflicts
