@@ -12,6 +12,7 @@ import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
+// repository จำลองเก็บข้อมูลผู้ใช้ในหน่วยความจำ
 @Component
 public class InMemoryUserDirectory implements UserDirectory {
 

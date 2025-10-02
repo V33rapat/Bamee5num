@@ -18,7 +18,7 @@ public class EmployeeApiController {
         this.menuItemService = menuItemService;
     }
 
-    // Employee-specific endpoints
+   
     // Employees เห็น menu
     @GetMapping("/menu")
     public List<MenuItem> getMenuForEmployee() {

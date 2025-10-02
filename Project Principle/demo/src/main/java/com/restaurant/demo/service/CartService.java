@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 
+// จัดการตะกร้าสินค้า
 @Service
 public class CartService {
 
