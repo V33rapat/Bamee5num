@@ -49,7 +49,7 @@ CREATE TABLE IF NOT EXISTS cart_items (
 
 -- Create employees table (base table for Employee entity with JOINED inheritance)
 CREATE TABLE IF NOT EXISTS employees (
-    id BIGINT PRIMARY KEY,
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(100) NOT NULL,
     position VARCHAR(50) NOT NULL,
     INDEX idx_position (position)
@@ -88,11 +88,11 @@ INSERT INTO customers (name, username, email, phone, password_hash) VALUES
 -- Insert sample employees and managers (optional)
 INSERT INTO employees (id, name, position) VALUES
 (1001, 'Alice Manager', 'Manager'),
-(1002, 'Bob Employee', 'Server'),
-(1003, 'Charlie Employee', 'Cook');
+(1002, 'Bob Employee', 'employee'),
+(1003, 'Charlie Employee', 'employee');
 
 INSERT INTO managers (id, username, email, password, created_at, updated_at) VALUES 
-(1001, 'alice_manager', 'alice@restaurant.com', '$2a$10$example_hash_for_password', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+(1001, 'alice_manager', 'alice@restaurant.com', '$2a$12$eJtOxgKnHNmUBfe72eOhEOjsaUqsX5YRb0uuQmhnRrDONGcv.z.EG', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 
 -- Insert sample menu items (optional)
 INSERT INTO menu_items (name, price, category, description, active) VALUES

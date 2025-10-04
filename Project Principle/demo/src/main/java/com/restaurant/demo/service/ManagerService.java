@@ -49,6 +49,12 @@ public class ManagerService {
 
         // Create new Manager entity
         Manager manager = new Manager();
+        
+        // Set inherited Employee fields
+        manager.setName(dto.getUsername()); // Using username as name
+        manager.setPosition("Manager");
+        
+        // Set Manager-specific fields
         manager.setUsername(dto.getUsername());
         manager.setEmail(dto.getEmail());
         

@@ -173,6 +173,7 @@
                        id="password" 
                        th:field="*{password}" 
                        placeholder="Password (min 8 characters)" 
+                       th:value="${error != null ? '' : ''}"
                        required />
                 <div class="form-note">Minimum 8 characters</div>
                 <span th:if="${#fields.hasErrors('password')}" 
@@ -187,7 +188,8 @@
                 <input type="password" 
                        id="confirmPassword" 
                        th:field="*{confirmPassword}" 
-                       placeholder="Confirm Password" 
+                       placeholder="Confirm Password"
+                       th:value="${error != null ? '' : ''}"
                        required />
                 <span th:if="${#fields.hasErrors('confirmPassword')}" 
                       th:errors="*{confirmPassword}" 
@@ -207,5 +209,31 @@
 
     <!-- Link to JavaScript file -->
     <script src="/js/manager-auth.js"></script>
+    
+    <!-- Clear password fields on error and reset validation -->
+    <script th:if="${error}">
+        document.addEventListener('DOMContentLoaded', function() {
+            // Clear password fields when there's an error
+            const passwordInput = document.getElementById('password');
+            const confirmPasswordInput = document.getElementById('confirmPassword');
+            
+            if (passwordInput) {
+                passwordInput.value = '';
+            }
+            if (confirmPasswordInput) {
+                confirmPasswordInput.value = '';
+            }
+            
+            // Trigger validation to update button state
+            setTimeout(function() {
+                if (passwordInput) {
+                    passwordInput.dispatchEvent(new Event('input'));
+                }
+                if (confirmPasswordInput) {
+                    confirmPasswordInput.dispatchEvent(new Event('input'));
+                }
+            }, 100);
+        });
+    </script>
 </body>
 </html>

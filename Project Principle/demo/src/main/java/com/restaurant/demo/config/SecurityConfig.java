@@ -41,12 +41,12 @@ public class SecurityConfig {
             .authorizeHttpRequests(authz -> authz
                 .requestMatchers("/", "/login", "/register", "/css/**", "/js/**", "/images/**", "/static/**", "/api/customers/login", "/api/customers/register", "/api/customers/**").permitAll()
                 .requestMatchers("/customer/**", "/api/cart/**").permitAll()
-                .requestMatchers("/manager/register", "/manager/login").permitAll()
-                .requestMatchers("/manager/**").authenticated()
+                .requestMatchers("/manager/**").permitAll()  // Allow all manager routes to bypass Spring Security
                 .anyRequest().authenticated()
             )
             .formLogin(form -> form
                 .loginPage("/login")
+                .loginProcessingUrl("/login")  // Only process /login for customer authentication
                 .successHandler(authenticationSuccessHandler)
                 .permitAll()
             )
