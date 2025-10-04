@@ -17,7 +17,7 @@
 - `src/main/java/com/restaurant/demo/service/ManagerService.java` - **CREATED** - Service layer for manager authentication logic (registration, login, password hashing)
 
 ### Backend - Controller
-- `src/main/java/com/restaurant/demo/controller/ManagerAuthController.java` - **NEW** - Controller for manager registration and login endpoints
+- `src/main/java/com/restaurant/demo/controller/ManagerAuthController.java` - **CREATED** - Controller for manager registration and login endpoints with session management and logout functionality
 
 ### Backend - Configuration
 - `src/main/java/com/restaurant/demo/config/SecurityConfig.java` - Update security configuration to handle manager authentication routes separately
@@ -128,50 +128,50 @@
   - [x] 4.18 Create `getManagerByEmail(String email)` method that returns Optional<Manager>
   - [x] 4.19 Create `getManagerById(Long id)` method that returns Optional<Manager>
 
-- [ ] 5.0 Create Manager Authentication Controller
-  - [ ] 5.1 Create `ManagerAuthController.java` class in controller package
-  - [ ] 5.2 Add `@Controller` annotation (not @RestController, since we're returning views)
-  - [ ] 5.3 Add `@RequestMapping("/manager")` at class level
-  - [ ] 5.4 Inject `ManagerService` using constructor injection
-  - [ ] 5.5 Create `showRegistrationForm()` method with `@GetMapping("/register")`
-  - [ ] 5.6 In showRegistrationForm: Add empty ManagerRegistrationDto to model
-  - [ ] 5.7 In showRegistrationForm: Return "manager-register" view name
-  - [ ] 5.8 Create `processRegistration()` method with `@PostMapping("/register")`
-  - [ ] 5.9 In processRegistration: Add `@Valid @ModelAttribute` ManagerRegistrationDto parameter
-  - [ ] 5.10 In processRegistration: Add BindingResult parameter to capture validation errors
-  - [ ] 5.11 In processRegistration: Check for validation errors, return to form if errors exist
-  - [ ] 5.12 In processRegistration: Check if passwords match, add error and return if not
-  - [ ] 5.13 In processRegistration: Call managerService.registerManager() in try-catch block
-  - [ ] 5.14 In processRegistration: Catch ManagerAlreadyExistsException and add error to model
-  - [ ] 5.15 In processRegistration: On success, redirect to "/manager/login" with success message
-  - [ ] 5.16 Create `showLoginForm()` method with `@GetMapping("/login")`
-  - [ ] 5.17 In showLoginForm: Add empty ManagerLoginDto to model
-  - [ ] 5.18 In showLoginForm: Return "manager-login" view name
-  - [ ] 5.19 Create `processLogin()` method with `@PostMapping("/login")`
-  - [ ] 5.20 In processLogin: Add `@Valid @ModelAttribute` ManagerLoginDto parameter
-  - [ ] 5.21 In processLogin: Add HttpSession parameter to manage session
-  - [ ] 5.22 In processLogin: Call managerService.authenticateManager()
-  - [ ] 5.23 In processLogin: If authentication fails, add error message and return to login form
-  - [ ] 5.24 In processLogin: If successful, store manager ID, username, email in session
-  - [ ] 5.25 In processLogin: Set session attribute "managerAuthenticated" = true
-  - [ ] 5.26 In processLogin: Redirect to "/manager" (dashboard)
-  - [ ] 5.27 Create `logout()` method with `@PostMapping("/logout")` or `@GetMapping("/logout")`
-  - [ ] 5.28 In logout: Invalidate session using `session.invalidate()`
-  - [ ] 5.29 In logout: Redirect to "/manager/login"
+- [x] 5.0 Create Manager Authentication Controller
+  - [x] 5.1 Create `ManagerAuthController.java` class in controller package
+  - [x] 5.2 Add `@Controller` annotation (not @RestController, since we're returning views)
+  - [x] 5.3 Add `@RequestMapping("/manager")` at class level
+  - [x] 5.4 Inject `ManagerService` using constructor injection
+  - [x] 5.5 Create `showRegistrationForm()` method with `@GetMapping("/register")`
+  - [x] 5.6 In showRegistrationForm: Add empty ManagerRegistrationDto to model
+  - [x] 5.7 In showRegistrationForm: Return "manager-register" view name
+  - [x] 5.8 Create `processRegistration()` method with `@PostMapping("/register")`
+  - [x] 5.9 In processRegistration: Add `@Valid @ModelAttribute` ManagerRegistrationDto parameter
+  - [x] 5.10 In processRegistration: Add BindingResult parameter to capture validation errors
+  - [x] 5.11 In processRegistration: Check for validation errors, return to form if errors exist
+  - [x] 5.12 In processRegistration: Check if passwords match, add error and return if not
+  - [x] 5.13 In processRegistration: Call managerService.registerManager() in try-catch block
+  - [x] 5.14 In processRegistration: Catch ManagerAlreadyExistsException and add error to model
+  - [x] 5.15 In processRegistration: On success, redirect to "/manager/login" with success message
+  - [x] 5.16 Create `showLoginForm()` method with `@GetMapping("/login")`
+  - [x] 5.17 In showLoginForm: Add empty ManagerLoginDto to model
+  - [x] 5.18 In showLoginForm: Return "manager-login" view name
+  - [x] 5.19 Create `processLogin()` method with `@PostMapping("/login")`
+  - [x] 5.20 In processLogin: Add `@Valid @ModelAttribute` ManagerLoginDto parameter
+  - [x] 5.21 In processLogin: Add HttpSession parameter to manage session
+  - [x] 5.22 In processLogin: Call managerService.authenticateManager()
+  - [x] 5.23 In processLogin: If authentication fails, add error message and return to login form
+  - [x] 5.24 In processLogin: If successful, store manager ID, username, email in session
+  - [x] 5.25 In processLogin: Set session attribute "managerAuthenticated" = true
+  - [x] 5.26 In processLogin: Redirect to "/manager" (dashboard)
+  - [x] 5.27 Create `logout()` method with `@PostMapping("/logout")` or `@GetMapping("/logout")`
+  - [x] 5.28 In logout: Invalidate session using `session.invalidate()`
+  - [x] 5.29 In logout: Redirect to "/manager/login"
 
-- [ ] 6.0 Update Security Configuration for Manager Routes
-  - [ ] 6.1 Open `SecurityConfig.java` file
-  - [ ] 6.2 Locate the `authorizeHttpRequests` configuration block
-  - [ ] 6.3 Add `.requestMatchers("/manager/register", "/manager/login").permitAll()` before authentication requirements
-  - [ ] 6.4 Add `.requestMatchers("/manager/**").authenticated()` to require authentication for manager dashboard
-  - [ ] 6.5 Consider creating a separate SecurityFilterChain for manager routes (optional, for complete separation)
-  - [ ] 6.6 If creating separate chain: Create new `@Bean` method `managerSecurityFilterChain(HttpSecurity http)`
-  - [ ] 6.7 If creating separate chain: Use `.securityMatcher("/manager/**")` to apply only to manager routes
-  - [ ] 6.8 If creating separate chain: Configure separate session management for managers
-  - [ ] 6.9 If creating separate chain: Set login page to "/manager/login"
-  - [ ] 6.10 If creating separate chain: Set logout URL to "/manager/logout"
-  - [ ] 6.11 Ensure BCryptPasswordEncoder bean is available (already exists, verify it's being used)
-  - [ ] 6.12 Test that manager routes are accessible without breaking customer authentication
+- [x] 6.0 Update Security Configuration for Manager Routes
+  - [x] 6.1 Open `SecurityConfig.java` file
+  - [x] 6.2 Locate the `authorizeHttpRequests` configuration block
+  - [x] 6.3 Add `.requestMatchers("/manager/register", "/manager/login").permitAll()` before authentication requirements
+  - [x] 6.4 Add `.requestMatchers("/manager/**").authenticated()` to require authentication for manager dashboard
+  - [x] 6.5 Consider creating a separate SecurityFilterChain for manager routes (optional, for complete separation)
+  - [x] 6.6 If creating separate chain: Create new `@Bean` method `managerSecurityFilterChain(HttpSecurity http)`
+  - [x] 6.7 If creating separate chain: Use `.securityMatcher("/manager/**")` to apply only to manager routes
+  - [x] 6.8 If creating separate chain: Configure separate session management for managers
+  - [x] 6.9 If creating separate chain: Set login page to "/manager/login"
+  - [x] 6.10 If creating separate chain: Set logout URL to "/manager/logout"
+  - [x] 6.11 Ensure BCryptPasswordEncoder bean is available (already exists, verify it's being used)
+  - [x] 6.12 Test that manager routes are accessible without breaking customer authentication
 
 - [ ] 7.0 Create Manager Registration Frontend (HTML + JS)
   - [ ] 7.1 Create `manager-register.html` file in `src/main/resources/templates/`
