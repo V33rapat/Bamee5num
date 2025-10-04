@@ -68,17 +68,17 @@ Based on: `prd-menu-management.md`
   - [x] 4.11 Refresh menu list after successful addition
   - [x] 4.12 Handle and display error messages from backend
 
-- [ ] 5.0 Implement Frontend Edit Menu UI and Functionality
-  - [ ] 5.1 Add "แก้ไข" (Edit) button/icon for each menu item in the menu list table in `manager.html`
-  - [ ] 5.2 Create edit menu modal HTML structure (can reuse add menu modal with dynamic title)
-  - [ ] 5.3 Implement `showEditMenuModal(menuItemId)` function in `manager.js` that fetches menu item data via GET `/api/manager/menu-items/{id}`
-  - [ ] 5.4 Pre-populate form fields with current menu item data in the edit modal
-  - [ ] 5.5 Change modal title to "แก้ไขเมนู" (Edit Menu) when in edit mode
-  - [ ] 5.6 Implement `handleEditMenu(event, menuItemId)` function in `manager.js` to submit updated data via PUT to `/api/manager/menu-items/{id}`
-  - [ ] 5.7 Show success modal "แก้ไขเมนูสำเร็จ" after successful update
-  - [ ] 5.8 Refresh menu list after successful edit
-  - [ ] 5.9 Handle 404 error if menu item not found
-  - [ ] 5.10 Handle validation errors and display to user
+- [x] 5.0 Implement Frontend Edit Menu UI and Functionality
+  - [x] 5.1 Add "แก้ไข" (Edit) button/icon for each menu item in the menu list table in `manager.html`
+  - [x] 5.2 Create edit menu modal HTML structure (can reuse add menu modal with dynamic title)
+  - [x] 5.3 Implement `showEditMenuModal(menuItemId)` function in `manager.js` that fetches menu item data via GET `/api/manager/menu-items/{id}`
+  - [x] 5.4 Pre-populate form fields with current menu item data in the edit modal
+  - [x] 5.5 Change modal title to "แก้ไขเมนู" (Edit Menu) when in edit mode
+  - [x] 5.6 Implement `handleEditMenu(event, menuItemId)` function in `manager.js` to submit updated data via PUT to `/api/manager/menu-items/{id}`
+  - [x] 5.7 Show success modal "แก้ไขเมนูสำเร็จ" after successful update
+  - [x] 5.8 Refresh menu list after successful edit
+  - [x] 5.9 Handle 404 error if menu item not found
+  - [x] 5.10 Handle validation errors and display to user
 
 - [ ] 6.0 Enhance Menu Display to Show Active/Inactive Status
   - [ ] 6.1 Update `loadMenuItems()` function in `manager.js` to call `/api/manager/menu-items` instead of `/api/menuItems` to get all items

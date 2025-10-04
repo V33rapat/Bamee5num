@@ -97,9 +97,19 @@ async function loadMenuItems() {
         div.className = "flex justify-between bg-gray-100 p-4 rounded-lg";
         div.innerHTML = `
             <span>${item.name} - ฿${item.price}</span>
-            <button class="bg-red-500 text-white px-3 py-1 rounded delete-menu" data-id="${item.id}">ลบ</button>
+            <div class="flex space-x-2">
+                <button class="bg-blue-500 text-white px-3 py-1 rounded edit-menu" data-id="${item.id}">แก้ไข</button>
+                <button class="bg-red-500 text-white px-3 py-1 rounded delete-menu" data-id="${item.id}">ลบ</button>
+            </div>
         `;
         menuList.appendChild(div);
+    });
+
+    document.querySelectorAll(".edit-menu").forEach(btn => {
+        btn.addEventListener("click", () => {
+            const id = parseInt(btn.dataset.id, 10);
+            showEditMenuModal(id);
+        });
     });
 
     document.querySelectorAll(".delete-menu").forEach(btn => {
@@ -135,11 +145,79 @@ function hideAddMenuModal() {
         if (activeCheckbox) {
             activeCheckbox.checked = true;
         }
+        // Remove edit mode data
+        delete form.dataset.mode;
+        delete form.dataset.id;
+    }
+    // Reset modal title to "Add Menu"
+    const modalTitle = document.getElementById('menuModalTitle');
+    if (modalTitle) {
+        modalTitle.textContent = 'เพิ่มเมนูใหม่';
+    }
+}
+
+async function showEditMenuModal(menuItemId) {
+    try {
+        // Fetch menu item data
+        const resp = await fetch(`/api/manager/menu-items/${menuItemId}`);
+        
+        if (resp.status === 404) {
+            alert('ไม่พบเมนูที่ต้องการแก้ไข');
+            return;
+        }
+        
+        if (!resp.ok) {
+            throw new Error('Failed to fetch menu item');
+        }
+        
+        const menuItem = await resp.json();
+        
+        // Get form and modal elements
+        const form = document.getElementById('addMenuForm');
+        const modal = document.getElementById('addMenuModal');
+        const modalTitle = document.getElementById('menuModalTitle');
+        
+        // Set form to edit mode
+        if (form) {
+            form.dataset.mode = 'edit';
+            form.dataset.id = String(menuItemId);
+        }
+        
+        // Change modal title to "Edit Menu"
+        if (modalTitle) {
+            modalTitle.textContent = 'แก้ไขเมนู';
+        }
+        
+        // Pre-populate form fields
+        const nameInput = document.getElementById('menuName');
+        const priceInput = document.getElementById('menuPrice');
+        const categorySelect = document.getElementById('menuCategory');
+        const descriptionTextarea = document.getElementById('menuDescription');
+        const activeCheckbox = document.getElementById('menuActive');
+        
+        if (nameInput) nameInput.value = menuItem.name || '';
+        if (priceInput) priceInput.value = menuItem.price || '';
+        if (categorySelect) categorySelect.value = menuItem.category || '';
+        if (descriptionTextarea) descriptionTextarea.value = menuItem.description || '';
+        if (activeCheckbox) activeCheckbox.checked = menuItem.active !== false;
+        
+        // Show modal
+        if (modal) {
+            modal.classList.remove('hidden');
+        }
+    } catch (err) {
+        console.error('Error fetching menu item:', err);
+        alert('เกิดข้อผิดพลาดในการโหลดข้อมูลเมนู');
     }
 }
 
 async function handleAddMenu(event) {
     event.preventDefault();
+    
+    // Get form and determine mode
+    const form = document.getElementById('addMenuForm');
+    const mode = form.dataset.mode || 'add';
+    const menuItemId = form.dataset.id;
     
     // Get form values
     const name = document.getElementById('menuName').value.trim();
@@ -190,17 +268,35 @@ async function handleAddMenu(event) {
     };
 
     try {
-        const resp = await fetch('/api/manager/menu-items', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(menuData)
-        });
+        let resp;
+        let successMessage;
+        
+        if (mode === 'edit' && menuItemId) {
+            // Edit mode - PUT request
+            resp = await fetch(`/api/manager/menu-items/${menuItemId}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(menuData)
+            });
+            successMessage = 'แก้ไขเมนูสำเร็จ';
+        } else {
+            // Add mode - POST request
+            resp = await fetch('/api/manager/menu-items', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(menuData)
+            });
+            successMessage = 'เพิ่มเมนูสำเร็จ';
+        }
 
         if (resp.ok) {
             // Success
             hideAddMenuModal();
-            showSuccessModal('เพิ่มเมนูสำเร็จ');
+            showSuccessModal(successMessage);
             await loadMenuItems();
+        } else if (resp.status === 404) {
+            // Not found (for edit mode)
+            alert('ไม่พบเมนูที่ต้องการแก้ไข');
         } else if (resp.status === 400) {
             // Validation error from backend
             const errorData = await resp.json();
@@ -212,12 +308,12 @@ async function handleAddMenu(event) {
             }
             alert(errorMessage);
         } else if (resp.status === 403) {
-            alert('คุณไม่มีสิทธิ์ในการเพิ่มเมนู');
+            alert('คุณไม่มีสิทธิ์ในการจัดการเมนู');
         } else {
-            alert('เกิดข้อผิดพลาดในการเพิ่มเมนู');
+            alert('เกิดข้อผิดพลาดในการบันทึกเมนู');
         }
     } catch (err) {
-        console.error('Error adding menu:', err);
+        console.error('Error saving menu:', err);
         alert('เกิดข้อผิดพลาดในการเชื่อมต่อกับเซิร์ฟเวอร์');
     }
 }
