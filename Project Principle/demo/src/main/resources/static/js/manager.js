@@ -5,6 +5,14 @@ let employeeNameInput;
 let employeePositionInput;
 let currentMenuFilter = 'all'; // Track current filter: 'all' or 'active'
 
+function getCsrfToken() {
+    return document.querySelector('meta[name="_csrf"]')?.content;
+}
+
+function getCsrfHeader() {
+    return document.querySelector('meta[name="_csrf_header"]')?.content;
+}
+
 // Utility function to add timeout to fetch requests
 async function fetchWithTimeout(url, options = {}, timeout = 10000) {
     const controller = new AbortController();
@@ -176,7 +184,17 @@ async function loadMenuItems() {
     document.querySelectorAll(".delete-menu").forEach(btn => {
         btn.addEventListener("click", async () => {
             const id = parseInt(btn.dataset.id, 10);
-            const resp = await fetch(`/api/menuItems/${id}`, { method: 'DELETE' });
+
+            // Get CSRF token
+            const csrfToken = getCsrfToken();
+            const csrfHeader = getCsrfHeader();
+
+            const resp = await fetch(`/api/manager/menu-items/${id}`, { 
+                method: 'DELETE', 
+            headers: {
+                [csrfHeader]: csrfToken
+            }
+        });
             if (resp.ok || resp.status === 204) {
                 await loadMenuItems();
             } else {
@@ -332,11 +350,18 @@ async function handleAddMenu(event) {
         let resp;
         let successMessage;
         
+        // Get CSRF token for secure requests
+        const csrfToken = getCsrfToken();
+        const csrfHeader = getCsrfHeader();
+        
         if (mode === 'edit' && menuItemId) {
             // Edit mode - PUT request
             resp = await fetchWithTimeout(`/api/manager/menu-items/${menuItemId}`, {
                 method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
+                headers: { 
+                    'Content-Type': 'application/json',
+                    [csrfHeader]: csrfToken
+                },
                 body: JSON.stringify(menuData)
             });
             successMessage = 'แก้ไขเมนูสำเร็จ';
@@ -344,7 +369,10 @@ async function handleAddMenu(event) {
             // Add mode - POST request
             resp = await fetchWithTimeout('/api/manager/menu-items', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: { 
+                    'Content-Type': 'application/json',
+                    [csrfHeader]: csrfToken
+                },
                 body: JSON.stringify(menuData)
             });
             successMessage = 'เพิ่มเมนูสำเร็จ';

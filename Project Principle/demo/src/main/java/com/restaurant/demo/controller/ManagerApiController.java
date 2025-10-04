@@ -148,4 +148,11 @@ public class ManagerApiController {
                 .collect(Collectors.toList());
         return ResponseEntity.ok(responses);
     }
+
+    // Task 3.5: DELETE /api/manager/menu-items/{id} - Delete menu item
+    @DeleteMapping("/manager/menu-items/{id}")
+    public ResponseEntity<Void> deleteMenuItem(@PathVariable Long id) {
+        menuItemService.deleteMenuItem(id);
+        return ResponseEntity.noContent().build();
+    }
 }
