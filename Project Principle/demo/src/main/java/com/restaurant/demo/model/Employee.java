@@ -11,23 +11,23 @@ import jakarta.persistence.Table;
 @Inheritance(strategy = InheritanceType.JOINED)
 public class Employee {
     @Id
-    protected int id;
+    protected Long id;
     protected String name;
     protected String position;
 
     public Employee() {}
 
-    public Employee(int id, String name, String position) {
+    public Employee(Long id, String name, String position) {
         this.id = id;
         this.name = name;
         this.position = position;
     }
 
-    public int getId() {
+    public Long getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(Long id) {
         this.id = id;
     }
 

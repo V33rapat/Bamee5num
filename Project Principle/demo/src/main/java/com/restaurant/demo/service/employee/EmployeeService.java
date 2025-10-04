@@ -44,7 +44,7 @@ public class EmployeeService {
         int employeeId = employeeDirectory.nextIdentity();
         String loginCode = loginCodeGenerator.generate();
 
-        Employee employee = new Employee(employeeId, name, position);
+        Employee employee = new Employee((long) employeeId, name, position);
         employeeDirectory.save(employee);
 
         User account = new User(employeeId, username, name, name, "employee", Instant.now().toString(), loginCode);

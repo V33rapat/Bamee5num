@@ -28,7 +28,7 @@ public class SalesReportService {
         List<CartItem> cartItems = cartService.getAllCartItems();
         List<User> users = userDirectory.findAll();
         User managerUser = managerContext.getCurrentManager();
-        Manager manager = managerUser != null ? new Manager(managerUser.getId(), managerUser.getFullName()) : new Manager();
+        Manager manager = managerUser != null ? new Manager((long) managerUser.getId(), managerUser.getFullName()) : new Manager();
         return manager.viewSalesReport(cartItems, users);
     }
 }

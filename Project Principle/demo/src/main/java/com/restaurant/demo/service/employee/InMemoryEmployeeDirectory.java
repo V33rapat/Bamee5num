@@ -14,28 +14,28 @@ import java.util.concurrent.atomic.AtomicInteger;
 @Component
 public class InMemoryEmployeeDirectory implements EmployeeDirectory {
 
-    private final Map<Integer, Employee> employees = new ConcurrentHashMap<>();
+    private final Map<Long, Employee> employees = new ConcurrentHashMap<>();
     private final AtomicInteger sequence;
 
     public InMemoryEmployeeDirectory() {
-        Employee employeeOne = new Employee(1, "Employee One", "Chef");
-        Employee employeeTwo = new Employee(2, "Employee Two", "Cashier");
+        Employee employeeOne = new Employee(1L, "Employee One", "Chef");
+        Employee employeeTwo = new Employee(2L, "Employee Two", "Cashier");
         employees.put(employeeOne.getId(), employeeOne);
         employees.put(employeeTwo.getId(), employeeTwo);
-        int maxId = employees.keySet().stream().max(Integer::compareTo).orElse(0);
-        this.sequence = new AtomicInteger(maxId);
+        long maxId = employees.keySet().stream().max(Long::compareTo).orElse(0L);
+        this.sequence = new AtomicInteger((int) maxId);
     }
 
     @Override
     public List<Employee> findAll() {
         return employees.values().stream()
-                .sorted(Comparator.comparingInt(Employee::getId))
+                .sorted(Comparator.comparingLong(Employee::getId))
                 .collect(ArrayList::new, ArrayList::add, ArrayList::addAll);
     }
 
     @Override
     public Optional<Employee> findById(int id) {
-        return Optional.ofNullable(employees.get(id));
+        return Optional.ofNullable(employees.get((long) id));
     }
 
     @Override
@@ -46,7 +46,7 @@ public class InMemoryEmployeeDirectory implements EmployeeDirectory {
 
     @Override
     public boolean deleteById(int id) {
-        return employees.remove(id) != null;
+        return employees.remove((long) id) != null;
     }
 
     @Override

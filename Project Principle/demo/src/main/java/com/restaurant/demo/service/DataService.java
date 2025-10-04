@@ -22,14 +22,14 @@ public class DataService {
     public DataService(CartService cartService) {
         this.cartService = cartService;
 
-        manager = new Manager(1, "Admin");
+        manager = new Manager(1L, "Admin");
 
         users.add(new User(1, "admin", "Admin User", "Admin", "manager", Instant.now().toString()));
         users.add(new User(2, "employee1", "Employee One", "Employee One", "employee", Instant.now().toString()));
         users.add(new User(3, "customer1", "Customer One", "Customer One", "customer", Instant.now().toString()));
 
-        employees.add(new Employee(1, "Employee One", "Chef"));
-        employees.add(new Employee(2, "Employee Two", "Cashier"));
+        employees.add(new Employee(1L, "Employee One", "Chef"));
+        employees.add(new Employee(2L, "Employee Two", "Cashier"));
 
         
     }
@@ -65,7 +65,7 @@ public class DataService {
   
 
     public Employee addEmployee(Employee employee) {
-        int newId = employees.stream().mapToInt(Employee::getId).max().orElse(0) + 1;
+        Long newId = employees.stream().mapToLong(Employee::getId).max().orElse(0L) + 1L;
         employee.setId(newId);
         employees.add(employee);
         return employee;
