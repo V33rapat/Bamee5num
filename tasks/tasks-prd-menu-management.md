@@ -6,7 +6,9 @@ Based on: `prd-menu-management.md`
 
 - `src/main/java/com/restaurant/demo/dto/MenuItemRequest.java` - Request DTO for creating/updating menu items with validation annotations (✅ Created)
 - `src/main/java/com/restaurant/demo/dto/MenuItemResponse.java` - Response DTO for menu item data sent to frontend with static factory method (✅ Created)
-- `src/main/java/com/restaurant/demo/service/MenuItemService.java` - Service layer methods for menu CRUD operations (will be modified)
+- `src/main/java/com/restaurant/demo/service/MenuItemService.java` - Service layer methods for menu CRUD operations (✅ Modified with createMenuItem, updateMenuItem, getMenuItemById, getAllMenuItems methods)
+- `src/main/java/com/restaurant/demo/exception/MenuItemNotFoundException.java` - Custom exception for menu item not found scenarios (✅ Created)
+- `src/main/java/com/restaurant/demo/exception/GlobalExceptionHandler.java` - Global exception handler with MenuItemNotFoundException handler (✅ Modified)
 - `src/main/java/com/restaurant/demo/controller/ManagerApiController.java` - REST endpoints for manager menu operations (will be modified)
 - `src/main/java/com/restaurant/demo/model/MenuItem.java` - Entity model (already exists, may need validation annotations)
 - `src/main/java/com/restaurant/demo/repository/MenuItemRepo.java` - Repository interface (already exists)
@@ -34,14 +36,14 @@ Based on: `prd-menu-management.md`
   - [x] 1.5 Add constructors, getters, and setters for both DTOs
   - [x] 1.6 Add utility method in `MenuItemResponse` to convert from `MenuItem` entity (static factory method)
 
-- [ ] 2.0 Implement Backend Service Layer for Menu CRUD Operations
-  - [ ] 2.1 Add `createMenuItem(MenuItemRequest request)` method to `MenuItemService` that validates and saves new menu items
-  - [ ] 2.2 Add `updateMenuItem(Long id, MenuItemRequest request)` method to `MenuItemService` that finds and updates existing menu items
-  - [ ] 2.3 Add `getMenuItemById(Long id)` method to `MenuItemService` that returns Optional<MenuItem>
-  - [ ] 2.4 Add `getAllMenuItems()` method to `MenuItemService` that returns all menu items (both active and inactive)
-  - [ ] 2.5 Add business logic validation in service methods (e.g., price range validation, category validation)
-  - [ ] 2.6 Add proper exception handling with custom exceptions (e.g., `MenuItemNotFoundException`)
-  - [ ] 2.7 Add mapper methods to convert between `MenuItem` entity and DTOs
+- [x] 2.0 Implement Backend Service Layer for Menu CRUD Operations
+  - [x] 2.1 Add `createMenuItem(MenuItemRequest request)` method to `MenuItemService` that validates and saves new menu items
+  - [x] 2.2 Add `updateMenuItem(Long id, MenuItemRequest request)` method to `MenuItemService` that finds and updates existing menu items
+  - [x] 2.3 Add `getMenuItemById(Long id)` method to `MenuItemService` that returns Optional<MenuItem>
+  - [x] 2.4 Add `getAllMenuItems()` method to `MenuItemService` that returns all menu items (both active and inactive)
+  - [x] 2.5 Add business logic validation in service methods (e.g., price range validation, category validation)
+  - [x] 2.6 Add proper exception handling with custom exceptions (e.g., `MenuItemNotFoundException`)
+  - [x] 2.7 Add mapper methods to convert between `MenuItem` entity and DTOs
 
 - [ ] 3.0 Create Manager API Endpoints for Menu Management
   - [ ] 3.1 Add `POST /api/manager/menu-items` endpoint in `ManagerApiController` that accepts `MenuItemRequest` and returns `MenuItemResponse` with HTTP 201
