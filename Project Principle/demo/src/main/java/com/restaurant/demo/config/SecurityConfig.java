@@ -36,7 +36,13 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        http
+        http.csrf(csrf -> csrf
+            // ยกเว้นการตรวจสอบ CSRF สำหรับทุก API ที่เริ่มต้นด้วย /api/
+            // เนื่องจาก API เหล่านี้มักจะถูกเรียกจาก JavaScript โดยไม่มี Token
+            .ignoringRequestMatchers(
+                "/api/**" // <-- ใช้ /api/** เพื่อครอบคลุม /api/cart/**, /api/manager/** ฯลฯ
+            ) 
+        )
             .authenticationProvider(authenticationProvider())
             .authorizeHttpRequests(authz -> authz
                 .requestMatchers("/", "/login", "/register", "/css/**", "/js/**", "/images/**", "/static/**", "/api/customers/login", "/api/customers/register", "/api/customers/**").permitAll()

@@ -1,16 +1,33 @@
 // customer.js
-import { menuItems } from "./db.js";
+
 
 document.addEventListener("DOMContentLoaded", () => {
     setupCustomerDashboard();
 });
 
-export function setupCustomerDashboard() {
+async function fetchMenuItems() {
+    try {
+        // ใช้ Endpoint เดียวกันหรือคล้ายกับที่ Manager ใช้ แต่ควรเป็น Endpoint สำหรับ Customer
+        // ซึ่งโดยปกติจะดึงเฉพาะเมนูที่ 'active' (พร้อมจำหน่าย) เท่านั้น
+        const response = await fetch("/api/manager/menu-items"); // สมมติว่ามี API สำหรับลูกค้า
+
+        if (!response.ok) {
+            throw new Error("ไม่สามารถโหลดเมนูอาหารจากเซิร์ฟเวอร์ได้");
+        }
+
+        return await response.json();
+    } catch (error) {
+        console.error("Error fetching menu items:", error);
+        return []; // ส่งกลับอาเรย์ว่างถ้าเกิดข้อผิดพลาด
+    }
+}
+
+export async function setupCustomerDashboard() {
     // Read customer ID from DOM (set by Thymeleaf server-side rendering)
     // Server-side session validation already happened in PageController
     const customerIdElement = document.getElementById("customerId");
     const customerId = customerIdElement ? parseInt(customerIdElement.value) : null;
-    
+
     // If customer ID is not present in DOM, server didn't render it (no valid session)
     if (!customerId || isNaN(customerId)) {
         // Server should have already redirected, but as a fallback:
@@ -18,7 +35,7 @@ export function setupCustomerDashboard() {
         window.location.href = "/login";
         return;
     }
-    
+
     console.log("Customer ID from DOM:", customerId, "Type:", typeof customerId);
 
     // Load customer profile data from API to get the actual name
@@ -28,9 +45,18 @@ export function setupCustomerDashboard() {
     document.getElementById("userNav").classList.remove("hidden");
     document.getElementById("navButtons").classList.add("hidden");
 
+
+    // โหลดเมนูอาหารจาก API ก่อนเริ่มสร้าง DOM
+    const menuItems = await fetchMenuItems();
+
     // สร้างเมนูอาหาร
     const menuGrid = document.getElementById("menuGrid");
     menuGrid.innerHTML = "";
+    // ตรวจสอบว่ามีเมนูหรือไม่ ก่อนเริ่มวนลูป
+    if (menuItems.length === 0) {
+        menuGrid.innerHTML = '<p class="text-center text-gray-500 col-span-full">ยังไม่มีเมนูอาหาร</p>';
+    }
+
     menuItems.forEach(item => {
         const div = document.createElement("div");
         div.className = "bg-white p-6 rounded-xl shadow-lg";
@@ -69,10 +95,10 @@ export function setupCustomerDashboard() {
             // Get CSRF token from meta tags (set by Thymeleaf in customer.html)
             const csrfToken = document.querySelector('meta[name="_csrf"]')?.content;
             const csrfHeader = document.querySelector('meta[name="_csrf_header"]')?.content;
-            
+
             // Create form data for POST request
             const formData = new FormData();
-            
+
             // Send POST request to logout endpoint with CSRF token
             const response = await fetch('/logout', {
                 method: 'POST',
@@ -81,12 +107,12 @@ export function setupCustomerDashboard() {
                 },
                 body: formData
             });
-            
+
             // Clear localStorage to remove any legacy data (from old API login flow)
             // NOTE: We don't use localStorage for session validation anymore,
             // but clear it here to maintain cleanup consistency
             localStorage.removeItem("currentUser");
-            
+
             // Redirect to index page (server will also redirect, but this ensures it happens)
             window.location.href = "/";
         } catch (error) {
@@ -111,7 +137,7 @@ async function loadCustomerProfile(customerId) {
             throw new Error("ไม่สามารถโหลดข้อมูลลูกค้าได้");
         }
         const customerData = await response.json();
-        
+
         // Update welcome text with customer's actual name
         document.getElementById("welcomeText").textContent = `สวัสดี, ${customerData.username}`;
     } catch (error) {
@@ -140,17 +166,28 @@ async function addToCart(item, userId) {
             headers: { "Content-Type": "application/x-www-form-urlencoded" },
             body: new URLSearchParams({
                 customerId: userId,
-                itemName: item.name,
-                itemPrice: item.price,
+                menuItemId: item.id, // <--- ใช้ ID
                 quantity: 1
             })
         });
-        if (!res.ok) throw new Error("เพิ่มสินค้าไม่สำเร็จ");
+
+        if (!res.ok) {
+             // โค้ดสำหรับดึง Error Body และแสดงผล (ช่วยในการ Debug)
+             let errorText = `Status ${res.status} ${res.statusText}.`;
+             const errorBody = await res.json().catch(() => res.text());
+             if (typeof errorBody === 'object' && errorBody !== null && errorBody.message) {
+                 errorText += ` Detail: ${errorBody.message}`;
+             } else if (typeof errorBody === 'string') {
+                 errorText += ` Detail: ${errorBody.substring(0, 100)}`;
+             }
+             throw new Error(errorText);
+        }
+
         showNotification(`${item.name} ถูกเพิ่มในตะกร้า`);
         loadCart(userId);
     } catch (err) {
         console.error(err);
-        alert("เกิดข้อผิดพลาดในการเพิ่มสินค้า");
+        alert(`เกิดข้อผิดพลาดในการเพิ่มสินค้า: ${err.message}`);
     }
 }
 

@@ -2,8 +2,10 @@ package com.restaurant.demo.service;
 
 import com.restaurant.demo.model.CartItem;
 import com.restaurant.demo.model.Customer;
+import com.restaurant.demo.model.MenuItem;
 import com.restaurant.demo.repository.CartItemRepository;
 import com.restaurant.demo.repository.CustomerRepository;
+import com.restaurant.demo.repository.MenuItemRepo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -20,6 +22,9 @@ public class CartService {
     @Autowired
     private CustomerRepository customerRepository;
 
+    @Autowired
+    private MenuItemRepo menuItemRepository;
+
     // Helper method to get customer by ID
     private Customer getCustomerById(Long customerId) {
         if (customerId == null) {
@@ -30,9 +35,30 @@ public class CartService {
     }
 
     // Public methods that accept customerId
-    public CartItem addToCart(Long customerId, String itemName, BigDecimal itemPrice, Integer quantity) {
+    public CartItem addToCart(Long customerId, Long menuItemId, Integer quantity) {
+
+        // 1. ค้นหา Customer
         Customer customer = getCustomerById(customerId);
-        return addToCart(customer, itemName, itemPrice, quantity);
+
+        // 2. ค้นหา MenuItem ด้วย ID
+        MenuItem menuItem = menuItemRepository.findById(menuItemId)
+                .orElseThrow(() -> new RuntimeException("Menu item not found with ID: " + menuItemId));
+
+        // *****************************************************************
+        // แก้ไข: แปลง double/Double (จาก menuItem.getPrice()) เป็น BigDecimal
+        // *****************************************************************
+
+        // **ตัวเลือกที่แนะนำ (แก้ไขตามภาพที่คุณพยายามทำ แต่ทำให้ถูกต้อง):**
+        // ใช้วิธีสร้าง BigDecimal จาก String เพื่อหลีกเลี่ยงความคลาดเคลื่อนของ Double
+        BigDecimal itemPrice;
+        try {
+            itemPrice = new BigDecimal(String.valueOf(menuItem.getPrice()));
+        } catch (NumberFormatException e) {
+            throw new RuntimeException("Invalid price format for menu item ID: " + menuItemId, e);
+        }
+
+        // 3. เรียกใช้ Method ตัวถัดไป
+        return addToCart(customer, menuItem.getName(), itemPrice, quantity.intValue());
     }
 
     public CartItem updateCartItemQuantity(Long cartItemId, Long customerId, Integer quantity) {
@@ -251,7 +277,7 @@ public class CartService {
             // Validate ownership for existing items
             Optional<CartItem> existingItem = cartItemRepository.findById(cartItem.getId());
             if (existingItem.isPresent() &&
-                !existingItem.get().getCustomer().getId().equals(authenticatedCustomer.getId())) {
+                    !existingItem.get().getCustomer().getId().equals(authenticatedCustomer.getId())) {
                 throw new RuntimeException("Access denied: Item does not belong to authenticated customer");
             }
         }
@@ -269,27 +295,32 @@ public class CartService {
 
     @Deprecated
     public CartItem addToCart(int customerId, String name, int price, int quantity) {
-        throw new UnsupportedOperationException("Use addToCart(Customer customer, String name, int price, int quantity) instead");
+        throw new UnsupportedOperationException(
+                "Use addToCart(Customer customer, String name, int price, int quantity) instead");
     }
 
     @Deprecated
     public CartItem incrementQuantity(int itemId) {
-        throw new UnsupportedOperationException("Use incrementQuantity(Long itemId, Customer authenticatedCustomer) instead");
+        throw new UnsupportedOperationException(
+                "Use incrementQuantity(Long itemId, Customer authenticatedCustomer) instead");
     }
 
     @Deprecated
     public CartItem decrementQuantity(int itemId) {
-        throw new UnsupportedOperationException("Use decrementQuantity(Long itemId, Customer authenticatedCustomer) instead");
+        throw new UnsupportedOperationException(
+                "Use decrementQuantity(Long itemId, Customer authenticatedCustomer) instead");
     }
 
     @Deprecated
     public CartItem updateQuantity(int itemId, int quantity) {
-        throw new UnsupportedOperationException("Use updateQuantity(Long itemId, int quantity, Customer authenticatedCustomer) instead");
+        throw new UnsupportedOperationException(
+                "Use updateQuantity(Long itemId, int quantity, Customer authenticatedCustomer) instead");
     }
 
     @Deprecated
     public void removeFromCart(int itemId) {
-        throw new UnsupportedOperationException("Use removeFromCart(Long itemId, Customer authenticatedCustomer) instead");
+        throw new UnsupportedOperationException(
+                "Use removeFromCart(Long itemId, Customer authenticatedCustomer) instead");
     }
 
     @Deprecated

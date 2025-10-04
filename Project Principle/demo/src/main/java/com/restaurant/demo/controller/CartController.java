@@ -26,18 +26,21 @@ public class CartController {
      */
     @PostMapping("/add")
     public ResponseEntity<CartItem> addToCart(
-            @RequestParam @NotNull(message = "Customer ID is required")
-            @Positive(message = "Customer ID must be positive") Long customerId,
-            @RequestParam @NotBlank(message = "Item name is required")
-            @Size(min = 1, max = 100, message = "Item name must be between 1 and 100 characters") String itemName,
-            @RequestParam @NotNull(message = "Item price is required")
-            @DecimalMin(value = "0.01", message = "Item price must be greater than 0")
-            @DecimalMax(value = "9999.99", message = "Item price must not exceed 9999.99") BigDecimal itemPrice,
-            @RequestParam @NotNull(message = "Quantity is required")
-            @Min(value = 1, message = "Quantity must be at least 1")
-            @Max(value = 100, message = "Quantity must not exceed 100") Integer quantity) {
+            @RequestParam @NotNull(message = "Customer ID is required") @Positive(message = "Customer ID must be positive") Long customerId,
 
-        CartItem cartItem = cartService.addToCart(customerId, itemName, itemPrice, quantity);
+            // ***************************************************************
+            // แก้ไข: เปลี่ยนจาก itemName/itemPrice เป็น menuItemId
+            @RequestParam @NotNull(message = "Menu Item ID is required") // <-- ใช้ @NotNull แทน @NotBlank
+            @Positive(message = "Menu Item ID must be positive") Long menuItemId, // <-- ใช้ Long แทน String/BigDecimal
+            // ***************************************************************
+
+            @RequestParam @NotNull(message = "Quantity is required") @Min(value = 1, message = "Quantity must be at least 1") @Max(value = 100, message = "Quantity must not exceed 100") Integer quantity) {
+
+        // 2. เรียกใช้ Service โดยส่ง Customer ID และ Menu Item ID
+        // ***************************************************************
+        CartItem cartItem = cartService.addToCart(customerId, menuItemId, quantity); // <-- แก้ Signature ที่เรียกใช้
+        // ***************************************************************
+
         return new ResponseEntity<>(cartItem, HttpStatus.CREATED);
     }
 
@@ -46,13 +49,9 @@ public class CartController {
      */
     @PutMapping("/update/{cartItemId}")
     public ResponseEntity<CartItem> updateCartItem(
-            @PathVariable @NotNull(message = "Cart item ID is required")
-            @Positive(message = "Cart item ID must be positive") Long cartItemId,
-            @RequestParam @NotNull(message = "Customer ID is required")
-            @Positive(message = "Customer ID must be positive") Long customerId,
-            @RequestParam @NotNull(message = "Quantity is required")
-            @Min(value = 1, message = "Quantity must be at least 1")
-            @Max(value = 100, message = "Quantity must not exceed 100") Integer quantity) {
+            @PathVariable @NotNull(message = "Cart item ID is required") @Positive(message = "Cart item ID must be positive") Long cartItemId,
+            @RequestParam @NotNull(message = "Customer ID is required") @Positive(message = "Customer ID must be positive") Long customerId,
+            @RequestParam @NotNull(message = "Quantity is required") @Min(value = 1, message = "Quantity must be at least 1") @Max(value = 100, message = "Quantity must not exceed 100") Integer quantity) {
 
         CartItem cartItem = cartService.updateCartItemQuantity(cartItemId, customerId, quantity);
         return new ResponseEntity<>(cartItem, HttpStatus.OK);
@@ -63,10 +62,8 @@ public class CartController {
      */
     @DeleteMapping("/remove/{cartItemId}")
     public ResponseEntity<Void> removeFromCart(
-            @PathVariable @NotNull(message = "Cart item ID is required")
-            @Positive(message = "Cart item ID must be positive") Long cartItemId,
-            @RequestParam @NotNull(message = "Customer ID is required")
-            @Positive(message = "Customer ID must be positive") Long customerId) {
+            @PathVariable @NotNull(message = "Cart item ID is required") @Positive(message = "Cart item ID must be positive") Long cartItemId,
+            @RequestParam @NotNull(message = "Customer ID is required") @Positive(message = "Customer ID must be positive") Long customerId) {
 
         cartService.removeFromCart(cartItemId, customerId);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
@@ -77,8 +74,7 @@ public class CartController {
      */
     @GetMapping("/customer/{customerId}")
     public ResponseEntity<List<CartItem>> getCartItems(
-            @PathVariable @NotNull(message = "Customer ID is required")
-            @Positive(message = "Customer ID must be positive") Long customerId) {
+            @PathVariable @NotNull(message = "Customer ID is required") @Positive(message = "Customer ID must be positive") Long customerId) {
 
         List<CartItem> cartItems = cartService.getCartItems(customerId);
         return new ResponseEntity<>(cartItems, HttpStatus.OK);
@@ -89,10 +85,8 @@ public class CartController {
      */
     @GetMapping("/{cartItemId}")
     public ResponseEntity<CartItem> getCartItem(
-            @PathVariable @NotNull(message = "Cart item ID is required")
-            @Positive(message = "Cart item ID must be positive") Long cartItemId,
-            @RequestParam @NotNull(message = "Customer ID is required")
-            @Positive(message = "Customer ID must be positive") Long customerId) {
+            @PathVariable @NotNull(message = "Cart item ID is required") @Positive(message = "Cart item ID must be positive") Long cartItemId,
+            @RequestParam @NotNull(message = "Customer ID is required") @Positive(message = "Customer ID must be positive") Long customerId) {
 
         CartItem cartItem = cartService.getCartItem(cartItemId, customerId);
         return new ResponseEntity<>(cartItem, HttpStatus.OK);
@@ -103,8 +97,7 @@ public class CartController {
      */
     @DeleteMapping("/clear/{customerId}")
     public ResponseEntity<Void> clearCart(
-            @PathVariable @NotNull(message = "Customer ID is required")
-            @Positive(message = "Customer ID must be positive") Long customerId) {
+            @PathVariable @NotNull(message = "Customer ID is required") @Positive(message = "Customer ID must be positive") Long customerId) {
 
         cartService.clearCart(customerId);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
@@ -115,8 +108,7 @@ public class CartController {
      */
     @GetMapping("/total/{customerId}")
     public ResponseEntity<BigDecimal> getCartTotal(
-            @PathVariable @NotNull(message = "Customer ID is required")
-            @Positive(message = "Customer ID must be positive") Long customerId) {
+            @PathVariable @NotNull(message = "Customer ID is required") @Positive(message = "Customer ID must be positive") Long customerId) {
 
         BigDecimal total = cartService.calculateCartTotal(customerId);
         return new ResponseEntity<>(total, HttpStatus.OK);
