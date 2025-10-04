@@ -5,6 +5,27 @@ let employeeNameInput;
 let employeePositionInput;
 let currentMenuFilter = 'all'; // Track current filter: 'all' or 'active'
 
+// Utility function to add timeout to fetch requests
+async function fetchWithTimeout(url, options = {}, timeout = 10000) {
+    const controller = new AbortController();
+    const id = setTimeout(() => controller.abort(), timeout);
+    
+    try {
+        const response = await fetch(url, {
+            ...options,
+            signal: controller.signal
+        });
+        clearTimeout(id);
+        return response;
+    } catch (error) {
+        clearTimeout(id);
+        if (error.name === 'AbortError') {
+            throw new Error('คำขอหมดเวลา กรุณาลองใหม่อีกครั้ง');
+        }
+        throw error;
+    }
+}
+
 export async function setupManagerDashboard() {
     // Check if manager is authenticated via server session
     // If not authenticated, user would be redirected by Spring Security or controller
@@ -38,6 +59,11 @@ document.addEventListener("DOMContentLoaded", () => {
     const closeSuccessBtn = document.getElementById('closeSuccessModal');
     if (closeSuccessBtn) {
         closeSuccessBtn.addEventListener('click', hideSuccessModal);
+    }
+
+    const closeErrorBtn = document.getElementById('closeErrorModal');
+    if (closeErrorBtn) {
+        closeErrorBtn.addEventListener('click', hideErrorModal);
     }
 
     // Filter button event listeners
@@ -194,7 +220,7 @@ function hideAddMenuModal() {
 async function showEditMenuModal(menuItemId) {
     try {
         // Fetch menu item data
-        const resp = await fetch(`/api/manager/menu-items/${menuItemId}`);
+        const resp = await fetchWithTimeout(`/api/manager/menu-items/${menuItemId}`);
         
         if (resp.status === 404) {
             alert('ไม่พบเมนูที่ต้องการแก้ไข');
@@ -242,7 +268,7 @@ async function showEditMenuModal(menuItemId) {
         }
     } catch (err) {
         console.error('Error fetching menu item:', err);
-        alert('เกิดข้อผิดพลาดในการโหลดข้อมูลเมนู');
+        showErrorModal('เกิดข้อผิดพลาดในการโหลดข้อมูลเมนู');
     }
 }
 
@@ -263,33 +289,33 @@ async function handleAddMenu(event) {
 
     // Client-side validation
     if (!name) {
-        alert('กรุณาระบุชื่อเมนู');
+        showErrorModal('กรุณาระบุชื่อเมนู');
         return;
     }
 
     if (name.length > 100) {
-        alert('ชื่อเมนูต้องไม่เกิน 100 ตัวอักษร');
+        showErrorModal('ชื่อเมนูต้องไม่เกิน 100 ตัวอักษร');
         return;
     }
 
     if (!priceValue || parseFloat(priceValue) <= 0) {
-        alert('กรุณาระบุราคาที่มากกว่า 0');
+        showErrorModal('กรุณาระบุราคาที่มากกว่า 0');
         return;
     }
 
     const price = parseFloat(priceValue);
     if (price > 9999.99) {
-        alert('ราคาต้องไม่เกิน 9999.99 บาท');
+        showErrorModal('ราคาต้องไม่เกิน 9999.99 บาท');
         return;
     }
 
     if (!category) {
-        alert('กรุณาเลือกหมวดหมู่');
+        showErrorModal('กรุณาเลือกหมวดหมู่');
         return;
     }
 
     if (description.length > 500) {
-        alert('รายละเอียดเมนูต้องไม่เกิน 500 ตัวอักษร');
+        showErrorModal('รายละเอียดเมนูต้องไม่เกิน 500 ตัวอักษร');
         return;
     }
 
@@ -308,7 +334,7 @@ async function handleAddMenu(event) {
         
         if (mode === 'edit' && menuItemId) {
             // Edit mode - PUT request
-            resp = await fetch(`/api/manager/menu-items/${menuItemId}`, {
+            resp = await fetchWithTimeout(`/api/manager/menu-items/${menuItemId}`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(menuData)
@@ -316,7 +342,7 @@ async function handleAddMenu(event) {
             successMessage = 'แก้ไขเมนูสำเร็จ';
         } else {
             // Add mode - POST request
-            resp = await fetch('/api/manager/menu-items', {
+            resp = await fetchWithTimeout('/api/manager/menu-items', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(menuData)
@@ -331,7 +357,7 @@ async function handleAddMenu(event) {
             await loadMenuItems();
         } else if (resp.status === 404) {
             // Not found (for edit mode)
-            alert('ไม่พบเมนูที่ต้องการแก้ไข');
+            showErrorModal('ไม่พบเมนูที่ต้องการแก้ไข');
         } else if (resp.status === 400) {
             // Validation error from backend
             const errorData = await resp.json();
@@ -341,15 +367,15 @@ async function handleAddMenu(event) {
             } else if (errorData.errors) {
                 errorMessage += Object.values(errorData.errors).join('\n');
             }
-            alert(errorMessage);
+            showErrorModal(errorMessage);
         } else if (resp.status === 403) {
-            alert('คุณไม่มีสิทธิ์ในการจัดการเมนู');
+            showErrorModal('คุณไม่มีสิทธิ์ในการจัดการเมนู');
         } else {
-            alert('เกิดข้อผิดพลาดในการบันทึกเมนู');
+            showErrorModal('เกิดข้อผิดพลาดในการบันทึกเมนู');
         }
     } catch (err) {
         console.error('Error saving menu:', err);
-        alert('เกิดข้อผิดพลาดในการเชื่อมต่อกับเซิร์ฟเวอร์');
+        showErrorModal('เกิดข้อผิดพลาดในการเชื่อมต่อกับเซิร์ฟเวอร์');
     }
 }
 
@@ -533,6 +559,22 @@ function showSuccessModal(message) {
 
 function hideSuccessModal() {
     const modal = document.getElementById('successModal');
+    if (modal) {
+        modal.classList.add('hidden');
+    }
+}
+
+function showErrorModal(message) {
+    const modal = document.getElementById('errorModal');
+    const messageEl = document.getElementById('errorMessage');
+    if (modal && messageEl) {
+        messageEl.textContent = message;
+        modal.classList.remove('hidden');
+    }
+}
+
+function hideErrorModal() {
+    const modal = document.getElementById('errorModal');
     if (modal) {
         modal.classList.add('hidden');
     }

@@ -8,12 +8,13 @@ Based on: `prd-menu-management.md`
 - `src/main/java/com/restaurant/demo/dto/MenuItemResponse.java` - Response DTO for menu item data sent to frontend with static factory method (✅ Created)
 - `src/main/java/com/restaurant/demo/service/MenuItemService.java` - Service layer methods for menu CRUD operations (✅ Modified with createMenuItem, updateMenuItem, getMenuItemById, getAllMenuItems methods)
 - `src/main/java/com/restaurant/demo/exception/MenuItemNotFoundException.java` - Custom exception for menu item not found scenarios (✅ Created)
-- `src/main/java/com/restaurant/demo/exception/GlobalExceptionHandler.java` - Global exception handler with MenuItemNotFoundException handler (✅ Modified)
+- `src/main/java/com/restaurant/demo/exception/GlobalExceptionHandler.java` - Global exception handler with MethodArgumentNotValidException and MenuItemNotFoundException handlers (✅ Modified - Added MethodArgumentNotValidException handler for @Valid validation errors)
 - `src/main/java/com/restaurant/demo/controller/ManagerApiController.java` - REST endpoints for manager menu operations (✅ Modified with POST, PUT, GET endpoints for menu management)
 - `src/main/java/com/restaurant/demo/model/MenuItem.java` - Entity model (already exists, may need validation annotations)
 - `src/main/java/com/restaurant/demo/repository/MenuItemRepo.java` - Repository interface (already exists)
-- `src/main/resources/templates/manager.html` - Manager dashboard HTML with menu management UI (✅ Modified with updated add menu modal including active checkbox, proper labels, success modal)
-- `src/main/resources/static/js/manager.js` - JavaScript for menu CRUD operations (✅ Modified with updated handleAddMenu, showAddMenuModal, hideAddMenuModal, showSuccessModal functions)
+- `src/main/resources/templates/manager.html` - Manager dashboard HTML with menu management UI (✅ Modified with updated add menu modal, success modal, and error modal)
+- `src/main/resources/static/js/manager.js` - JavaScript for menu CRUD operations (✅ Modified with comprehensive validation, error display functions, and timeout handling)
+- `tasks/validation-test-scenarios.md` - Comprehensive test scenarios document for validation testing (✅ Created - 21 test cases)
 - `src/test/java/com/restaurant/demo/controller/ManagerApiControllerTest.java` - Integration tests for menu API endpoints
 - `src/test/java/com/restaurant/demo/service/MenuItemServiceTest.java` - Unit tests for menu service methods
 
@@ -88,16 +89,16 @@ Based on: `prd-menu-management.md`
   - [x] 6.5 Ensure edit button appears for all items regardless of active status
   - [x] 6.6 Add filter/toggle option to show only active or all menu items (optional enhancement)
 
-- [ ] 7.0 Add Validation and Error Handling
-  - [ ] 7.1 Add client-side validation in `manager.js` for required fields before form submission
-  - [ ] 7.2 Add client-side validation for price (must be positive, max 9999.99)
-  - [ ] 7.3 Add client-side validation for name length (max 100 characters)
-  - [ ] 7.4 Add client-side validation for description length (max 500 characters)
-  - [ ] 7.5 Create error display function in `manager.js` to show validation errors in Thai
-  - [ ] 7.6 Add backend validation error handling in controller with proper error response format
-  - [ ] 7.7 Create custom exception handler (@ControllerAdvice) for menu-related exceptions if not exists
-  - [ ] 7.8 Add network error handling (timeout, connection issues) in frontend
-  - [ ] 7.9 Test all validation scenarios and ensure proper error messages display
+- [x] 7.0 Add Validation and Error Handling
+  - [x] 7.1 Add client-side validation in `manager.js` for required fields before form submission
+  - [x] 7.2 Add client-side validation for price (must be positive, max 9999.99)
+  - [x] 7.3 Add client-side validation for name length (max 100 characters)
+  - [x] 7.4 Add client-side validation for description length (max 500 characters)
+  - [x] 7.5 Create error display function in `manager.js` to show validation errors in Thai
+  - [x] 7.6 Add backend validation error handling in controller with proper error response format
+  - [x] 7.7 Create custom exception handler (@ControllerAdvice) for menu-related exceptions if not exists
+  - [x] 7.8 Add network error handling (timeout, connection issues) in frontend
+  - [x] 7.9 Test all validation scenarios and ensure proper error messages display
 
 - [ ] 8.0 Write Backend Tests for Menu Management
   - [ ] 8.1 Create `MenuItemServiceTest.java` in `src/test/java/com/restaurant/demo/service/`
