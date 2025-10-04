@@ -80,13 +80,13 @@ Based on: `prd-menu-management.md`
   - [x] 5.9 Handle 404 error if menu item not found
   - [x] 5.10 Handle validation errors and display to user
 
-- [ ] 6.0 Enhance Menu Display to Show Active/Inactive Status
-  - [ ] 6.1 Update `loadMenuItems()` function in `manager.js` to call `/api/manager/menu-items` instead of `/api/menuItems` to get all items
-  - [ ] 6.2 Modify menu list display to show both active and inactive items
-  - [ ] 6.3 Add visual indicator for inactive items (e.g., gray background, "ไม่พร้อมจำหน่าย" badge)
-  - [ ] 6.4 Add CSS styles for inactive menu items (opacity, background color changes)
-  - [ ] 6.5 Ensure edit button appears for all items regardless of active status
-  - [ ] 6.6 Add filter/toggle option to show only active or all menu items (optional enhancement)
+- [x] 6.0 Enhance Menu Display to Show Active/Inactive Status
+  - [x] 6.1 Update `loadMenuItems()` function in `manager.js` to call `/api/manager/menu-items` instead of `/api/menuItems` to get all items
+  - [x] 6.2 Modify menu list display to show both active and inactive items
+  - [x] 6.3 Add visual indicator for inactive items (e.g., gray background, "ไม่พร้อมจำหน่าย" badge)
+  - [x] 6.4 Add CSS styles for inactive menu items (opacity, background color changes)
+  - [x] 6.5 Ensure edit button appears for all items regardless of active status
+  - [x] 6.6 Add filter/toggle option to show only active or all menu items (optional enhancement)
 
 - [ ] 7.0 Add Validation and Error Handling
   - [ ] 7.1 Add client-side validation in `manager.js` for required fields before form submission

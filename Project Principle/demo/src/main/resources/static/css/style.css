@@ -486,3 +486,35 @@ body {
         transition-duration: 0.01ms !important;
     }
 }
+
+/* Menu Item Styles */
+.inactive-menu-item {
+    opacity: 0.6;
+    background-color: #e5e7eb !important; /* lighter gray */
+}
+
+.inactive-badge {
+    display: inline-block;
+    font-size: 0.75rem;
+    font-weight: 500;
+}
+
+/* Menu item filter styles */
+.filter-btn {
+    transition: all 0.3s ease;
+}
+
+.filter-btn.active {
+    background-color: #f97316;
+    color: white;
+}
+
+.filter-btn:not(.active) {
+    background-color: #e5e7eb;
+    color: #374151;
+}
+
+.filter-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}

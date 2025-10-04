@@ -3,6 +3,7 @@ let employeeForm;
 let employeeModalTitle;
 let employeeNameInput;
 let employeePositionInput;
+let currentMenuFilter = 'all'; // Track current filter: 'all' or 'active'
 
 export async function setupManagerDashboard() {
     // Check if manager is authenticated via server session
@@ -37,6 +38,28 @@ document.addEventListener("DOMContentLoaded", () => {
     const closeSuccessBtn = document.getElementById('closeSuccessModal');
     if (closeSuccessBtn) {
         closeSuccessBtn.addEventListener('click', hideSuccessModal);
+    }
+
+    // Filter button event listeners
+    const filterAllBtn = document.getElementById('filterAllBtn');
+    const filterActiveBtn = document.getElementById('filterActiveBtn');
+    
+    if (filterAllBtn) {
+        filterAllBtn.addEventListener('click', () => {
+            currentMenuFilter = 'all';
+            filterAllBtn.classList.add('active');
+            filterActiveBtn.classList.remove('active');
+            loadMenuItems();
+        });
+    }
+    
+    if (filterActiveBtn) {
+        filterActiveBtn.addEventListener('click', () => {
+            currentMenuFilter = 'active';
+            filterActiveBtn.classList.add('active');
+            filterAllBtn.classList.remove('active');
+            loadMenuItems();
+        });
     }
 
     employeeModal = document.getElementById('employeeModal');
@@ -85,18 +108,30 @@ async function loadMenuItems() {
     menuList.innerHTML = "";
     let menuItems = [];
     try {
-        const resp = await fetch('/api/menuItems');
+        const resp = await fetch('/api/manager/menu-items');
         if (resp.ok) {
             menuItems = await resp.json();
         }
     } catch (e) {
         alert('โหลดเมนูไม่สำเร็จ');
     }
-    menuItems.forEach(item => {
+    
+    // Apply filter based on currentMenuFilter
+    const filteredItems = currentMenuFilter === 'active' 
+        ? menuItems.filter(item => item.active) 
+        : menuItems;
+    
+    filteredItems.forEach(item => {
         const div = document.createElement("div");
-        div.className = "flex justify-between bg-gray-100 p-4 rounded-lg";
+        // Add 'inactive-menu-item' class if item is not active
+        const activeClass = item.active ? '' : 'inactive-menu-item';
+        div.className = `flex justify-between bg-gray-100 p-4 rounded-lg ${activeClass}`;
+        
+        // Create badge for inactive items
+        const statusBadge = item.active ? '' : '<span class="inactive-badge ml-2 px-2 py-1 text-xs bg-gray-400 text-white rounded">ไม่พร้อมจำหน่าย</span>';
+        
         div.innerHTML = `
-            <span>${item.name} - ฿${item.price}</span>
+            <span>${item.name} - ฿${item.price}${statusBadge}</span>
             <div class="flex space-x-2">
                 <button class="bg-blue-500 text-white px-3 py-1 rounded edit-menu" data-id="${item.id}">แก้ไข</button>
                 <button class="bg-red-500 text-white px-3 py-1 rounded delete-menu" data-id="${item.id}">ลบ</button>
