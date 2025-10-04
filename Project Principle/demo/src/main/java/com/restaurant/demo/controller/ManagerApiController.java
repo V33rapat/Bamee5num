@@ -1,10 +1,14 @@
 package com.restaurant.demo.controller;
 
+import com.restaurant.demo.dto.MenuItemRequest;
+import com.restaurant.demo.dto.MenuItemResponse;
 import com.restaurant.demo.model.CartItem;
 import com.restaurant.demo.model.Employee;
 import com.restaurant.demo.model.Manager;
+import com.restaurant.demo.model.MenuItem;
 import com.restaurant.demo.model.User;
 import com.restaurant.demo.service.CartService;
+import com.restaurant.demo.service.MenuItemService;
 import com.restaurant.demo.service.employee.EmployeeService;
 import com.restaurant.demo.service.employee.dto.EmployeeCredentials;
 import com.restaurant.demo.service.employee.dto.EmployeeRegistrationRequest;
@@ -12,6 +16,7 @@ import com.restaurant.demo.service.employee.dto.EmployeeRegistrationResult;
 import com.restaurant.demo.service.employee.dto.EmployeeUpdateRequest;
 import com.restaurant.demo.service.manager.ManagerContext;
 import com.restaurant.demo.service.manager.SalesReportService;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -24,6 +29,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 
@@ -35,15 +41,18 @@ public class ManagerApiController {
     private final EmployeeService employeeService;
     private final CartService cartService;
     private final SalesReportService salesReportService;
+    private final MenuItemService menuItemService;
 
     public ManagerApiController(ManagerContext managerContext,
                                 EmployeeService employeeService,
                                 CartService cartService,
-                                SalesReportService salesReportService) {
+                                SalesReportService salesReportService,
+                                MenuItemService menuItemService) {
         this.managerContext = managerContext;
         this.employeeService = employeeService;
         this.cartService = cartService;
         this.salesReportService = salesReportService;
+        this.menuItemService = menuItemService;
     }
 
     @GetMapping("/currentUser")
@@ -102,5 +111,41 @@ public class ManagerApiController {
     @GetMapping("/reports/sales")
     public Manager.SalesReport getSalesReport() {
         return salesReportService.getDailySalesReport();
+    }
+
+    // ===== Menu Management Endpoints =====
+
+    // Task 3.1: POST /api/manager/menu-items - Create new menu item
+    @PostMapping("/manager/menu-items")
+    public ResponseEntity<MenuItemResponse> createMenuItem(@Valid @RequestBody MenuItemRequest request) {
+        MenuItemResponse response = menuItemService.createMenuItem(request);
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    }
+
+    // Task 3.2: PUT /api/manager/menu-items/{id} - Update existing menu item
+    @PutMapping("/manager/menu-items/{id}")
+    public ResponseEntity<MenuItemResponse> updateMenuItem(
+            @PathVariable Long id,
+            @Valid @RequestBody MenuItemRequest request) {
+        MenuItemResponse response = menuItemService.updateMenuItem(id, request);
+        return ResponseEntity.ok(response);
+    }
+
+    // Task 3.3: GET /api/manager/menu-items/{id} - Get single menu item by ID
+    @GetMapping("/manager/menu-items/{id}")
+    public ResponseEntity<MenuItemResponse> getMenuItemById(@PathVariable Long id) {
+        return menuItemService.getMenuItemById(id)
+                .map(menuItem -> ResponseEntity.ok(MenuItemResponse.fromEntity(menuItem)))
+                .orElse(ResponseEntity.notFound().build());
+    }
+
+    // Task 3.4: GET /api/manager/menu-items - Get all menu items (active and inactive)
+    @GetMapping("/manager/menu-items")
+    public ResponseEntity<List<MenuItemResponse>> getAllMenuItems() {
+        List<MenuItem> menuItems = menuItemService.getAllMenuItems();
+        List<MenuItemResponse> responses = menuItems.stream()
+                .map(MenuItemResponse::fromEntity)
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(responses);
     }
 }

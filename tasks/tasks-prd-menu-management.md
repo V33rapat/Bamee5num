@@ -9,7 +9,7 @@ Based on: `prd-menu-management.md`
 - `src/main/java/com/restaurant/demo/service/MenuItemService.java` - Service layer methods for menu CRUD operations (✅ Modified with createMenuItem, updateMenuItem, getMenuItemById, getAllMenuItems methods)
 - `src/main/java/com/restaurant/demo/exception/MenuItemNotFoundException.java` - Custom exception for menu item not found scenarios (✅ Created)
 - `src/main/java/com/restaurant/demo/exception/GlobalExceptionHandler.java` - Global exception handler with MenuItemNotFoundException handler (✅ Modified)
-- `src/main/java/com/restaurant/demo/controller/ManagerApiController.java` - REST endpoints for manager menu operations (will be modified)
+- `src/main/java/com/restaurant/demo/controller/ManagerApiController.java` - REST endpoints for manager menu operations (✅ Modified with POST, PUT, GET endpoints for menu management)
 - `src/main/java/com/restaurant/demo/model/MenuItem.java` - Entity model (already exists, may need validation annotations)
 - `src/main/java/com/restaurant/demo/repository/MenuItemRepo.java` - Repository interface (already exists)
 - `src/main/resources/templates/manager.html` - Manager dashboard HTML with menu management UI (will be modified)
@@ -45,14 +45,14 @@ Based on: `prd-menu-management.md`
   - [x] 2.6 Add proper exception handling with custom exceptions (e.g., `MenuItemNotFoundException`)
   - [x] 2.7 Add mapper methods to convert between `MenuItem` entity and DTOs
 
-- [ ] 3.0 Create Manager API Endpoints for Menu Management
-  - [ ] 3.1 Add `POST /api/manager/menu-items` endpoint in `ManagerApiController` that accepts `MenuItemRequest` and returns `MenuItemResponse` with HTTP 201
-  - [ ] 3.2 Add `PUT /api/manager/menu-items/{id}` endpoint in `ManagerApiController` that updates menu item and returns `MenuItemResponse` with HTTP 200
-  - [ ] 3.3 Add `GET /api/manager/menu-items/{id}` endpoint in `ManagerApiController` that returns single menu item or HTTP 404
-  - [ ] 3.4 Add `GET /api/manager/menu-items` endpoint in `ManagerApiController` that returns all menu items (active and inactive)
-  - [ ] 3.5 Add `@Valid` annotation to request parameters to trigger validation
-  - [ ] 3.6 Add proper HTTP status codes and ResponseEntity handling for success/error cases
-  - [ ] 3.7 Ensure endpoints are protected by Spring Security (manager role required)
+- [x] 3.0 Create Manager API Endpoints for Menu Management
+  - [x] 3.1 Add `POST /api/manager/menu-items` endpoint in `ManagerApiController` that accepts `MenuItemRequest` and returns `MenuItemResponse` with HTTP 201
+  - [x] 3.2 Add `PUT /api/manager/menu-items/{id}` endpoint in `ManagerApiController` that updates menu item and returns `MenuItemResponse` with HTTP 200
+  - [x] 3.3 Add `GET /api/manager/menu-items/{id}` endpoint in `ManagerApiController` that returns single menu item or HTTP 404
+  - [x] 3.4 Add `GET /api/manager/menu-items` endpoint in `ManagerApiController` that returns all menu items (active and inactive)
+  - [x] 3.5 Add `@Valid` annotation to request parameters to trigger validation
+  - [x] 3.6 Add proper HTTP status codes and ResponseEntity handling for success/error cases
+  - [x] 3.7 Ensure endpoints are protected by Spring Security (manager role required)
 
 - [ ] 4.0 Implement Frontend Add Menu UI and Functionality
   - [ ] 4.1 Add "เพิ่มเมนู" (Add Menu) button in `manager.html` within the menu management section
