@@ -34,6 +34,11 @@ document.addEventListener("DOMContentLoaded", () => {
     document.getElementById('cancelAddMenu').addEventListener('click', hideAddMenuModal);
     document.getElementById('addMenuForm').addEventListener('submit', handleAddMenu);
 
+    const closeSuccessBtn = document.getElementById('closeSuccessModal');
+    if (closeSuccessBtn) {
+        closeSuccessBtn.addEventListener('click', hideSuccessModal);
+    }
+
     employeeModal = document.getElementById('employeeModal');
     employeeForm = document.getElementById('employeeForm');
     employeeModalTitle = document.getElementById('employeeModalTitle');
@@ -111,34 +116,109 @@ async function loadMenuItems() {
 }
 
 function showAddMenuModal() {
-    document.getElementById('addMenuModal').classList.remove('hidden');
+    const modal = document.getElementById('addMenuModal');
+    if (modal) {
+        modal.classList.remove('hidden');
+    }
 }
 
 function hideAddMenuModal() {
-    document.getElementById('addMenuModal').classList.add('hidden');
+    const modal = document.getElementById('addMenuModal');
+    const form = document.getElementById('addMenuForm');
+    if (modal) {
+        modal.classList.add('hidden');
+    }
+    if (form) {
+        form.reset();
+        // Reset checkbox to checked state
+        const activeCheckbox = document.getElementById('menuActive');
+        if (activeCheckbox) {
+            activeCheckbox.checked = true;
+        }
+    }
 }
 
 async function handleAddMenu(event) {
     event.preventDefault();
+    
+    // Get form values
+    const name = document.getElementById('menuName').value.trim();
+    const priceValue = document.getElementById('menuPrice').value;
+    const category = document.getElementById('menuCategory').value;
+    const description = document.getElementById('menuDescription').value.trim();
+    const active = document.getElementById('menuActive').checked;
+
+    // Client-side validation
+    if (!name) {
+        alert('กรุณาระบุชื่อเมนู');
+        return;
+    }
+
+    if (name.length > 100) {
+        alert('ชื่อเมนูต้องไม่เกิน 100 ตัวอักษร');
+        return;
+    }
+
+    if (!priceValue || parseFloat(priceValue) <= 0) {
+        alert('กรุณาระบุราคาที่มากกว่า 0');
+        return;
+    }
+
+    const price = parseFloat(priceValue);
+    if (price > 9999.99) {
+        alert('ราคาต้องไม่เกิน 9999.99 บาท');
+        return;
+    }
+
+    if (!category) {
+        alert('กรุณาเลือกหมวดหมู่');
+        return;
+    }
+
+    if (description.length > 500) {
+        alert('รายละเอียดเมนูต้องไม่เกิน 500 ตัวอักษร');
+        return;
+    }
+
+    // Prepare request data
     const menuData = {
-        name: document.getElementById('menuName').value,
-        price: parseFloat(document.getElementById('menuPrice').value),
-        category: document.getElementById('menuCategory').value,
-        description: document.getElementById('menuDescription').value
+        name: name,
+        price: price,
+        category: category,
+        description: description,
+        active: active
     };
 
-    const resp = await fetch('/api/menuItems', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(menuData)
-    });
-    if (resp.ok) {
-        alert('เพิ่มเมนูใหม่สำเร็จ!');
-        await loadMenuItems();
-        hideAddMenuModal();
-        event.target.reset();
-    } else {
-        alert('เกิดข้อผิดพลาดในการเพิ่มเมนู');
+    try {
+        const resp = await fetch('/api/manager/menu-items', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(menuData)
+        });
+
+        if (resp.ok) {
+            // Success
+            hideAddMenuModal();
+            showSuccessModal('เพิ่มเมนูสำเร็จ');
+            await loadMenuItems();
+        } else if (resp.status === 400) {
+            // Validation error from backend
+            const errorData = await resp.json();
+            let errorMessage = 'ข้อมูลไม่ถูกต้อง:\n';
+            if (errorData.message) {
+                errorMessage += errorData.message;
+            } else if (errorData.errors) {
+                errorMessage += Object.values(errorData.errors).join('\n');
+            }
+            alert(errorMessage);
+        } else if (resp.status === 403) {
+            alert('คุณไม่มีสิทธิ์ในการเพิ่มเมนู');
+        } else {
+            alert('เกิดข้อผิดพลาดในการเพิ่มเมนู');
+        }
+    } catch (err) {
+        console.error('Error adding menu:', err);
+        alert('เกิดข้อผิดพลาดในการเชื่อมต่อกับเซิร์ฟเวอร์');
     }
 }
 
@@ -308,6 +388,22 @@ async function handleEmployeeSubmit(event) {
     } catch (err) {
         console.error(err);
         alert('บันทึกข้อมูลพนักงานไม่สำเร็จ');
+    }
+}
+
+function showSuccessModal(message) {
+    const modal = document.getElementById('successModal');
+    const messageEl = document.getElementById('successMessage');
+    if (modal && messageEl) {
+        messageEl.textContent = message;
+        modal.classList.remove('hidden');
+    }
+}
+
+function hideSuccessModal() {
+    const modal = document.getElementById('successModal');
+    if (modal) {
+        modal.classList.add('hidden');
     }
 }
 

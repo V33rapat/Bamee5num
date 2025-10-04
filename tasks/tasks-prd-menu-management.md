@@ -12,8 +12,8 @@ Based on: `prd-menu-management.md`
 - `src/main/java/com/restaurant/demo/controller/ManagerApiController.java` - REST endpoints for manager menu operations (✅ Modified with POST, PUT, GET endpoints for menu management)
 - `src/main/java/com/restaurant/demo/model/MenuItem.java` - Entity model (already exists, may need validation annotations)
 - `src/main/java/com/restaurant/demo/repository/MenuItemRepo.java` - Repository interface (already exists)
-- `src/main/resources/templates/manager.html` - Manager dashboard HTML with menu management UI (will be modified)
-- `src/main/resources/static/js/manager.js` - JavaScript for menu CRUD operations (will be modified)
+- `src/main/resources/templates/manager.html` - Manager dashboard HTML with menu management UI (✅ Modified with updated add menu modal including active checkbox, proper labels, success modal)
+- `src/main/resources/static/js/manager.js` - JavaScript for menu CRUD operations (✅ Modified with updated handleAddMenu, showAddMenuModal, hideAddMenuModal, showSuccessModal functions)
 - `src/test/java/com/restaurant/demo/controller/ManagerApiControllerTest.java` - Integration tests for menu API endpoints
 - `src/test/java/com/restaurant/demo/service/MenuItemServiceTest.java` - Unit tests for menu service methods
 
@@ -54,19 +54,19 @@ Based on: `prd-menu-management.md`
   - [x] 3.6 Add proper HTTP status codes and ResponseEntity handling for success/error cases
   - [x] 3.7 Ensure endpoints are protected by Spring Security (manager role required)
 
-- [ ] 4.0 Implement Frontend Add Menu UI and Functionality
-  - [ ] 4.1 Add "เพิ่มเมนู" (Add Menu) button in `manager.html` within the menu management section
-  - [ ] 4.2 Create modal HTML structure for add menu form with fields: name, price, category dropdown, description textarea, active checkbox
-  - [ ] 4.3 Style the modal consistently with existing design (orange buttons, proper spacing, Thai labels)
-  - [ ] 4.4 Add category dropdown options: "Noodles", "Beverages", "Desserts"
-  - [ ] 4.5 Add "บันทึก" (Save) and "ยกเลิก" (Cancel) buttons to the modal
-  - [ ] 4.6 Implement `showAddMenuModal()` function in `manager.js` to display the modal
-  - [ ] 4.7 Implement `hideAddMenuModal()` function in `manager.js` to close the modal and reset form
-  - [ ] 4.8 Implement `handleAddMenu(event)` function in `manager.js` to submit form data via POST to `/api/manager/menu-items`
-  - [ ] 4.9 Add client-side validation before submission (required fields, positive price)
-  - [ ] 4.10 Show success modal "เพิ่มเมนูสำเร็จ" after successful creation
-  - [ ] 4.11 Refresh menu list after successful addition
-  - [ ] 4.12 Handle and display error messages from backend
+- [x] 4.0 Implement Frontend Add Menu UI and Functionality
+  - [x] 4.1 Add "เพิ่มเมนู" (Add Menu) button in `manager.html` within the menu management section
+  - [x] 4.2 Create modal HTML structure for add menu form with fields: name, price, category dropdown, description textarea, active checkbox
+  - [x] 4.3 Style the modal consistently with existing design (orange buttons, proper spacing, Thai labels)
+  - [x] 4.4 Add category dropdown options: "Noodles", "Beverages", "Desserts"
+  - [x] 4.5 Add "บันทึก" (Save) and "ยกเลิก" (Cancel) buttons to the modal
+  - [x] 4.6 Implement `showAddMenuModal()` function in `manager.js` to display the modal
+  - [x] 4.7 Implement `hideAddMenuModal()` function in `manager.js` to close the modal and reset form
+  - [x] 4.8 Implement `handleAddMenu(event)` function in `manager.js` to submit form data via POST to `/api/manager/menu-items`
+  - [x] 4.9 Add client-side validation before submission (required fields, positive price)
+  - [x] 4.10 Show success modal "เพิ่มเมนูสำเร็จ" after successful creation
+  - [x] 4.11 Refresh menu list after successful addition
+  - [x] 4.12 Handle and display error messages from backend
 
 - [ ] 5.0 Implement Frontend Edit Menu UI and Functionality
   - [ ] 5.1 Add "แก้ไข" (Edit) button/icon for each menu item in the menu list table in `manager.html`

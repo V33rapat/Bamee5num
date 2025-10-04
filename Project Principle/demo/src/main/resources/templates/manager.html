@@ -76,18 +76,34 @@
         <div class="bg-white rounded-xl p-8 max-w-md w-full mx-4">
             <h3 class="text-2xl font-bold mb-6">เพิ่มเมนูใหม่</h3>
             <form id="addMenuForm" class="space-y-4">
-                <input type="text" id="menuName" placeholder="ชื่อเมนู" class="w-full p-3 border rounded-lg" required>
-                <input type="number" id="menuPrice" placeholder="ราคา" class="w-full p-3 border rounded-lg" required>
-                <select id="menuCategory" class="w-full p-3 border rounded-lg" required>
-                    <option value="">เลือกหมวดหมู่</option>
-                    <option value="noodles">บะหมี่</option>
-                    <option value="drinks">เครื่องดื่ม</option>
-                    <option value="desserts">ของหวาน</option>
-                </select>
-                <textarea id="menuDescription" placeholder="รายละเอียดเมนู" class="w-full p-3 border rounded-lg h-24"></textarea>
+                <div>
+                    <label for="menuName" class="block text-sm font-medium text-gray-700 mb-1">ชื่อเมนู *</label>
+                    <input type="text" id="menuName" placeholder="ชื่อเมนู" class="w-full p-3 border rounded-lg" required maxlength="100">
+                </div>
+                <div>
+                    <label for="menuPrice" class="block text-sm font-medium text-gray-700 mb-1">ราคา *</label>
+                    <input type="number" id="menuPrice" placeholder="ราคา" class="w-full p-3 border rounded-lg" required step="0.01" min="0.01" max="9999.99">
+                </div>
+                <div>
+                    <label for="menuCategory" class="block text-sm font-medium text-gray-700 mb-1">ประเภท *</label>
+                    <select id="menuCategory" class="w-full p-3 border rounded-lg" required>
+                        <option value="">เลือกหมวดหมู่</option>
+                        <option value="Noodles">บะหมี่</option>
+                        <option value="Beverages">เครื่องดื่ม</option>
+                        <option value="Desserts">ของหวาน</option>
+                    </select>
+                </div>
+                <div>
+                    <label for="menuDescription" class="block text-sm font-medium text-gray-700 mb-1">รายละเอียดเมนู</label>
+                    <textarea id="menuDescription" placeholder="รายละเอียดเมนู" class="w-full p-3 border rounded-lg h-24" maxlength="500"></textarea>
+                </div>
+                <div class="flex items-center">
+                    <input type="checkbox" id="menuActive" class="mr-2 w-4 h-4" checked>
+                    <label for="menuActive" class="text-sm font-medium text-gray-700">เปิดให้บริการ</label>
+                </div>
                 <div class="flex space-x-4">
-                    <button type="button" id="cancelAddMenu" class="flex-1 bg-gray-300 text-gray-700 py-3 rounded-lg">ยกเลิก</button>
-                    <button type="submit" class="flex-1 bg-orange-500 text-white py-3 rounded-lg">เพิ่มเมนู</button>
+                    <button type="button" id="cancelAddMenu" class="flex-1 bg-gray-300 text-gray-700 py-3 rounded-lg hover:bg-gray-400">ยกเลิก</button>
+                    <button type="submit" class="flex-1 bg-orange-500 text-white py-3 rounded-lg hover:bg-orange-600">บันทึก</button>
                 </div>
             </form>
         </div>
@@ -104,6 +120,17 @@
                     <button type="submit" class="flex-1 bg-blue-500 text-white py-3 rounded-lg">บันทึก</button>
                 </div>
             </form>
+        </div>
+    </div>
+
+    <!-- Success Modal -->
+    <div id="successModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center hidden">
+        <div class="bg-white rounded-xl p-8 max-w-md w-full mx-4 text-center">
+            <div class="mb-4">
+                <i class="fas fa-check-circle text-green-500 text-6xl"></i>
+            </div>
+            <h3 id="successMessage" class="text-2xl font-bold mb-6">สำเร็จ!</h3>
+            <button id="closeSuccessModal" class="bg-orange-500 text-white px-6 py-3 rounded-lg hover:bg-orange-600">ตรงรับ</button>
         </div>
     </div>
 
