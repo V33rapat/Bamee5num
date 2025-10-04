@@ -28,12 +28,12 @@
 - `src/main/java/com/restaurant/demo/exception/InvalidManagerCredentialsException.java` - **CREATED** - Custom exception for invalid manager credentials during authentication
 
 ### Frontend - Templates
-- `src/main/resources/templates/manager-register.html` - **NEW** - Manager registration page
+- `src/main/resources/templates/manager-register.html` - **CREATED** - Manager registration page with Thymeleaf form binding and validation
 - `src/main/resources/templates/manager-login.html` - **NEW** - Manager login page
 - `src/main/resources/templates/manager.html` - Update existing manager dashboard to include logout functionality
 
 ### Frontend - JavaScript
-- `src/main/resources/static/js/manager-auth.js` - **NEW** - Client-side validation for manager authentication forms
+- `src/main/resources/static/js/manager-auth.js` - **CREATED** - Client-side validation for manager authentication forms with real-time validation
 
 ### Database
 - `database-setup.sql` - Update SQL script to change employees.id to BIGINT and alter managers table with new columns (username, email, password, timestamps)
@@ -173,70 +173,70 @@
   - [x] 6.11 Ensure BCryptPasswordEncoder bean is available (already exists, verify it's being used)
   - [x] 6.12 Test that manager routes are accessible without breaking customer authentication
 
-- [ ] 7.0 Create Manager Registration Frontend (HTML + JS)
-  - [ ] 7.1 Create `manager-register.html` file in `src/main/resources/templates/`
-  - [ ] 7.2 Add HTML boilerplate with Thymeleaf namespace: `xmlns:th="http://www.thymeleaf.org"`
-  - [ ] 7.3 Copy styling from `register.html` (customer registration) for consistency
-  - [ ] 7.4 Set page title to "Manager Registration - Bamee 5 Num"
-  - [ ] 7.5 Create main container div with class "register-container"
-  - [ ] 7.6 Add heading "Manager Registration"
-  - [ ] 7.7 Create form with `th:action="@{/manager/register}"` and `method="post"`
-  - [ ] 7.8 Add `th:object="${managerRegistrationDto}"` to form tag
-  - [ ] 7.9 Add CSRF token input: `<input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>`
-  - [ ] 7.10 Create form group for username with label, input, and error display
-  - [ ] 7.11 Add input: `<input type="text" th:field="*{username}" placeholder="Username" required />`
-  - [ ] 7.12 Add error display: `<span th:if="${#fields.hasErrors('username')}" th:errors="*{username}"></span>`
-  - [ ] 7.13 Create form group for email with validation
-  - [ ] 7.14 Add input: `<input type="email" th:field="*{email}" placeholder="Email" required />`
-  - [ ] 7.15 Add error display for email field
-  - [ ] 7.16 Create form group for password with minimum 8 characters
-  - [ ] 7.17 Add input: `<input type="password" th:field="*{password}" placeholder="Password (min 8 characters)" required />`
-  - [ ] 7.18 Add error display for password field
-  - [ ] 7.19 Create form group for confirm password
-  - [ ] 7.20 Add input: `<input type="password" th:field="*{confirmPassword}" placeholder="Confirm Password" required />`
-  - [ ] 7.21 Add error display for confirmPassword field
-  - [ ] 7.22 Add general error message display area: `<div th:if="${error}" class="error-message" th:text="${error}"></div>`
-  - [ ] 7.23 Add success message display area: `<div th:if="${message}" class="success-message" th:text="${message}"></div>`
-  - [ ] 7.24 Add submit button with text "Register"
-  - [ ] 7.25 Add link to login page: "Already have an account? <a th:href="@{/manager/login}">Login here</a>"
-  - [ ] 7.26 Add CSS styling for error messages (red color)
-  - [ ] 7.27 Add CSS styling for success messages (green color)
-  - [ ] 7.28 Ensure responsive design matches existing pages
-  - [ ] 7.29 Create `manager-auth.js` file in `src/main/resources/static/js/`
-  - [ ] 7.30 Add client-side validation for username (min 3 characters, alphanumeric + underscore only)
-  - [ ] 7.31 Add client-side validation for email format
-  - [ ] 7.32 Add client-side validation for password length (min 8 characters)
-  - [ ] 7.33 Add client-side validation to check if password and confirmPassword match
-  - [ ] 7.34 Display validation errors in real-time as user types
-  - [ ] 7.35 Disable submit button if validation fails
-  - [ ] 7.36 Link manager-auth.js to manager-register.html: `<script src="/js/manager-auth.js"></script>`
+- [x] 7.0 Create Manager Registration Frontend (HTML + JS)
+  - [x] 7.1 Create `manager-register.html` file in `src/main/resources/templates/`
+  - [x] 7.2 Add HTML boilerplate with Thymeleaf namespace: `xmlns:th="http://www.thymeleaf.org"`
+  - [x] 7.3 Copy styling from `register.html` (customer registration) for consistency
+  - [x] 7.4 Set page title to "Manager Registration - Bamee 5 Num"
+  - [x] 7.5 Create main container div with class "register-container"
+  - [x] 7.6 Add heading "Manager Registration"
+  - [x] 7.7 Create form with `th:action="@{/manager/register}"` and `method="post"`
+  - [x] 7.8 Add `th:object="${managerRegistrationDto}"` to form tag
+  - [x] 7.9 Add CSRF token input: `<input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>`
+  - [x] 7.10 Create form group for username with label, input, and error display
+  - [x] 7.11 Add input: `<input type="text" th:field="*{username}" placeholder="Username" required />`
+  - [x] 7.12 Add error display: `<span th:if="${#fields.hasErrors('username')}" th:errors="*{username}"></span>`
+  - [x] 7.13 Create form group for email with validation
+  - [x] 7.14 Add input: `<input type="email" th:field="*{email}" placeholder="Email" required />`
+  - [x] 7.15 Add error display for email field
+  - [x] 7.16 Create form group for password with minimum 8 characters
+  - [x] 7.17 Add input: `<input type="password" th:field="*{password}" placeholder="Password (min 8 characters)" required />`
+  - [x] 7.18 Add error display for password field
+  - [x] 7.19 Create form group for confirm password
+  - [x] 7.20 Add input: `<input type="password" th:field="*{confirmPassword}" placeholder="Confirm Password" required />`
+  - [x] 7.21 Add error display for confirmPassword field
+  - [x] 7.22 Add general error message display area: `<div th:if="${error}" class="error-message" th:text="${error}"></div>`
+  - [x] 7.23 Add success message display area: `<div th:if="${message}" class="success-message" th:text="${message}"></div>`
+  - [x] 7.24 Add submit button with text "Register"
+  - [x] 7.25 Add link to login page: "Already have an account? <a th:href="@{/manager/login}">Login here</a>"
+  - [x] 7.26 Add CSS styling for error messages (red color)
+  - [x] 7.27 Add CSS styling for success messages (green color)
+  - [x] 7.28 Ensure responsive design matches existing pages
+  - [x] 7.29 Create `manager-auth.js` file in `src/main/resources/static/js/`
+  - [x] 7.30 Add client-side validation for username (min 3 characters, alphanumeric + underscore only)
+  - [x] 7.31 Add client-side validation for email format
+  - [x] 7.32 Add client-side validation for password length (min 8 characters)
+  - [x] 7.33 Add client-side validation to check if password and confirmPassword match
+  - [x] 7.34 Display validation errors in real-time as user types
+  - [x] 7.35 Disable submit button if validation fails
+  - [x] 7.36 Link manager-auth.js to manager-register.html: `<script src="/js/manager-auth.js"></script>`
 
-- [ ] 8.0 Create Manager Login Frontend (HTML + JS)
-  - [ ] 8.1 Create `manager-login.html` file in `src/main/resources/templates/`
-  - [ ] 8.2 Add HTML boilerplate with Thymeleaf namespace
-  - [ ] 8.3 Copy styling from `login.html` (customer login) for consistency
-  - [ ] 8.4 Set page title to "Manager Login - Bamee 5 Num"
-  - [ ] 8.5 Create main container div with class "login-container"
-  - [ ] 8.6 Add heading "Manager Login"
-  - [ ] 8.7 Create form with `th:action="@{/manager/login}"` and `method="post"`
-  - [ ] 8.8 Add `th:object="${managerLoginDto}"` to form tag
-  - [ ] 8.9 Add CSRF token input
-  - [ ] 8.10 Create form group for email
-  - [ ] 8.11 Add input: `<input type="email" th:field="*{email}" placeholder="Email" required />`
-  - [ ] 8.12 Add error display for email field
-  - [ ] 8.13 Create form group for password
-  - [ ] 8.14 Add input: `<input type="password" th:field="*{password}" placeholder="Password" required />`
-  - [ ] 8.15 Add error display for password field
-  - [ ] 8.16 Add error message display: `<div th:if="${error}" class="error-message" th:text="${error}"></div>`
-  - [ ] 8.17 Add success message display: `<div th:if="${message}" class="success-message" th:text="${message}"></div>`
-  - [ ] 8.18 Add submit button with text "Login"
-  - [ ] 8.19 Add link to registration page: "Don't have an account? <a th:href="@{/manager/register}">Register here</a>"
-  - [ ] 8.20 Add CSS styling consistent with login.html
-  - [ ] 8.21 Ensure responsive design
-  - [ ] 8.22 Link manager-auth.js for client-side validation: `<script src="/js/manager-auth.js"></script>`
-  - [ ] 8.23 In manager-auth.js, add login form validation
-  - [ ] 8.24 Validate email format before submission
-  - [ ] 8.25 Ensure password field is not empty before submission
+- [x] 8.0 Create Manager Login Frontend (HTML + JS)
+  - [x] 8.1 Create `manager-login.html` file in `src/main/resources/templates/`
+  - [x] 8.2 Add HTML boilerplate with Thymeleaf namespace
+  - [x] 8.3 Copy styling from `login.html` (customer login) for consistency
+  - [x] 8.4 Set page title to "Manager Login - Bamee 5 Num"
+  - [x] 8.5 Create main container div with class "login-container"
+  - [x] 8.6 Add heading "Manager Login"
+  - [x] 8.7 Create form with `th:action="@{/manager/login}"` and `method="post"`
+  - [x] 8.8 Add `th:object="${managerLoginDto}"` to form tag
+  - [x] 8.9 Add CSRF token input
+  - [x] 8.10 Create form group for email
+  - [x] 8.11 Add input: `<input type="email" th:field="*{email}" placeholder="Email" required />`
+  - [x] 8.12 Add error display for email field
+  - [x] 8.13 Create form group for password
+  - [x] 8.14 Add input: `<input type="password" th:field="*{password}" placeholder="Password" required />`
+  - [x] 8.15 Add error display for password field
+  - [x] 8.16 Add error message display: `<div th:if="${error}" class="error-message" th:text="${error}"></div>`
+  - [x] 8.17 Add success message display: `<div th:if="${message}" class="success-message" th:text="${message}"></div>`
+  - [x] 8.18 Add submit button with text "Login"
+  - [x] 8.19 Add link to registration page: "Don't have an account? <a th:href="@{/manager/register}">Register here</a>"
+  - [x] 8.20 Add CSS styling consistent with login.html
+  - [x] 8.21 Ensure responsive design
+  - [x] 8.22 Link manager-auth.js for client-side validation: `<script src="/js/manager-auth.js"></script>`
+  - [x] 8.23 In manager-auth.js, add login form validation
+  - [x] 8.24 Validate email format before submission
+  - [x] 8.25 Ensure password field is not empty before submission
 
 - [ ] 9.0 Update Manager Dashboard with Logout Functionality
   - [ ] 9.1 Open `manager.html` file

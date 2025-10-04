@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manager Login - Bamee 5 Num</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(to bottom right, #fff7ed, #fef2f2);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .login-container {
+            background: white;
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            width: 100%;
+            max-width: 400px;
+        }
+        .login-container h2 {
+            text-align: center;
+            margin-bottom: 30px;
+            color: #ea580c;
+            font-size: 24px;
+            font-weight: bold;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            color: #333;
+            font-weight: 500;
+        }
+        input[type="email"], input[type="password"] {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #fed7aa;
+            border-radius: 8px;
+            font-size: 16px;
+            box-sizing: border-box;
+            transition: border-color 0.3s;
+        }
+        input[type="email"]:focus, input[type="password"]:focus {
+            outline: none;
+            border-color: #f97316;
+        }
+        input.error-input {
+            border-color: #dc2626;
+        }
+        .btn-primary {
+            width: 100%;
+            padding: 12px;
+            background-color: #f97316;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            margin-top: 10px;
+        }
+        .btn-primary:hover {
+            background-color: #ea580c;
+        }
+        .btn-primary:disabled {
+            background-color: #fed7aa;
+            cursor: not-allowed;
+        }
+        .error-message {
+            color: #dc2626;
+            margin-top: 10px;
+            text-align: center;
+            padding: 10px;
+            background-color: #fef2f2;
+            border-radius: 8px;
+            border: 1px solid #fecaca;
+        }
+        .success-message {
+            color: #059669;
+            margin-top: 10px;
+            text-align: center;
+            padding: 10px;
+            background-color: #f0fdf4;
+            border-radius: 8px;
+            border: 1px solid #86efac;
+        }
+        .field-error {
+            color: #dc2626;
+            font-size: 14px;
+            margin-top: 5px;
+            display: block;
+        }
+        .register-link {
+            text-align: center;
+            margin-top: 20px;
+        }
+        .register-link a {
+            color: #f97316;
+            text-decoration: none;
+            font-weight: 500;
+        }
+        .register-link a:hover {
+            color: #ea580c;
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <h2>👨‍💼 Manager Login</h2>
+        
+        <!-- Display general error message from backend -->
+        <div th:if="${error}" class="error-message" th:text="${error}"></div>
+        
+        <!-- Display success message (e.g., after registration) -->
+        <div th:if="${message}" class="success-message" th:text="${message}"></div>
+        
+        <form id="loginForm" th:action="@{/manager/login}" method="post" th:object="${managerLoginDto}">
+            <!-- CSRF Token -->
+            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+            
+            <div class="form-group">
+                <label for="email">Email</label>
+                <input type="email" 
+                       id="email" 
+                       th:field="*{email}" 
+                       placeholder="manager@example.com" 
+                       required />
+                <span class="field-error" th:if="${#fields.hasErrors('email')}" th:errors="*{email}"></span>
+                <span class="field-error" id="emailError"></span>
+            </div>
+            
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input type="password" 
+                       id="password" 
+                       th:field="*{password}" 
+                       placeholder="Enter your password" 
+                       required />
+                <span class="field-error" th:if="${#fields.hasErrors('password')}" th:errors="*{password}"></span>
+                <span class="field-error" id="passwordError"></span>
+            </div>
+            
+            <button type="submit" class="btn-primary" id="submitBtn">Login</button>
+        </form>
+        
+        <div class="register-link">
+            <p>Don't have an account? <a th:href="@{/manager/register}">Register here</a></p>
+        </div>
+    </div>
+    
+    <script th:src="@{/js/manager-auth.js}"></script>
+</body>
+</html>
