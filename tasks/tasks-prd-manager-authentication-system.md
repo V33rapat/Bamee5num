@@ -1,11 +1,10 @@
 # Task List: Manager Authentication System Implementation
 
-Based on PRD: `prd-manager-authentication-system.md`
-
 ## Relevant Files
 
 ### Backend - Model/Entity
-- `src/main/java/com/restaurant/demo/model/Manager.java` - Update Manager entity to include authentication fields (username, email, password, timestamps)
+- `src/main/java/com/restaurant/demo/model/Employee.java` - Update Employee entity to change id type from int to Long
+- `src/main/java/com/restaurant/demo/model/Manager.java` - Update Manager entity to include authentication fields (username, email, password, timestamps) while KEEPING inheritance from Employee
 
 ### Backend - DTOs
 - `src/main/java/com/restaurant/demo/dto/ManagerRegistrationDto.java` - **NEW** - DTO for manager registration with validation annotations
@@ -36,7 +35,7 @@ Based on PRD: `prd-manager-authentication-system.md`
 - `src/main/resources/static/js/manager-auth.js` - **NEW** - Client-side validation for manager authentication forms
 
 ### Database
-- `database-setup.sql` - Update SQL script to alter managers table with new columns
+- `database-setup.sql` - Update SQL script to change employees.id to BIGINT and alter managers table with new columns (username, email, password, timestamps)
 
 ### Testing
 - `src/test/java/com/restaurant/demo/service/ManagerServiceTest.java` - **NEW** - Unit tests for ManagerService
@@ -46,7 +45,10 @@ Based on PRD: `prd-manager-authentication-system.md`
 ### Notes
 - The existing codebase uses BCryptPasswordEncoder (already configured in SecurityConfig)
 - Customer authentication pattern in `CustomerService.java` can be used as reference
-- Manager entity uses JOINED inheritance strategy (extends Employee)
+- **IMPORTANT:** Manager entity uses JOINED inheritance strategy (extends Employee) - DO NOT break this inheritance!
+- Manager inherits from Employee, so authentication fields are added to Manager class while keeping the inheritance intact
+- ID type changed from `int` to `Long` in Employee for consistency with Customer entity (which uses Long)
+- The managers table has a foreign key to employees(id), maintaining the inheritance relationship at database level
 - Test structure follows pattern in existing test files under `src/test/java/com/restaurant/demo/`
 - Run tests using Maven: `mvn test` or specific test: `mvn test -Dtest=ManagerServiceTest`
 
@@ -55,39 +57,49 @@ Based on PRD: `prd-manager-authentication-system.md`
 ## Tasks
 
 - [ ] 1.0 Update Database Schema for Manager Authentication
-  - [ ] 1.1 Open `database-setup.sql` file
-  - [ ] 1.2 Locate the `managers` table definition (currently only has `id` column)
-  - [ ] 1.3 Add ALTER TABLE statement to add `username` VARCHAR(50) UNIQUE NOT NULL
-  - [ ] 1.4 Add ALTER TABLE statement to add `email` VARCHAR(100) UNIQUE NOT NULL
-  - [ ] 1.5 Add ALTER TABLE statement to add `password` VARCHAR(255) NOT NULL
-  - [ ] 1.6 Add ALTER TABLE statement to add `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-  - [ ] 1.7 Add ALTER TABLE statement to add `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-  - [ ] 1.8 Add indexes for `username` and `email` columns for performance
-  - [ ] 1.9 Run the SQL script against your database to apply the changes
-  - [ ] 1.10 Verify the table structure using `DESCRIBE managers;` in MySQL
+  - [x] 1.1 Open `database-setup.sql` file
+  - [x] 1.2 Locate the `employees` table definition - change `id` column type from `INT` to `BIGINT` for consistency
+  - [x] 1.3 Update the `managers` table foreign key to reference `employees(id)` with BIGINT type
+  - [x] 1.4 Locate the `managers` table definition (currently only has `id` column with FK to employees)
+  - [x] 1.5 Add ALTER TABLE statement to add `username` VARCHAR(50) UNIQUE NOT NULL to managers table
+  - [x] 1.6 Add ALTER TABLE statement to add `email` VARCHAR(100) UNIQUE NOT NULL to managers table
+  - [x] 1.7 Add ALTER TABLE statement to add `password` VARCHAR(255) NOT NULL to managers table
+  - [x] 1.8 Add ALTER TABLE statement to add `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP to managers table
+  - [x] 1.9 Add ALTER TABLE statement to add `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP to managers table
+  - [x] 1.10 Add indexes for `username` and `email` columns on managers table for performance
+  - [x] 1.11 Run the SQL script against your database to apply the changes
+  - [x] 1.12 Verify the table structure using `DESCRIBE employees;` and `DESCRIBE managers;` in MySQL
+  - [x] 1.13 Verify the foreign key relationship is intact between managers and employees
 
-- [ ] 2.0 Create Manager Entity and DTOs
-  - [ ] 2.1 Update `Manager.java` entity to remove inheritance from Employee (make it standalone for authentication)
-  - [ ] 2.2 Add `@Entity` and `@Table(name = "managers")` annotations
-  - [ ] 2.3 Add fields: `id` (Long), `username` (String), `email` (String), `password` (String), `createdAt` (LocalDateTime), `updatedAt` (LocalDateTime)
-  - [ ] 2.4 Add JPA annotations: `@Id`, `@GeneratedValue(strategy = GenerationType.IDENTITY)` on id
-  - [ ] 2.5 Add `@Column` annotations with constraints (unique, nullable, length) matching database schema
-  - [ ] 2.6 Add validation annotations: `@NotBlank`, `@Email`, `@Size` on appropriate fields
-  - [ ] 2.7 Add `@PrePersist` method to set `createdAt` and `updatedAt` timestamps
-  - [ ] 2.8 Add `@PreUpdate` method to update `updatedAt` timestamp
-  - [ ] 2.9 Generate getters, setters, constructors (no-arg and all-args)
-  - [ ] 2.10 Create `ManagerRegistrationDto.java` in dto package
-  - [ ] 2.11 Add fields to ManagerRegistrationDto: username, email, password, confirmPassword
-  - [ ] 2.12 Add validation annotations: `@NotBlank`, `@Email`, `@Size(min=8)` for password, `@Size(min=3, max=50)` for username
-  - [ ] 2.13 Generate getters and setters for ManagerRegistrationDto
-  - [ ] 2.14 Create `ManagerLoginDto.java` in dto package
-  - [ ] 2.15 Add fields to ManagerLoginDto: email, password
-  - [ ] 2.16 Add validation annotations: `@NotBlank`, `@Email`
-  - [ ] 2.17 Generate getters and setters for ManagerLoginDto
+- [ ] 2.0 Update Manager Entity and Create DTOs
+  - [ ] 2.1 Open `Employee.java` and change `id` field type from `int` to `Long` for consistency
+  - [ ] 2.2 Update Employee constructors and methods to use `Long` instead of `int`
+  - [ ] 2.3 Open `Manager.java` - KEEP the inheritance from Employee (extends Employee)
+  - [ ] 2.4 KEEP existing annotations: `@Entity`, `@Table(name = "managers")`, `@PrimaryKeyJoinColumn(name = "id")`
+  - [ ] 2.5 KEEP all existing business methods (addItem, removeItem, manageEmployees, viewSalesReport, SalesReport class)
+  - [ ] 2.6 Add new private fields for authentication: `username` (String), `email` (String), `password` (String)
+  - [ ] 2.7 Add new private fields for timestamps: `createdAt` (LocalDateTime), `updatedAt` (LocalDateTime)
+  - [ ] 2.8 Add `@Column` annotation on username: `@Column(unique = true, nullable = false, length = 50)`
+  - [ ] 2.9 Add `@Column` annotation on email: `@Column(unique = true, nullable = false, length = 100)`
+  - [ ] 2.10 Add `@Column` annotation on password: `@Column(nullable = false, length = 255)`
+  - [ ] 2.11 Add `@Column` annotations on timestamps: `@Column(name = "created_at")` and `@Column(name = "updated_at")`
+  - [ ] 2.12 Add validation annotations: `@NotBlank` on username and email, `@Email` on email, `@Size` constraints
+  - [ ] 2.13 Add `@PrePersist` method to set `createdAt` and `updatedAt` to current timestamp
+  - [ ] 2.14 Add `@PreUpdate` method to update `updatedAt` to current timestamp
+  - [ ] 2.15 Generate getters and setters for new fields (username, email, password, createdAt, updatedAt)
+  - [ ] 2.16 Update existing constructors or add new constructors that accept authentication parameters
+  - [ ] 2.17 Create `ManagerRegistrationDto.java` in dto package
+  - [ ] 2.18 Add fields to ManagerRegistrationDto: username, email, password, confirmPassword
+  - [ ] 2.19 Add validation annotations: `@NotBlank`, `@Email`, `@Size(min=8)` for password, `@Size(min=3, max=50)` for username
+  - [ ] 2.20 Generate getters and setters for ManagerRegistrationDto
+  - [ ] 2.21 Create `ManagerLoginDto.java` in dto package
+  - [ ] 2.22 Add fields to ManagerLoginDto: email, password
+  - [ ] 2.23 Add validation annotations: `@NotBlank`, `@Email`
+  - [ ] 2.24 Generate getters and setters for `ManagerLoginDtontication-system.md`
 
 - [ ] 3.0 Implement Manager Repository Layer
   - [ ] 3.1 Create `ManagerRepository.java` interface in repository package
-  - [ ] 3.2 Extend `JpaRepository<Manager, Long>`
+  - [ ] 3.2 Extend `JpaRepository<Manager, Long>` (Note: Long type matches updated Employee id)
   - [ ] 3.3 Add custom query method: `Optional<Manager> findByEmail(String email);`
   - [ ] 3.4 Add custom query method: `Optional<Manager> findByUsername(String username);`
   - [ ] 3.5 Add custom query method: `boolean existsByEmail(String email);`

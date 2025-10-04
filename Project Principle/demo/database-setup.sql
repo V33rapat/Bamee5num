@@ -49,7 +49,7 @@ CREATE TABLE IF NOT EXISTS cart_items (
 
 -- Create employees table (base table for Employee entity with JOINED inheritance)
 CREATE TABLE IF NOT EXISTS employees (
-    id INT PRIMARY KEY,
+    id BIGINT PRIMARY KEY,
     name VARCHAR(100) NOT NULL,
     position VARCHAR(50) NOT NULL,
     INDEX idx_position (position)
@@ -57,8 +57,15 @@ CREATE TABLE IF NOT EXISTS employees (
 
 -- Create managers table (extends employees with JOINED inheritance strategy)
 CREATE TABLE IF NOT EXISTS managers (
-    id INT PRIMARY KEY,
-    FOREIGN KEY (id) REFERENCES employees(id) ON DELETE CASCADE
+    id BIGINT PRIMARY KEY,
+    username VARCHAR(50) UNIQUE NOT NULL,
+    email VARCHAR(100) UNIQUE NOT NULL,
+    password VARCHAR(255) NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (id) REFERENCES employees(id) ON DELETE CASCADE,
+    INDEX idx_username (username),
+    INDEX idx_email (email)
 );
 
 -- Create menu_items table (for MenuItem entity)
@@ -84,7 +91,8 @@ INSERT INTO employees (id, name, position) VALUES
 (1002, 'Bob Employee', 'Server'),
 (1003, 'Charlie Employee', 'Cook');
 
-INSERT INTO managers (id) VALUES (1001);
+INSERT INTO managers (id, username, email, password, created_at, updated_at) VALUES 
+(1001, 'alice_manager', 'alice@restaurant.com', '$2a$10$example_hash_for_password', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 
 -- Insert sample menu items (optional)
 INSERT INTO menu_items (name, price, category, description, active) VALUES
@@ -95,3 +103,32 @@ INSERT INTO menu_items (name, price, category, description, active) VALUES
 ('Thai Iced Tea', 45.00, 'Beverage', 'Traditional Thai tea with milk', TRUE);
 
 SHOW TABLES;
+
+-- ============================================================================
+-- MIGRATION SCRIPTS FOR EXISTING DATABASES
+-- ============================================================================
+-- If you already have an existing database with the old schema, run these
+-- ALTER TABLE statements to migrate to the new schema with manager authentication
+-- ============================================================================
+
+-- Step 1: Modify employees table - change id from INT to BIGINT
+-- Note: This requires dropping and recreating the managers table first due to FK constraint
+-- ALTER TABLE employees MODIFY COLUMN id BIGINT;
+
+-- Step 2: Modify managers table - change id from INT to BIGINT and add authentication fields
+-- Note: If managers table exists with old schema, drop and recreate it
+-- DROP TABLE IF EXISTS managers;
+-- Then the CREATE TABLE statement above will handle the new structure
+
+-- Alternative: If you want to preserve existing manager data, use these ALTER statements:
+-- ALTER TABLE managers DROP FOREIGN KEY managers_ibfk_1; -- Drop the old FK first
+-- ALTER TABLE managers MODIFY COLUMN id BIGINT;
+-- ALTER TABLE managers ADD COLUMN username VARCHAR(50) UNIQUE NOT NULL AFTER id;
+-- ALTER TABLE managers ADD COLUMN email VARCHAR(100) UNIQUE NOT NULL AFTER username;
+-- ALTER TABLE managers ADD COLUMN password VARCHAR(255) NOT NULL AFTER email;
+-- ALTER TABLE managers ADD COLUMN created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP AFTER password;
+-- ALTER TABLE managers ADD COLUMN updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP AFTER created_at;
+-- ALTER TABLE managers ADD INDEX idx_username (username);
+-- ALTER TABLE managers ADD INDEX idx_email (email);
+-- ALTER TABLE managers ADD FOREIGN KEY (id) REFERENCES employees(id) ON DELETE CASCADE;
+
