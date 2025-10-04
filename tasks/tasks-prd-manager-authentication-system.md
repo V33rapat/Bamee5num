@@ -56,7 +56,7 @@
 
 ## Tasks
 
-- [ ] 1.0 Update Database Schema for Manager Authentication
+- [x] 1.0 Update Database Schema for Manager Authentication
   - [x] 1.1 Open `database-setup.sql` file
   - [x] 1.2 Locate the `employees` table definition - change `id` column type from `INT` to `BIGINT` for consistency
   - [x] 1.3 Update the `managers` table foreign key to reference `employees(id)` with BIGINT type
@@ -71,40 +71,40 @@
   - [x] 1.12 Verify the table structure using `DESCRIBE employees;` and `DESCRIBE managers;` in MySQL
   - [x] 1.13 Verify the foreign key relationship is intact between managers and employees
 
-- [ ] 2.0 Update Manager Entity and Create DTOs
-  - [ ] 2.1 Open `Employee.java` and change `id` field type from `int` to `Long` for consistency
-  - [ ] 2.2 Update Employee constructors and methods to use `Long` instead of `int`
-  - [ ] 2.3 Open `Manager.java` - KEEP the inheritance from Employee (extends Employee)
-  - [ ] 2.4 KEEP existing annotations: `@Entity`, `@Table(name = "managers")`, `@PrimaryKeyJoinColumn(name = "id")`
-  - [ ] 2.5 KEEP all existing business methods (addItem, removeItem, manageEmployees, viewSalesReport, SalesReport class)
-  - [ ] 2.6 Add new private fields for authentication: `username` (String), `email` (String), `password` (String)
-  - [ ] 2.7 Add new private fields for timestamps: `createdAt` (LocalDateTime), `updatedAt` (LocalDateTime)
-  - [ ] 2.8 Add `@Column` annotation on username: `@Column(unique = true, nullable = false, length = 50)`
-  - [ ] 2.9 Add `@Column` annotation on email: `@Column(unique = true, nullable = false, length = 100)`
-  - [ ] 2.10 Add `@Column` annotation on password: `@Column(nullable = false, length = 255)`
-  - [ ] 2.11 Add `@Column` annotations on timestamps: `@Column(name = "created_at")` and `@Column(name = "updated_at")`
-  - [ ] 2.12 Add validation annotations: `@NotBlank` on username and email, `@Email` on email, `@Size` constraints
-  - [ ] 2.13 Add `@PrePersist` method to set `createdAt` and `updatedAt` to current timestamp
-  - [ ] 2.14 Add `@PreUpdate` method to update `updatedAt` to current timestamp
-  - [ ] 2.15 Generate getters and setters for new fields (username, email, password, createdAt, updatedAt)
-  - [ ] 2.16 Update existing constructors or add new constructors that accept authentication parameters
-  - [ ] 2.17 Create `ManagerRegistrationDto.java` in dto package
-  - [ ] 2.18 Add fields to ManagerRegistrationDto: username, email, password, confirmPassword
-  - [ ] 2.19 Add validation annotations: `@NotBlank`, `@Email`, `@Size(min=8)` for password, `@Size(min=3, max=50)` for username
-  - [ ] 2.20 Generate getters and setters for ManagerRegistrationDto
-  - [ ] 2.21 Create `ManagerLoginDto.java` in dto package
-  - [ ] 2.22 Add fields to ManagerLoginDto: email, password
-  - [ ] 2.23 Add validation annotations: `@NotBlank`, `@Email`
-  - [ ] 2.24 Generate getters and setters for `ManagerLoginDtontication-system.md`
+- [x] 2.0 Update Manager Entity and Create DTOs
+  - [x] 2.1 Open `Employee.java` and change `id` field type from `int` to `Long` for consistency
+  - [x] 2.2 Update Employee constructors and methods to use `Long` instead of `int`
+  - [x] 2.3 Open `Manager.java` - KEEP the inheritance from Employee (extends Employee)
+  - [x] 2.4 KEEP existing annotations: `@Entity`, `@Table(name = "managers")`, `@PrimaryKeyJoinColumn(name = "id")`
+  - [x] 2.5 KEEP all existing business methods (addItem, removeItem, manageEmployees, viewSalesReport, SalesReport class)
+  - [x] 2.6 Add new private fields for authentication: `username` (String), `email` (String), `password` (String)
+  - [x] 2.7 Add new private fields for timestamps: `createdAt` (LocalDateTime), `updatedAt` (LocalDateTime)
+  - [x] 2.8 Add `@Column` annotation on username: `@Column(unique = true, nullable = false, length = 50)`
+  - [x] 2.9 Add `@Column` annotation on email: `@Column(unique = true, nullable = false, length = 100)`
+  - [x] 2.10 Add `@Column` annotation on password: `@Column(nullable = false, length = 255)`
+  - [x] 2.11 Add `@Column` annotations on timestamps: `@Column(name = "created_at")` and `@Column(name = "updated_at")`
+  - [x] 2.12 Add validation annotations: `@NotBlank` on username and email, `@Email` on email, `@Size` constraints
+  - [x] 2.13 Add `@PrePersist` method to set `createdAt` and `updatedAt` to current timestamp
+  - [x] 2.14 Add `@PreUpdate` method to update `updatedAt` to current timestamp
+  - [x] 2.15 Generate getters and setters for new fields (username, email, password, createdAt, updatedAt)
+  - [x] 2.16 Update existing constructors or add new constructors that accept authentication parameters
+  - [x] 2.17 Create `ManagerRegistrationDto.java` in dto package
+  - [x] 2.18 Add fields to ManagerRegistrationDto: username, email, password, confirmPassword
+  - [x] 2.19 Add validation annotations: `@NotBlank`, `@Email`, `@Size(min=8)` for password, `@Size(min=3, max=50)` for username
+  - [x] 2.20 Generate getters and setters for ManagerRegistrationDto
+  - [x] 2.21 Create `ManagerLoginDto.java` in dto package
+  - [x] 2.22 Add fields to ManagerLoginDto: email, password
+  - [x] 2.23 Add validation annotations: `@NotBlank`, `@Email`
+  - [x] 2.24 Generate getters and setters for `ManagerLoginDto`
 
-- [ ] 3.0 Implement Manager Repository Layer
-  - [ ] 3.1 Create `ManagerRepository.java` interface in repository package
-  - [ ] 3.2 Extend `JpaRepository<Manager, Long>` (Note: Long type matches updated Employee id)
-  - [ ] 3.3 Add custom query method: `Optional<Manager> findByEmail(String email);`
-  - [ ] 3.4 Add custom query method: `Optional<Manager> findByUsername(String username);`
-  - [ ] 3.5 Add custom query method: `boolean existsByEmail(String email);`
-  - [ ] 3.6 Add custom query method: `boolean existsByUsername(String username);`
-  - [ ] 3.7 Add `@Repository` annotation to the interface (optional but recommended)
+- [x] 3.0 Implement Manager Repository Layer
+  - [x] 3.1 Create `ManagerRepository.java` interface in repository package
+  - [x] 3.2 Extend `JpaRepository<Manager, Long>` (Note: Long type matches updated Employee id)
+  - [x] 3.3 Add custom query method: `Optional<Manager> findByEmail(String email);`
+  - [x] 3.4 Add custom query method: `Optional<Manager> findByUsername(String username);`
+  - [x] 3.5 Add custom query method: `boolean existsByEmail(String email);`
+  - [x] 3.6 Add custom query method: `boolean existsByUsername(String username);`
+  - [x] 3.7 Add `@Repository` annotation to the interface (optional but recommended)
 
 - [ ] 4.0 Implement Manager Service Layer
   - [ ] 4.1 Create `ManagerService.java` class in service package
