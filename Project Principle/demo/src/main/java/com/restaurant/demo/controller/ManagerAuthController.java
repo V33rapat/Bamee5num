@@ -184,7 +184,7 @@ public class ManagerAuthController {
     }
 
     /**
-     * Logout manager and invalidate session
+     * Logout manager and invalidate session (GET method for direct access)
      * 
      * @param session HTTP session
      * @return Redirect to login page
@@ -192,6 +192,23 @@ public class ManagerAuthController {
     @GetMapping("/logout")
     public String logout(HttpSession session) {
         logger.info("Manager logout - sessionId: {}", session.getId());
+        
+        // Invalidate session
+        session.invalidate();
+        
+        // Redirect to login page
+        return "redirect:/manager/login";
+    }
+
+    /**
+     * Logout manager and invalidate session (POST method for form submission)
+     * 
+     * @param session HTTP session
+     * @return Redirect to login page
+     */
+    @PostMapping("/logout")
+    public String logoutPost(HttpSession session) {
+        logger.info("Manager logout (POST) - sessionId: {}", session.getId());
         
         // Invalidate session
         session.invalidate();

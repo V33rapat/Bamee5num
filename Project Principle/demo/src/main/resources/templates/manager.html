@@ -13,9 +13,14 @@
         <div id="navButtons" class="space-x-4">
             <a href="/" class="text-gray-700 hover:text-orange-600">เข้าสู่ระบบ</a>
         </div>
-        <div id="userNav" class="hidden flex items-center space-x-4">
-            <span id="welcomeText" class="font-semibold text-gray-700"></span>
-            <button id="logoutBtn" class="text-red-500 hover:text-red-700">Logout</button>
+        <div id="userNav" class="flex items-center space-x-4">
+            <span id="welcomeText" class="font-semibold text-gray-700">
+                สวัสดี, <span th:text="${session.managerUsername != null ? session.managerUsername : 'Manager'}">Manager</span>
+            </span>
+            <form th:action="@{/manager/logout}" method="post" style="margin: 0;">
+                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+                <button type="submit" class="text-red-500 hover:text-red-700 font-medium">Logout</button>
+            </form>
         </div>
     </header>
 

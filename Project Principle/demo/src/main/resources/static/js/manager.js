@@ -5,16 +5,16 @@ let employeeNameInput;
 let employeePositionInput;
 
 export async function setupManagerDashboard() {
-    const user = JSON.parse(localStorage.getItem("currentUser"));
-    if (!user || user.role !== "manager") {
-        alert("กรุณาเข้าสู่ระบบ!");
-        window.location.href = "/";
-        return;
+    // Check if manager is authenticated via server session
+    // If not authenticated, user would be redirected by Spring Security or controller
+    // We can verify by checking if the welcome text has a username
+    const welcomeSpan = document.querySelector('#welcomeText span[th\\:text]');
+    
+    // Hide the nav buttons since we're authenticated
+    const navButtons = document.getElementById("navButtons");
+    if (navButtons) {
+        navButtons.classList.add("hidden");
     }
-
-    document.getElementById("welcomeText").textContent = `สวัสดี, ${user.fullName}`;
-    document.getElementById("userNav").classList.remove("hidden");
-    document.getElementById("navButtons").classList.add("hidden");
 
     document.getElementById('addMenuBtn').addEventListener('click', showAddMenuModal);
 
@@ -22,11 +22,6 @@ export async function setupManagerDashboard() {
     if (addEmployeeBtn) {
         addEmployeeBtn.addEventListener('click', () => openEmployeeDialog());
     }
-
-    document.getElementById("logoutBtn").addEventListener("click", () => {
-        localStorage.removeItem("currentUser");
-        window.location.href = "/";
-    });
 
     await loadMenuItems();
     await loadEmployeeManagement();

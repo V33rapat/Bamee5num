@@ -131,7 +131,13 @@ public class PageController {
     }
 
     @GetMapping("/manager")
-    public String manager() {
+    public String manager(HttpSession session) {
+        // Check if manager is authenticated via session
+        Boolean isAuthenticated = (Boolean) session.getAttribute("managerAuthenticated");
+        if (isAuthenticated == null || !isAuthenticated) {
+            // If not authenticated, redirect to login page
+            return "redirect:/manager/login";
+        }
         return "manager";
     }
 

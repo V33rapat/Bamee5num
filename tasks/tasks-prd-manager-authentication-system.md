@@ -238,20 +238,20 @@
   - [x] 8.24 Validate email format before submission
   - [x] 8.25 Ensure password field is not empty before submission
 
-- [ ] 9.0 Update Manager Dashboard with Logout Functionality
-  - [ ] 9.1 Open `manager.html` file
-  - [ ] 9.2 Locate the header or navigation section
-  - [ ] 9.3 Add welcome message displaying manager username from session: `<span th:text="${session.managerUsername}"></span>`
-  - [ ] 9.4 Create logout button or link
-  - [ ] 9.5 Add logout form: `<form th:action="@{/manager/logout}" method="post">`
-  - [ ] 9.6 Add CSRF token to logout form
-  - [ ] 9.7 Add submit button: `<button type="submit">Logout</button>`
-  - [ ] 9.8 Style the logout button to match the dashboard design
-  - [ ] 9.9 Position logout button in top-right corner or header area
-  - [ ] 9.10 Open `manager.js` file
-  - [ ] 9.11 Add session check on page load to verify manager is authenticated
-  - [ ] 9.12 If session check fails, redirect to `/manager/login`
-  - [ ] 9.13 Test that logout clears session and redirects properly
+- [x] 9.0 Update Manager Dashboard with Logout Functionality
+  - [x] 9.1 Open `manager.html` file
+  - [x] 9.2 Locate the header or navigation section
+  - [x] 9.3 Add welcome message displaying manager username from session: `<span th:text="${session.managerUsername}"></span>`
+  - [x] 9.4 Create logout button or link
+  - [x] 9.5 Add logout form: `<form th:action="@{/manager/logout}" method="post">`
+  - [x] 9.6 Add CSRF token to logout form
+  - [x] 9.7 Add submit button: `<button type="submit">Logout</button>`
+  - [x] 9.8 Style the logout button to match the dashboard design
+  - [x] 9.9 Position logout button in top-right corner or header area
+  - [x] 9.10 Open `manager.js` file
+  - [x] 9.11 Add session check on page load to verify manager is authenticated
+  - [x] 9.12 If session check fails, redirect to `/manager/login`
+  - [x] 9.13 Test that logout clears session and redirects properly
 
 - [ ] 10.0 Implement Custom Exception Handlers for Manager Authentication
   - [ ] 10.1 Create `ManagerAlreadyExistsException.java` in exception package
