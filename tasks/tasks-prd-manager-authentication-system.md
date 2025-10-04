@@ -14,7 +14,7 @@
 - `src/main/java/com/restaurant/demo/repository/ManagerRepository.java` - **NEW** - Repository interface with custom query methods (findByEmail, existsByEmail, existsByUsername)
 
 ### Backend - Service
-- `src/main/java/com/restaurant/demo/service/ManagerService.java` - **NEW** - Service layer for manager authentication logic (registration, login, password hashing)
+- `src/main/java/com/restaurant/demo/service/ManagerService.java` - **CREATED** - Service layer for manager authentication logic (registration, login, password hashing)
 
 ### Backend - Controller
 - `src/main/java/com/restaurant/demo/controller/ManagerAuthController.java` - **NEW** - Controller for manager registration and login endpoints
@@ -23,8 +23,9 @@
 - `src/main/java/com/restaurant/demo/config/SecurityConfig.java` - Update security configuration to handle manager authentication routes separately
 
 ### Backend - Exception Handling
-- `src/main/java/com/restaurant/demo/exception/ManagerAlreadyExistsException.java` - **NEW** - Custom exception for duplicate manager credentials
-- `src/main/java/com/restaurant/demo/exception/ManagerNotFoundException.java` - **NEW** - Custom exception for manager not found scenarios
+- `src/main/java/com/restaurant/demo/exception/ManagerAlreadyExistsException.java` - **CREATED** - Custom exception for duplicate manager credentials
+- `src/main/java/com/restaurant/demo/exception/ManagerNotFoundException.java` - **CREATED** - Custom exception for manager not found scenarios
+- `src/main/java/com/restaurant/demo/exception/InvalidManagerCredentialsException.java` - **CREATED** - Custom exception for invalid manager credentials during authentication
 
 ### Frontend - Templates
 - `src/main/resources/templates/manager-register.html` - **NEW** - Manager registration page
@@ -106,26 +107,26 @@
   - [x] 3.6 Add custom query method: `boolean existsByUsername(String username);`
   - [x] 3.7 Add `@Repository` annotation to the interface (optional but recommended)
 
-- [ ] 4.0 Implement Manager Service Layer
-  - [ ] 4.1 Create `ManagerService.java` class in service package
-  - [ ] 4.2 Add `@Service` and `@Transactional` annotations
-  - [ ] 4.3 Inject `ManagerRepository` using `@Autowired` or constructor injection
-  - [ ] 4.4 Inject `PasswordEncoder` using `@Autowired` or constructor injection
-  - [ ] 4.5 Create `registerManager(ManagerRegistrationDto dto)` method
-  - [ ] 4.6 In registerManager: Check if email already exists using `existsByEmail()`, throw ManagerAlreadyExistsException if true
-  - [ ] 4.7 In registerManager: Check if username already exists using `existsByUsername()`, throw ManagerAlreadyExistsException if true
-  - [ ] 4.8 In registerManager: Validate password and confirmPassword match, throw exception if not
-  - [ ] 4.9 In registerManager: Create new Manager entity, set username, email
-  - [ ] 4.10 In registerManager: Hash password using `passwordEncoder.encode(dto.getPassword())`
-  - [ ] 4.11 In registerManager: Save manager to database using repository.save()
-  - [ ] 4.12 In registerManager: Return saved manager or success message
-  - [ ] 4.13 Create `authenticateManager(String email, String password)` method
-  - [ ] 4.14 In authenticateManager: Find manager by email using `findByEmail()`
-  - [ ] 4.15 In authenticateManager: If not found, return Optional.empty() or throw exception
-  - [ ] 4.16 In authenticateManager: Verify password using `passwordEncoder.matches(password, manager.getPassword())`
-  - [ ] 4.17 In authenticateManager: Return Optional<Manager> if authentication successful
-  - [ ] 4.18 Create `getManagerByEmail(String email)` method that returns Optional<Manager>
-  - [ ] 4.19 Create `getManagerById(Long id)` method that returns Optional<Manager>
+- [x] 4.0 Implement Manager Service Layer
+  - [x] 4.1 Create `ManagerService.java` class in service package
+  - [x] 4.2 Add `@Service` and `@Transactional` annotations
+  - [x] 4.3 Inject `ManagerRepository` using `@Autowired` or constructor injection
+  - [x] 4.4 Inject `PasswordEncoder` using `@Autowired` or constructor injection
+  - [x] 4.5 Create `registerManager(ManagerRegistrationDto dto)` method
+  - [x] 4.6 In registerManager: Check if email already exists using `existsByEmail()`, throw ManagerAlreadyExistsException if true
+  - [x] 4.7 In registerManager: Check if username already exists using `existsByUsername()`, throw ManagerAlreadyExistsException if true
+  - [x] 4.8 In registerManager: Validate password and confirmPassword match, throw exception if not
+  - [x] 4.9 In registerManager: Create new Manager entity, set username, email
+  - [x] 4.10 In registerManager: Hash password using `passwordEncoder.encode(dto.getPassword())`
+  - [x] 4.11 In registerManager: Save manager to database using repository.save()
+  - [x] 4.12 In registerManager: Return saved manager or success message
+  - [x] 4.13 Create `authenticateManager(String email, String password)` method
+  - [x] 4.14 In authenticateManager: Find manager by email using `findByEmail()`
+  - [x] 4.15 In authenticateManager: If not found, return Optional.empty() or throw exception
+  - [x] 4.16 In authenticateManager: Verify password using `passwordEncoder.matches(password, manager.getPassword())`
+  - [x] 4.17 In authenticateManager: Return Optional<Manager> if authentication successful
+  - [x] 4.18 Create `getManagerByEmail(String email)` method that returns Optional<Manager>
+  - [x] 4.19 Create `getManagerById(Long id)` method that returns Optional<Manager>
 
 - [ ] 5.0 Create Manager Authentication Controller
   - [ ] 5.1 Create `ManagerAuthController.java` class in controller package

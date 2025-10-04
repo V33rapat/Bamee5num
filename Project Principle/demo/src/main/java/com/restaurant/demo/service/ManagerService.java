@@ -1,0 +1,112 @@
+package com.restaurant.demo.service;
+
+import com.restaurant.demo.dto.ManagerRegistrationDto;
+import com.restaurant.demo.exception.InvalidManagerCredentialsException;
+import com.restaurant.demo.exception.ManagerAlreadyExistsException;
+import com.restaurant.demo.model.Manager;
+import com.restaurant.demo.repository.ManagerRepository;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.Optional;
+
+@Service
+@Transactional
+public class ManagerService {
+
+    private final ManagerRepository managerRepository;
+    private final PasswordEncoder passwordEncoder;
+
+    public ManagerService(ManagerRepository managerRepository, PasswordEncoder passwordEncoder) {
+        this.managerRepository = managerRepository;
+        this.passwordEncoder = passwordEncoder;
+    }
+
+    /**
+     * Register a new manager with validation
+     * 
+     * @param dto ManagerRegistrationDto containing registration details
+     * @return Manager the saved manager entity
+     * @throws ManagerAlreadyExistsException if email or username already exists
+     * @throws IllegalArgumentException if passwords don't match
+     */
+    public Manager registerManager(ManagerRegistrationDto dto) {
+        // Check if email already exists
+        if (managerRepository.existsByEmail(dto.getEmail())) {
+            throw ManagerAlreadyExistsException.withEmail(dto.getEmail());
+        }
+
+        // Check if username already exists
+        if (managerRepository.existsByUsername(dto.getUsername())) {
+            throw ManagerAlreadyExistsException.withUsername(dto.getUsername());
+        }
+
+        // Validate password and confirmPassword match
+        if (!dto.getPassword().equals(dto.getConfirmPassword())) {
+            throw new IllegalArgumentException("Password and confirm password do not match");
+        }
+
+        // Create new Manager entity
+        Manager manager = new Manager();
+        manager.setUsername(dto.getUsername());
+        manager.setEmail(dto.getEmail());
+        
+        // Hash password using passwordEncoder
+        String hashedPassword = passwordEncoder.encode(dto.getPassword());
+        manager.setPassword(hashedPassword);
+
+        // Save manager to database
+        Manager savedManager = managerRepository.save(manager);
+
+        return savedManager;
+    }
+
+    /**
+     * Authenticate manager with email and password
+     * 
+     * @param email Manager's email
+     * @param password Manager's plain text password
+     * @return Optional<Manager> containing the manager if authentication successful
+     * @throws InvalidManagerCredentialsException if credentials are invalid
+     */
+    public Optional<Manager> authenticateManager(String email, String password) {
+        // Find manager by email
+        Optional<Manager> managerOpt = managerRepository.findByEmail(email);
+
+        // If not found, return empty Optional
+        if (managerOpt.isEmpty()) {
+            throw InvalidManagerCredentialsException.forLogin();
+        }
+
+        Manager manager = managerOpt.get();
+
+        // Verify password using passwordEncoder
+        if (!passwordEncoder.matches(password, manager.getPassword())) {
+            throw InvalidManagerCredentialsException.forLogin();
+        }
+
+        // Return Optional<Manager> if authentication successful
+        return Optional.of(manager);
+    }
+
+    /**
+     * Get manager by email
+     * 
+     * @param email Manager's email
+     * @return Optional<Manager> containing the manager if found
+     */
+    public Optional<Manager> getManagerByEmail(String email) {
+        return managerRepository.findByEmail(email);
+    }
+
+    /**
+     * Get manager by ID
+     * 
+     * @param id Manager's ID
+     * @return Optional<Manager> containing the manager if found
+     */
+    public Optional<Manager> getManagerById(Long id) {
+        return managerRepository.findById(id);
+    }
+}
