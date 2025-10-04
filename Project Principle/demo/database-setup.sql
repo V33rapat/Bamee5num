@@ -13,6 +13,7 @@ ALTER DATABASE restaurant_db CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 DROP TABLE IF EXISTS managers;
 DROP TABLE IF EXISTS employees;
 DROP TABLE IF EXISTS menu_items;
+DROP TABLE IF EXISTS menu_item;
 DROP TABLE IF EXISTS cart_items;
 DROP TABLE IF EXISTS customers;
 DROP TABLE IF EXISTS cart_item;
