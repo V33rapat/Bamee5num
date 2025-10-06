@@ -7,6 +7,10 @@ import jakarta.validation.constraints.Positive;
 
 public class OrderStatusUpdateDto {
 
+    @NotNull(message = "Order ID is required")
+    @Positive(message = "Order ID must be a positive number")
+    private Long orderId;  // ✅ เพิ่ม orderId
+
     @NotNull(message = "Customer ID is required")
     @Positive(message = "Customer ID must be a positive number")
     private Long customerId;
@@ -20,12 +24,21 @@ public class OrderStatusUpdateDto {
     public OrderStatusUpdateDto() {}
 
     // Constructor with all fields
-    public OrderStatusUpdateDto(Long customerId, String newStatus) {
+    public OrderStatusUpdateDto(Long orderId, Long customerId, String newStatus) {
+        this.orderId = orderId;
         this.customerId = customerId;
         this.newStatus = newStatus;
     }
 
     // Getters and Setters
+    public Long getOrderId() {
+        return orderId;
+    }
+
+    public void setOrderId(Long orderId) {
+        this.orderId = orderId;
+    }
+
     public Long getCustomerId() {
         return customerId;
     }

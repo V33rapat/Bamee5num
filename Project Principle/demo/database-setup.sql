@@ -82,6 +82,63 @@ CREATE TABLE IF NOT EXISTS menu_items (
     INDEX idx_active (active),
     INDEX idx_category (category)
 );
+-- ============================================================================
+-- ORDER MANAGEMENT SYSTEM TABLES
+-- ============================================================================
+
+-- Drop existing tables if they exist (order matters)
+DROP TABLE IF EXISTS order_items;
+DROP TABLE IF EXISTS orders;
+
+-- Create orders table
+CREATE TABLE IF NOT EXISTS orders (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    customer_id BIGINT NOT NULL,
+    employee_id BIGINT NULL,
+    total_amount DECIMAL(10, 2) NOT NULL CHECK (total_amount >= 0),
+    status VARCHAR(20) NOT NULL DEFAULT 'Pending'
+        CHECK (status IN ('Pending', 'In Progress', 'Completed', 'Cancelled')),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    
+    FOREIGN KEY (customer_id) REFERENCES customers(id) ON DELETE CASCADE,
+    FOREIGN KEY (employee_id) REFERENCES employees(id) ON DELETE SET NULL,
+    
+    INDEX idx_customer_id (customer_id),
+    INDEX idx_employee_id (employee_id),
+    INDEX idx_status (status),
+    INDEX idx_created_at (created_at)
+);
+
+-- Create order_items table
+CREATE TABLE IF NOT EXISTS order_items (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    order_id BIGINT NOT NULL,
+    item_name VARCHAR(100) NOT NULL,
+    item_price DECIMAL(10, 2) NOT NULL CHECK (item_price >= 0.01 AND item_price <= 9999.99),
+    quantity INT NOT NULL DEFAULT 1 CHECK (quantity >= 1 AND quantity <= 100),
+    total DECIMAL(10, 2) NOT NULL CHECK (total >= 0),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    
+    FOREIGN KEY (order_id) REFERENCES orders(id) ON DELETE CASCADE,
+    
+    INDEX idx_order_id (order_id),
+    INDEX idx_created_at (created_at)
+);
+
+-- ============================================================================
+-- SAMPLE INSERTION FOR TESTING (Optional)
+-- ============================================================================
+-- Sample: create a test order for customer 1
+-- INSERT INTO orders (customer_id, total_amount, status) VALUES (1, 130.00, 'Pending');
+-- SET @order_id = LAST_INSERT_ID();
+-- INSERT INTO order_items (order_id, item_name, item_price, quantity, total)
+-- VALUES 
+-- (@order_id, 'กะเพราเนื้อหมา', 50, 1, 50),
+-- (@order_id, 'กะเพราเนื้อแมว', 40, 2, 80);
+
+
 
 -- Insert some sample data for testing (optional)
 -- INSERT INTO customers (name, username, email, phone, password_hash) VALUES
