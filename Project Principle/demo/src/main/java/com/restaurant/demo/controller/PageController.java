@@ -130,6 +130,11 @@ public class PageController {
         return "employee";
     }
 
+    @GetMapping("/employee-login")
+    public String employeeLogin() {
+        return "employee-login";
+    }
+
     @GetMapping("/manager")
     public String manager(HttpSession session) {
         // Check if manager is authenticated via session

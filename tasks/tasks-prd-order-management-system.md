@@ -27,10 +27,10 @@ Generated from: `prd-order-management-system.md`
 - `Project Principle/demo/src/main/java/com/restaurant/demo/service/CartService.java` - Existing service for cart management (no changes needed)
 
 ### Backend - Controllers
-- `Project Principle/demo/src/main/java/com/restaurant/demo/controller/OrderController.java` - *NEW* - REST endpoints for order operations
-- `Project Principle/demo/src/main/java/com/restaurant/demo/controller/EmployeeController.java` - *NEW* - REST endpoints for employee operations
-- `Project Principle/demo/src/main/java/com/restaurant/demo/controller/ManagerApiController.java` - Add employee registration endpoint
-- `Project Principle/demo/src/main/java/com/restaurant/demo/controller/PageController.java` - Add employee login page route
+- `Project Principle/demo/src/main/java/com/restaurant/demo/controller/OrderController.java` - *CREATED* - REST endpoints for order operations (place order, get pending orders)
+- `Project Principle/demo/src/main/java/com/restaurant/demo/controller/EmployeeController.java` - *CREATED* - REST endpoints for employee operations (login, order management, status updates)
+- `Project Principle/demo/src/main/java/com/restaurant/demo/controller/ManagerApiController.java` - *UPDATED* - Added employee registration endpoint with role-based access control
+- `Project Principle/demo/src/main/java/com/restaurant/demo/controller/PageController.java` - *UPDATED* - Added employee login page route
 
 ### Frontend - HTML Templates
 - `Project Principle/demo/src/main/resources/templates/customer-orders.html` - *NEW* - Customer pending orders view page
@@ -102,19 +102,19 @@ Generated from: `prd-order-management-system.md`
   - [x] 5.8 Update CartService to integrate with OrderService for order placement
   - [x] 5.9 Add business logic validation for status transitions (Pending→In Progress→Finish, or →Cancelled)
   
-- [ ] 6.0 Backend - Controller Layer Development
-  - [ ] 6.1 Create `OrderController.java` with @RestController and @RequestMapping("/api/orders")
-  - [ ] 6.2 Add POST `/api/customers/{customerId}/place-order` endpoint to place order
-  - [ ] 6.3 Add GET `/api/customers/{customerId}/pending-orders` endpoint for customer pending orders
-  - [ ] 6.4 Create `EmployeeController.java` with @RestController and @RequestMapping("/api/employees")
-  - [ ] 6.5 Add POST `/api/employees/login` endpoint for employee authentication
-  - [ ] 6.6 Add GET `/api/employees/orders` endpoint with optional status query parameter
-  - [ ] 6.7 Add GET `/api/employees/orders/{orderId}` endpoint for specific order details
-  - [ ] 6.8 Add PUT `/api/employees/orders/{orderId}/status` endpoint to update order status
-  - [ ] 6.9 Add GET `/api/employees/orders/pending/count` endpoint for notification polling
-  - [ ] 6.10 Add POST `/api/managers/employees` endpoint in ManagerApiController for employee registration
-  - [ ] 6.11 Add proper CORS configuration and session management to all new endpoints
-  - [ ] 6.12 Implement role-based access control (employees cannot access manager endpoints)
+- [x] 6.0 Backend - Controller Layer Development
+  - [x] 6.1 Create `OrderController.java` with @RestController and @RequestMapping("/api/orders")
+  - [x] 6.2 Add POST `/api/customers/{customerId}/place-order` endpoint to place order
+  - [x] 6.3 Add GET `/api/customers/{customerId}/pending-orders` endpoint for customer pending orders
+  - [x] 6.4 Create `EmployeeController.java` with @RestController and @RequestMapping("/api/employees")
+  - [x] 6.5 Add POST `/api/employees/login` endpoint for employee authentication
+  - [x] 6.6 Add GET `/api/employees/orders` endpoint with optional status query parameter
+  - [x] 6.7 Add GET `/api/employees/orders/{orderId}` endpoint for specific order details
+  - [x] 6.8 Add PUT `/api/employees/orders/{orderId}/status` endpoint to update order status
+  - [x] 6.9 Add GET `/api/employees/orders/pending/count` endpoint for notification polling
+  - [x] 6.10 Add POST `/api/managers/employees` endpoint in ManagerApiController for employee registration
+  - [x] 6.11 Add proper CORS configuration and session management to all new endpoints
+  - [x] 6.12 Implement role-based access control (employees cannot access manager endpoints)
   
 - [ ] 7.0 Frontend - Customer Side Features
   - [ ] 7.1 Create `customer-orders.html` template with Thymeleaf structure
