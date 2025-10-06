@@ -11,6 +11,7 @@ import com.restaurant.demo.model.User;
 import com.restaurant.demo.service.CartService;
 import com.restaurant.demo.service.ManagerService;
 import com.restaurant.demo.service.MenuItemService;
+import com.restaurant.demo.service.OrderService;
 import com.restaurant.demo.service.employee.EmployeeService;
 import com.restaurant.demo.service.employee.dto.EmployeeCredentials;
 import com.restaurant.demo.service.employee.dto.EmployeeRegistrationRequest;
@@ -32,7 +33,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @RestController
@@ -47,19 +50,22 @@ public class ManagerApiController {
     private final SalesReportService salesReportService;
     private final MenuItemService menuItemService;
     private final ManagerService managerService;
+    private final OrderService orderService;
 
     public ManagerApiController(ManagerContext managerContext,
                                 EmployeeService employeeService,
                                 CartService cartService,
                                 SalesReportService salesReportService,
                                 MenuItemService menuItemService,
-                                ManagerService managerService) {
+                                ManagerService managerService,
+                                OrderService orderService) {
         this.managerContext = managerContext;
         this.employeeService = employeeService;
         this.cartService = cartService;
         this.salesReportService = salesReportService;
         this.menuItemService = menuItemService;
         this.managerService = managerService;
+        this.orderService = orderService;
     }
 
     /**
@@ -247,5 +253,40 @@ public class ManagerApiController {
         
         menuItemService.deleteMenuItem(id);
         return ResponseEntity.noContent().build();
+    }
+
+    // Task 8.9: GET /api/managers/order-stats - Get order statistics for manager dashboard
+    @GetMapping("/managers/order-stats")
+    public ResponseEntity<?> getOrderStats(HttpSession session) {
+        // Role-based access control: Only managers can access order stats
+        if (!isManager(session)) {
+            Map<String, String> errorResponse = new HashMap<>();
+            errorResponse.put("error", "Unauthorized. Only managers can access order statistics.");
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(errorResponse);
+        }
+
+        try {
+            Long pendingCount = orderService.getOrderCountByStatus("Pending");
+            Long inProgressCount = orderService.getOrderCountByStatus("In Progress");
+            Long finishCount = orderService.getOrderCountByStatus("Finish");
+            Long cancelledCount = orderService.getOrderCountByStatus("Cancelled");
+
+            Map<String, Object> stats = new HashMap<>();
+            stats.put("pendingOrders", pendingCount != null ? pendingCount : 0);
+            stats.put("inProgressOrders", inProgressCount != null ? inProgressCount : 0);
+            stats.put("completedOrders", finishCount != null ? finishCount : 0);
+            stats.put("cancelledOrders", cancelledCount != null ? cancelledCount : 0);
+            stats.put("totalOrders", 
+                (pendingCount != null ? pendingCount : 0) + 
+                (inProgressCount != null ? inProgressCount : 0) + 
+                (finishCount != null ? finishCount : 0) + 
+                (cancelledCount != null ? cancelledCount : 0));
+
+            return ResponseEntity.ok(stats);
+        } catch (Exception e) {
+            Map<String, String> errorResponse = new HashMap<>();
+            errorResponse.put("error", "Failed to fetch order statistics");
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
+        }
     }
 }

@@ -29,14 +29,14 @@ Generated from: `prd-order-management-system.md`
 ### Backend - Controllers
 - `Project Principle/demo/src/main/java/com/restaurant/demo/controller/OrderController.java` - *CREATED* - REST endpoints for order operations (place order, get pending orders)
 - `Project Principle/demo/src/main/java/com/restaurant/demo/controller/EmployeeController.java` - *CREATED* - REST endpoints for employee operations (login, order management, status updates)
-- `Project Principle/demo/src/main/java/com/restaurant/demo/controller/ManagerApiController.java` - *UPDATED* - Added employee registration endpoint with role-based access control
+- `Project Principle/demo/src/main/java/com/restaurant/demo/controller/ManagerApiController.java` - *UPDATED* - Added employee registration endpoint with role-based access control and order statistics endpoint for manager dashboard
 - `Project Principle/demo/src/main/java/com/restaurant/demo/controller/PageController.java` - *UPDATED* - Added employee login page route
 
 ### Frontend - HTML Templates
 - `Project Principle/demo/src/main/resources/templates/customer-orders.html` - *CREATED* - Customer pending orders view page
 - `Project Principle/demo/src/main/resources/templates/employee-orders.html` - *NEW* - Employee order management page
 - `Project Principle/demo/src/main/resources/templates/employee-login.html` - *NEW* - Employee login page
-- `Project Principle/demo/src/main/resources/templates/manager.html` - Modify to add employee registration UI
+- `Project Principle/demo/src/main/resources/templates/manager.html` - *UPDATED* - Modified to add employee registration form with username/password fields and order statistics display
 - `Project Principle/demo/src/main/resources/templates/employee.html` - Modify existing page for order management
 - `Project Principle/demo/src/main/resources/templates/customer.html` - *UPDATED* - Modified to add navigation link to pending orders and change button text
 
@@ -44,9 +44,8 @@ Generated from: `prd-order-management-system.md`
 - `Project Principle/demo/src/main/resources/static/js/customer-orders.js` - *CREATED* - Customer pending orders functionality with order display, grouping, and status badges
 - `Project Principle/demo/src/main/resources/static/js/employee-orders.js` - *NEW* - Employee order management functionality
 - `Project Principle/demo/src/main/resources/static/js/employee-auth.js` - *NEW* - Employee login functionality
-- `Project Principle/demo/src/main/resources/static/js/manager-employee-register.js` - *NEW* - Manager employee registration functionality
 - `Project Principle/demo/src/main/resources/static/js/customer.js` - *UPDATED* - Modified to change payment button to order button with place order API integration
-- `Project Principle/demo/src/main/resources/static/js/manager.js` - Modify to add employee registration UI handling
+- `Project Principle/demo/src/main/resources/static/js/manager.js` - *UPDATED* - Modified to add employee registration UI handling with username/password fields, validation, and order statistics display
 
 ### Database
 - `Project Principle/demo/database-setup.sql` - Add ALTER TABLE statements for status column and employee authentication fields
@@ -129,17 +128,17 @@ Generated from: `prd-order-management-system.md`
   - [x] 7.10 Clear cart UI after successful order placement
   - [x] 7.11 Add error handling for order placement failures
   
-- [ ] 8.0 Frontend - Manager Side Features
-  - [ ] 8.1 Create employee registration form section in `manager.html` or separate modal
-  - [ ] 8.2 Add input fields for name, position (dropdown), username, password
-  - [ ] 8.3 Create `manager-employee-register.js` to handle form submission
-  - [ ] 8.4 Implement client-side validation (required fields, username uniqueness check)
-  - [ ] 8.5 Call POST `/api/managers/employees` endpoint with form data
-  - [ ] 8.6 Display success message with generated credentials (if applicable)
-  - [ ] 8.7 Display error messages for duplicate username or validation failures
-  - [ ] 8.8 Add employee registration to manager dashboard navigation/tabs
-  - [ ] 8.9 Update manager statistics to show order counts (pending, completed)
-  - [ ] 8.10 Integrate employee registration with existing manager.js functionality
+- [x] 8.0 Frontend - Manager Side Features
+  - [x] 8.1 Create employee registration form section in `manager.html` or separate modal
+  - [x] 8.2 Add input fields for name, position (dropdown), username, password
+  - [x] 8.3 Create `manager-employee-register.js` to handle form submission
+  - [x] 8.4 Implement client-side validation (required fields, username uniqueness check)
+  - [x] 8.5 Call POST `/api/managers/employees` endpoint with form data
+  - [x] 8.6 Display success message with generated credentials (if applicable)
+  - [x] 8.7 Display error messages for duplicate username or validation failures
+  - [x] 8.8 Add employee registration to manager dashboard navigation/tabs
+  - [x] 8.9 Update manager statistics to show order counts (pending, completed)
+  - [x] 8.10 Integrate employee registration with existing manager.js functionality
   
 - [ ] 9.0 Frontend - Employee Side Features
   - [ ] 9.1 Create `employee-login.html` template with login form (username, password)
