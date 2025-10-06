@@ -1,5 +1,6 @@
 package com.restaurant.demo.service;
 
+import com.restaurant.demo.dto.CartItemDto;
 import com.restaurant.demo.model.CartItem;
 import com.restaurant.demo.model.Customer;
 import com.restaurant.demo.model.MenuItem;
@@ -8,10 +9,12 @@ import com.restaurant.demo.repository.CustomerRepository;
 import com.restaurant.demo.repository.MenuItemRepo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class CartService {
@@ -34,31 +37,13 @@ public class CartService {
                 .orElseThrow(() -> new RuntimeException("Customer not found with ID: " + customerId));
     }
 
-    // Public methods that accept customerId
     public CartItem addToCart(Long customerId, Long menuItemId, Integer quantity) {
-
-        // 1. ค้นหา Customer
         Customer customer = getCustomerById(customerId);
-
-        // 2. ค้นหา MenuItem ด้วย ID
         MenuItem menuItem = menuItemRepository.findById(menuItemId)
                 .orElseThrow(() -> new RuntimeException("Menu item not found with ID: " + menuItemId));
 
-        // *****************************************************************
-        // แก้ไข: แปลง double/Double (จาก menuItem.getPrice()) เป็น BigDecimal
-        // *****************************************************************
-
-        // **ตัวเลือกที่แนะนำ (แก้ไขตามภาพที่คุณพยายามทำ แต่ทำให้ถูกต้อง):**
-        // ใช้วิธีสร้าง BigDecimal จาก String เพื่อหลีกเลี่ยงความคลาดเคลื่อนของ Double
-        BigDecimal itemPrice;
-        try {
-            itemPrice = new BigDecimal(String.valueOf(menuItem.getPrice()));
-        } catch (NumberFormatException e) {
-            throw new RuntimeException("Invalid price format for menu item ID: " + menuItemId, e);
-        }
-
-        // 3. เรียกใช้ Method ตัวถัดไป
-        return addToCart(customer, menuItem.getName(), itemPrice, quantity.intValue());
+        BigDecimal itemPrice = BigDecimal.valueOf(menuItem.getPrice());
+        return addToCart(customer, menuItem.getName(), itemPrice, quantity);
     }
 
     public CartItem updateCartItemQuantity(Long cartItemId, Long customerId, Integer quantity) {
@@ -71,9 +56,11 @@ public class CartService {
         removeFromCart(cartItemId, customer);
     }
 
-    public List<CartItem> getCartItems(Long customerId) {
-        Customer customer = getCustomerById(customerId);
-        return getCartByCustomer(customer);
+    public List<CartItem> getCartByCustomer(Customer customer) {
+        if (customer == null) {
+            throw new RuntimeException("Customer authentication required");
+        }
+        return cartItemRepository.findByCustomer(customer);
     }
 
     public CartItem getCartItem(Long cartItemId, Long customerId) {
@@ -94,16 +81,17 @@ public class CartService {
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
     }
 
-    // Method for Manager features - get all cart items across all customers
     public List<CartItem> getAllCartItems() {
         return cartItemRepository.findAll();
     }
 
-    // Existing methods that work with Customer objects
-    public List<CartItem> getCartByCustomer(Customer customer) {
-        if (customer == null) {
-            throw new RuntimeException("Customer authentication required");
-        }
+    public List<CartItem> getCartItems(Long customerId) {
+        Customer customer = getCustomerById(customerId);
+        return cartItemRepository.findByCustomer(customer);
+    }
+
+    public List<CartItem> getCartByCustomerId(Long customerId) {
+        Customer customer = getCustomerById(customerId);
         return cartItemRepository.findByCustomer(customer);
     }
 
@@ -111,225 +99,111 @@ public class CartService {
         if (customer == null) {
             throw new RuntimeException("Customer authentication required");
         }
-
-        // Validate initial quantity
-        if (quantity < 1) {
-            throw new RuntimeException("Quantity must be at least 1");
-        }
-        if (quantity > 99) {
-            throw new RuntimeException("Quantity cannot exceed 99");
+        if (quantity < 1 || quantity > 99) {
+            throw new RuntimeException("Quantity must be between 1 and 99");
         }
 
-        // Check if item already exists in cart
-        Optional<CartItem> existingItem = cartItemRepository.findByCustomerAndItemName(customer, name);
+        Optional<CartItem> existingItem = cartItemRepository.findByCustomer_IdAndItemName(customer.getId(), name);
 
         if (existingItem.isPresent()) {
-            // Item exists, increase quantity
             CartItem item = existingItem.get();
-            int newQuantity = item.getQuantity() + quantity;
-
-            // Apply quantity validation
-            if (newQuantity > 99) {
-                newQuantity = 99; // Cap at maximum
-            }
-
+            int newQuantity = Math.min(item.getQuantity() + quantity, 99);
             item.setQuantity(newQuantity);
             return cartItemRepository.save(item);
         } else {
-            // Item doesn't exist, create new entry
             CartItem newItem = new CartItem(customer, name, price, quantity);
             return cartItemRepository.save(newItem);
         }
     }
 
-    public CartItem incrementQuantity(Long itemId, Customer authenticatedCustomer) {
-        if (authenticatedCustomer == null) {
-            throw new RuntimeException("Customer authentication required");
-        }
-
-        Optional<CartItem> optionalItem = cartItemRepository.findById(itemId);
-        if (optionalItem.isEmpty()) {
-            throw new RuntimeException("Cart item not found");
-        }
-
-        CartItem item = optionalItem.get();
-
-        // Validate ownership
-        if (!item.getCustomer().getId().equals(authenticatedCustomer.getId())) {
-            throw new RuntimeException("Access denied: Item does not belong to authenticated customer");
-        }
-
+    public CartItem incrementQuantity(Long itemId, Customer customer) {
+        CartItem item = getCartItem(itemId, customer).orElseThrow(() -> new RuntimeException("Cart item not found"));
         int newQuantity = item.getQuantity() + 1;
-
-        // Apply maximum quantity validation
-        if (newQuantity > 99) {
-            throw new RuntimeException("Quantity cannot exceed 99");
-        }
-
+        if (newQuantity > 99) throw new RuntimeException("Quantity cannot exceed 99");
         item.setQuantity(newQuantity);
         return cartItemRepository.save(item);
     }
 
-    public CartItem decrementQuantity(Long itemId, Customer authenticatedCustomer) {
-        if (authenticatedCustomer == null) {
-            throw new RuntimeException("Customer authentication required");
-        }
-
-        Optional<CartItem> optionalItem = cartItemRepository.findById(itemId);
-        if (optionalItem.isEmpty()) {
-            throw new RuntimeException("Cart item not found");
-        }
-
-        CartItem item = optionalItem.get();
-
-        // Validate ownership
-        if (!item.getCustomer().getId().equals(authenticatedCustomer.getId())) {
-            throw new RuntimeException("Access denied: Item does not belong to authenticated customer");
-        }
-
-        if (item.getQuantity() <= 1) {
-            throw new RuntimeException("Quantity cannot be less than 1");
-        }
-
+    public CartItem decrementQuantity(Long itemId, Customer customer) {
+        CartItem item = getCartItem(itemId, customer).orElseThrow(() -> new RuntimeException("Cart item not found"));
+        if (item.getQuantity() <= 1) throw new RuntimeException("Quantity cannot be less than 1");
         item.setQuantity(item.getQuantity() - 1);
         return cartItemRepository.save(item);
     }
 
-    public CartItem updateQuantity(Long itemId, int quantity, Customer authenticatedCustomer) {
-        if (authenticatedCustomer == null) {
-            throw new RuntimeException("Customer authentication required");
-        }
-
-        if (quantity < 1) {
-            throw new RuntimeException("Quantity must be at least 1");
-        }
-        if (quantity > 99) {
-            throw new RuntimeException("Quantity cannot exceed 99");
-        }
-
-        Optional<CartItem> optionalItem = cartItemRepository.findById(itemId);
-        if (optionalItem.isEmpty()) {
-            throw new RuntimeException("Cart item not found");
-        }
-
-        CartItem item = optionalItem.get();
-
-        // Validate ownership
-        if (!item.getCustomer().getId().equals(authenticatedCustomer.getId())) {
-            throw new RuntimeException("Access denied: Item does not belong to authenticated customer");
-        }
-
+    public CartItem updateQuantity(Long itemId, int quantity, Customer customer) {
+        if (quantity < 1 || quantity > 99) throw new RuntimeException("Quantity must be between 1 and 99");
+        CartItem item = getCartItem(itemId, customer).orElseThrow(() -> new RuntimeException("Cart item not found"));
         item.setQuantity(quantity);
         return cartItemRepository.save(item);
     }
 
-    public void removeFromCart(Long itemId, Customer authenticatedCustomer) {
-        if (authenticatedCustomer == null) {
-            throw new RuntimeException("Customer authentication required");
-        }
-
-        Optional<CartItem> optionalItem = cartItemRepository.findById(itemId);
-        if (optionalItem.isEmpty()) {
-            throw new RuntimeException("Cart item not found");
-        }
-
-        CartItem item = optionalItem.get();
-
-        // Validate ownership
-        if (!item.getCustomer().getId().equals(authenticatedCustomer.getId())) {
-            throw new RuntimeException("Access denied: Item does not belong to authenticated customer");
-        }
-
-        cartItemRepository.deleteById(itemId);
+    public void removeFromCart(Long itemId, Customer customer) {
+        CartItem item = getCartItem(itemId, customer).orElseThrow(() -> new RuntimeException("Cart item not found"));
+        cartItemRepository.delete(item);
     }
 
     public void clearCart(Customer customer) {
-        if (customer == null) {
-            throw new RuntimeException("Customer authentication required");
-        }
-
-        List<CartItem> customerItems = cartItemRepository.findByCustomer(customer);
-        cartItemRepository.deleteAll(customerItems);
+        List<CartItem> items = cartItemRepository.findByCustomer(customer);
+        cartItemRepository.deleteAll(items);
     }
 
-    public Optional<CartItem> getCartItem(Long itemId, Customer authenticatedCustomer) {
-        if (authenticatedCustomer == null) {
-            throw new RuntimeException("Customer authentication required");
-        }
-
+    public Optional<CartItem> getCartItem(Long itemId, Customer customer) {
         Optional<CartItem> optionalItem = cartItemRepository.findById(itemId);
-        if (optionalItem.isPresent()) {
-            CartItem item = optionalItem.get();
-            // Validate ownership
-            if (!item.getCustomer().getId().equals(authenticatedCustomer.getId())) {
-                throw new RuntimeException("Access denied: Item does not belong to authenticated customer");
+        optionalItem.ifPresent(item -> {
+            if (!item.getCustomer().getId().equals(customer.getId())) {
+                throw new RuntimeException("Access denied: Item does not belong to customer");
             }
-        }
+        });
         return optionalItem;
     }
 
-    public CartItem updateCartItem(CartItem cartItem, Customer authenticatedCustomer) {
-        if (authenticatedCustomer == null) {
-            throw new RuntimeException("Customer authentication required");
-        }
-
+    public CartItem updateCartItem(CartItem cartItem, Customer customer) {
         if (cartItem.getId() != null) {
-            // Validate ownership for existing items
             Optional<CartItem> existingItem = cartItemRepository.findById(cartItem.getId());
-            if (existingItem.isPresent() &&
-                    !existingItem.get().getCustomer().getId().equals(authenticatedCustomer.getId())) {
-                throw new RuntimeException("Access denied: Item does not belong to authenticated customer");
-            }
+            existingItem.ifPresent(item -> {
+                if (!item.getCustomer().getId().equals(customer.getId())) {
+                    throw new RuntimeException("Access denied: Item does not belong to customer");
+                }
+            });
         }
-
-        // Ensure the item belongs to the authenticated customer
-        cartItem.setCustomer(authenticatedCustomer);
+        cartItem.setCustomer(customer);
         return cartItemRepository.save(cartItem);
     }
 
-    // Deprecated methods for backward compatibility
-    @Deprecated
-    public List<CartItem> getCartByCustomerId(int customerId) {
-        throw new UnsupportedOperationException("Use getCartByCustomer(Customer customer) instead");
+    public CartItemDto toDto(CartItem item) {
+        return new CartItemDto(
+                item.getId(),
+                item.getCustomer().getId(),
+                item.getItemName(),
+                item.getItemPrice(),
+                item.getQuantity(),
+                item.getItemPrice().multiply(BigDecimal.valueOf(item.getQuantity())),
+                item.getStatus(),
+                item.getCreatedAt(),
+                item.getUpdatedAt()
+        );
     }
 
-    @Deprecated
-    public CartItem addToCart(int customerId, String name, int price, int quantity) {
-        throw new UnsupportedOperationException(
-                "Use addToCart(Customer customer, String name, int price, int quantity) instead");
+    public List<CartItemDto> toDtoList(List<CartItem> items) {
+        return items.stream().map(this::toDto).collect(Collectors.toList());
     }
 
-    @Deprecated
-    public CartItem incrementQuantity(int itemId) {
-        throw new UnsupportedOperationException(
-                "Use incrementQuantity(Long itemId, Customer authenticatedCustomer) instead");
+    // ------------------ Status Methods ------------------
+    @Transactional
+    public void finishCart(Long customerId) {
+        Customer customer = getCustomerById(customerId);
+        List<CartItem> items = cartItemRepository.findByCustomerAndStatus(customer, CartItem.STATUS_PENDING);
+        if (items.isEmpty()) throw new RuntimeException("Cart is empty. Cannot place order.");
+        items.forEach(item -> item.setStatus(CartItem.STATUS_FINISH));
+        cartItemRepository.saveAll(items);
     }
 
-    @Deprecated
-    public CartItem decrementQuantity(int itemId) {
-        throw new UnsupportedOperationException(
-                "Use decrementQuantity(Long itemId, Customer authenticatedCustomer) instead");
-    }
-
-    @Deprecated
-    public CartItem updateQuantity(int itemId, int quantity) {
-        throw new UnsupportedOperationException(
-                "Use updateQuantity(Long itemId, int quantity, Customer authenticatedCustomer) instead");
-    }
-
-    @Deprecated
-    public void removeFromCart(int itemId) {
-        throw new UnsupportedOperationException(
-                "Use removeFromCart(Long itemId, Customer authenticatedCustomer) instead");
-    }
-
-    @Deprecated
-    public void clearCart(int customerId) {
-        throw new UnsupportedOperationException("Use clearCart(Customer customer) instead");
-    }
-
-    @Deprecated
-    public Optional<CartItem> getCartItem(int itemId) {
-        throw new UnsupportedOperationException("Use getCartItem(Long itemId, Customer authenticatedCustomer) instead");
+    @Transactional
+    public void resetCart(Long customerId) {
+        Customer customer = getCustomerById(customerId);
+        List<CartItem> items = cartItemRepository.findByCustomerAndStatus(customer, CartItem.STATUS_FINISH);
+        items.forEach(item -> item.setStatus(CartItem.STATUS_PENDING));
+        cartItemRepository.saveAll(items);
     }
 }

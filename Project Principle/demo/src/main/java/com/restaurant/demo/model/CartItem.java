@@ -12,6 +12,12 @@ import java.time.LocalDateTime;
 @Table(name = "cart_items")
 public class CartItem {
 
+    // --- เพิ่ม constant สำหรับสถานะ ---
+    public static final String STATUS_PENDING = "Pending";
+    public static final String STATUS_IN_PROGRESS = "In Progress";
+    public static final String STATUS_CANCELLED = "Cancelled";
+    public static final String STATUS_FINISH = "Finish";
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -42,7 +48,7 @@ public class CartItem {
     @NotBlank(message = "Status is required")
     @Pattern(regexp = "Pending|In Progress|Cancelled|Finish", message = "Status must be one of: Pending, In Progress, Cancelled, Finish")
     @Column(name = "status", nullable = false, length = 20)
-    private String status = "Pending";
+    private String status = STATUS_PENDING; // ใช้ constant แทน string ตรงนี้
 
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
@@ -61,7 +67,7 @@ public class CartItem {
         this.itemName = itemName;
         this.itemPrice = itemPrice;
         this.quantity = quantity;
-        this.status = "Pending"; // Default status
+        this.status = STATUS_PENDING; // ใช้ constant
     }
 
     // Constructor with status parameter
@@ -70,7 +76,7 @@ public class CartItem {
         this.itemName = itemName;
         this.itemPrice = itemPrice;
         this.quantity = quantity;
-        this.status = status != null ? status : "Pending"; // Default to Pending if null
+        this.status = status != null ? status : STATUS_PENDING; // ใช้ constant
     }
 
     @PrePersist
@@ -78,7 +84,7 @@ public class CartItem {
         createdAt = LocalDateTime.now();
         updatedAt = LocalDateTime.now();
         if (status == null || status.isEmpty()) {
-            status = "Pending"; // Ensure status is set on persist
+            status = STATUS_PENDING; // ใช้ constant
         }
     }
 
@@ -120,7 +126,7 @@ public class CartItem {
         this.itemName = itemName;
     }
 
-    public @NotNull(message = "Item price is required") @DecimalMin(value = "0.01", message = "Item price must be greater than 0") @DecimalMax(value = "9999.99", message = "Item price must not exceed 9999.99") @Digits(integer = 4, fraction = 2, message = "Item price must have at most 4 integer digits and 2 decimal places") BigDecimal getItemPrice() {
+    public BigDecimal getItemPrice() {
         return itemPrice;
     }
 
@@ -160,7 +166,7 @@ public class CartItem {
         this.updatedAt = updatedAt;
     }
 
-    // Compatibility methods for Manager features (from main branch)
+    // Compatibility methods for Manager features
     public LocalDateTime getAddedAt() {
         return this.createdAt;
     }
