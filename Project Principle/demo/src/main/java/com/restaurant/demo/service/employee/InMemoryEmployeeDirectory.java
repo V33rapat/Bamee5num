@@ -1,6 +1,7 @@
 package com.restaurant.demo.service.employee;
 
 import com.restaurant.demo.model.Employee;
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
@@ -12,6 +13,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
 @Component
+//@Profile("test") // Only use this in-memory implementation for testing, not in production
 public class InMemoryEmployeeDirectory implements EmployeeDirectory {
 
     private final Map<Long, Employee> employees = new ConcurrentHashMap<>();

@@ -142,7 +142,7 @@ async function loadCustomerProfile(customerId) {
         const customerData = await response.json();
 
         // Update welcome text with customer's actual name
-        document.getElementById("welcomeText").textContent = `สวัสดี, ${customerData.username}`;
+        document.getElementById("welcomeText").textContent = `สวัสดี, ${customerData.name || customerData.username}`;
     } catch (error) {
         console.error("Error loading customer profile:", error);
         // Keep the Thymeleaf-rendered welcome text as is
@@ -390,7 +390,7 @@ async function placeOrder(userId) {
         }
 
         // Call place order API
-        const response = await fetch(`/api/customers/${userId}/place-order`, {
+        const response = await fetch(`/api/orders/customers/${userId}/place-order`, {
             method: "POST",
             headers: { "Content-Type": "application/json" }
         });

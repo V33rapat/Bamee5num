@@ -47,8 +47,9 @@ public class SecurityConfig {
             .authorizeHttpRequests(authz -> authz
                 .requestMatchers("/", "/login", "/register", "/css/**", "/js/**", "/images/**", "/static/**", "/api/customers/login", "/api/customers/register", "/api/customers/**").permitAll()
                 .requestMatchers("/customer/**", "/api/cart/**").permitAll()
-                .requestMatchers("/manager/**").permitAll()  // Allow all manager routes to bypass Spring Security
-                .requestMatchers("/api/manager/**", "/api/employees/**", "/api/reports/**", "/api/carts/**").permitAll()
+                .requestMatchers("/manager/**").permitAll()
+                .requestMatchers("/employee-login", "/employee", "/employee-orders").permitAll() 
+                .requestMatchers("/api/manager/**", "/api/managers/**", "/api/employees/**", "/api/reports/**", "/api/carts/**", "/api/orders/**").permitAll()
                 .anyRequest().authenticated()
             )
             .formLogin(form -> form

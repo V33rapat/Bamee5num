@@ -94,7 +94,8 @@ public class ManagerApiController {
 
     @GetMapping("/employees")
     public List<Employee> getEmployees() {
-        return employeeService.getEmployees();
+        // Use database-backed method instead of in-memory storage
+        return managerService.getAllEmployees();
     }
 
     @PostMapping("/employees")
@@ -122,8 +123,9 @@ public class ManagerApiController {
     }
 
     @DeleteMapping("/employees/{id}")
-    public ResponseEntity<Void> deleteEmployee(@PathVariable int id) {
-        boolean removed = employeeService.deleteEmployee(id);
+    public ResponseEntity<Void> deleteEmployee(@PathVariable Long id) {
+        // Use database-backed method instead of in-memory storage
+        boolean removed = managerService.deleteEmployee(id);
         if (removed) {
             return ResponseEntity.noContent().build();
         }

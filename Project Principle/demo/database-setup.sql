@@ -64,13 +64,10 @@ CREATE TABLE IF NOT EXISTS employees (
 -- Create managers table (extends employees with JOINED inheritance strategy)
 CREATE TABLE IF NOT EXISTS managers (
     id BIGINT PRIMARY KEY,
-    username VARCHAR(50) UNIQUE NOT NULL,
     email VARCHAR(100) UNIQUE NOT NULL,
-    password VARCHAR(255) NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     FOREIGN KEY (id) REFERENCES employees(id) ON DELETE CASCADE,
-    INDEX idx_username (username),
     INDEX idx_email (email)
 );
 
@@ -87,27 +84,16 @@ CREATE TABLE IF NOT EXISTS menu_items (
 );
 
 -- Insert some sample data for testing (optional)
-INSERT INTO customers (name, username, email, phone, password_hash) VALUES
-('John Doe', 'johndoe', 'john@example.com', '081-234-5678', '$2a$10$example_hash'),
-('Jane Smith', 'janesmith', 'jane@example.com', '089-876-5432', '$2a$10$example_hash');
+-- INSERT INTO customers (name, username, email, phone, password_hash) VALUES
+-- ('John Doe', 'johndoe', 'john@example.com', '081-234-5678', '$2a$10$example_hash'),
+-- ('Jane Smith', 'janesmith', 'jane@example.com', '089-876-5432', '$2a$10$example_hash');
 
--- Insert sample employees and managers (optional)
--- Note: password is 'password123' hashed with BCrypt
-INSERT INTO employees (id, name, position, username, password) VALUES
-(1001, 'Alice Manager', 'Manager', 'alice_manager', '$2a$12$eJtOxgKnHNmUBfe72eOhEOjsaUqsX5YRb0uuQmhnRrDONGcv.z.EG'),
-(1002, 'Bob Employee', 'Cashier', 'bob_employee', '$2a$12$eJtOxgKnHNmUBfe72eOhEOjsaUqsX5YRb0uuQmhnRrDONGcv.z.EG'),
-(1003, 'Charlie Employee', 'Cook', 'charlie_employee', '$2a$12$eJtOxgKnHNmUBfe72eOhEOjsaUqsX5YRb0uuQmhnRrDONGcv.z.EG');
+-- Insert sample manager (requires employee record first due to JOINED inheritance)
+INSERT INTO employees (id, name, position, username, password) VALUES 
+(1001, 'Alice Manager', 'Manager', 'alice_manager', '$2a$12$eJtOxgKnHNmUBfe72eOhEOjsaUqsX5YRb0uuQmhnRrDONGcv.z.EG');
 
-INSERT INTO managers (id, username, email, password, created_at, updated_at) VALUES 
-(1001, 'alice_manager', 'alice@restaurant.com', '$2a$12$eJtOxgKnHNmUBfe72eOhEOjsaUqsX5YRb0uuQmhnRrDONGcv.z.EG', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
-
--- Insert sample menu items (optional)
-INSERT INTO menu_items (name, price, category, description, active) VALUES
-('Pad Thai', 120.00, 'Main Course', 'Classic Thai stir-fried noodles', TRUE),
-('Tom Yum Soup', 95.00, 'Soup', 'Spicy and sour Thai soup', TRUE),
-('Green Curry', 135.00, 'Main Course', 'Thai green curry with chicken', TRUE),
-('Mango Sticky Rice', 85.00, 'Dessert', 'Sweet mango with sticky rice', TRUE),
-('Thai Iced Tea', 45.00, 'Beverage', 'Traditional Thai tea with milk', TRUE);
+INSERT INTO managers (id, email, created_at, updated_at) VALUES 
+(1001, 'alice@restaurant.com', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 
 SHOW TABLES;
 

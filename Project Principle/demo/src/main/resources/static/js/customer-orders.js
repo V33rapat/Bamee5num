@@ -40,17 +40,21 @@ async function loadPendingOrders(customerId) {
         emptyOrders.classList.add("hidden");
         ordersContainer.classList.add("hidden");
 
-        const response = await fetch(`/api/customers/${customerId}/pending-orders`);
+        const response = await fetch(`/api/orders/customers/${customerId}/pending-orders`);
         
         if (!response.ok) {
             throw new Error(`Failed to fetch orders: ${response.status} ${response.statusText}`);
         }
 
-        const orders = await response.json();
+        const orderData = await response.json();
         
         loadingIndicator.classList.add("hidden");
 
-        if (!orders || orders.length === 0) {
+        // Backend returns a single OrderResponseDto object, not an array
+        // Convert to array format expected by displayOrders function
+        const orders = (orderData && orderData.items && orderData.items.length > 0) ? [orderData] : [];
+
+        if (orders.length === 0) {
             emptyOrders.classList.remove("hidden");
             return;
         }
@@ -84,7 +88,7 @@ function createOrderCard(order) {
     card.className = "bg-white rounded-lg shadow-lg p-6";
 
     // Format date
-    const orderDate = order.orderDate ? new Date(order.orderDate).toLocaleString('th-TH', {
+    const orderDate = order.createdAt ? new Date(order.createdAt).toLocaleString('th-TH', {
         year: 'numeric',
         month: 'long',
         day: 'numeric',
@@ -117,7 +121,7 @@ function createOrderCard(order) {
     card.innerHTML = `
         <div class="flex justify-between items-start mb-4">
             <div>
-                <h3 class="text-xl font-bold text-gray-800">คำสั่งซื้อ #${order.orderId || order.customerId}</h3>
+                <h3 class="text-xl font-bold text-gray-800">คำสั่งซื้อ #${order.customerId}-${new Date(order.createdAt).getTime()}</h3>
                 <p class="text-sm text-gray-500 mt-1">${orderDate}</p>
             </div>
             ${statusBadge}

@@ -179,4 +179,18 @@ public class ManagerService {
     public Optional<Employee> getEmployeeById(Long id) {
         return employeeRepository.findById(id);
     }
+
+    /**
+     * Delete employee by ID
+     * 
+     * @param id Employee's ID
+     * @return true if employee was deleted, false if not found
+     */
+    public boolean deleteEmployee(Long id) {
+        if (employeeRepository.existsById(id)) {
+            employeeRepository.deleteById(id);
+            return true;
+        }
+        return false;
+    }
 }
