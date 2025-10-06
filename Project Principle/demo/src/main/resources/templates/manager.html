@@ -79,8 +79,37 @@
             </div>
 
             <div id="reportsManagement" class="manager-content hidden">
-                <h4 class="text-xl font-semibold mb-4">รายงานและสถิติ</h4>
-                <p class="text-gray-500">ยังไม่มีข้อมูลรายงาน กรุณากลับมาตรวจสอบอีกครั้ง</p>
+                <h4 class="text-2xl font-semibold mb-4">รายงานยอดขายรายเดือน</h4>
+                
+                <div class="mb-4">
+                    <label class="font-semibold mr-2">เลือกเดือน:</label>
+                    <select id="reportMonth" class="border px-2 py-1 rounded">
+                        <option value="1">มกราคม</option>
+                        <option value="2">กุมภาพันธ์</option>
+                        <option value="3">มีนาคม</option>
+                        <option value="4">เมษายน</option>
+                        <option value="5">พฤษภาคม</option>
+                        <option value="6">มิถุนายน</option>
+                        <option value="7">กรกฎาคม</option>
+                        <option value="8">สิงหาคม</option>
+                        <option value="9">กันยายน</option>
+                        <option value="10">ตุลาคม</option>
+                        <option value="11">พฤศจิกายน</option>
+                        <option value="12">ธันวาคม</option>
+                    </select>
+                    <button id="loadReportBtn" 
+                            class="bg-orange-500 text-white px-3 py-1 rounded hover:bg-orange-600">
+                        แสดงรายงาน
+                    </button>
+                </div>
+
+                <!-- 🧾 พื้นที่แสดงผลรายงาน -->
+                <div id="reportResult" class="bg-white shadow-md rounded-lg p-4 hidden">
+                    <h5 class="text-lg font-semibold mb-3">สรุปยอดขายเดือน <span id="monthName"></span></h5>
+                    <p>ยอดขายรวม: <span id="totalRevenue" class="font-bold text-green-600"></span> บาท</p>
+                    <p>จำนวนออเดอร์: <span id="totalOrders" class="font-bold"></span> รายการ</p>
+                    <p>เมนูขายดีที่สุด: <span id="topMenu" class="font-bold text-orange-500"></span> (<span id="topCount"></span> จาน)</p>
+                </div>
             </div>
         </div>
     </div>
