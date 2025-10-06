@@ -13,7 +13,7 @@
 <header class="bg-white shadow py-4 px-6 flex justify-between items-center">
     <h1 class="text-xl font-bold text-orange-600">Bamee 5 Num</h1>
     <div id="userNav" class="flex items-center space-x-4" th:if="${customer != null}">
-        <a href="/customer/${customer.id}" class="text-gray-700 hover:text-orange-600">เมนูอาหาร</a>
+        <a th:href="@{/customer/{id}(id=${customer.id})}" class="text-gray-700 hover:text-orange-600">เมนูอาหาร</a>
         <span id="welcomeText" class="font-semibold text-gray-700" th:text="'สวัสดี, ' + ${customer.username}">สวัสดี, ผู้ใช้</span>
         <button id="logoutBtn" class="text-red-500 hover:text-red-700">Logout</button>
     </div>
@@ -32,7 +32,7 @@
 <div class="max-w-7xl mx-auto px-4 py-8" th:if="${customer != null}">
     <div class="flex justify-between items-center mb-6">
         <h2 class="text-3xl font-bold text-orange-600">📋 คำสั่งซื้อของฉัน</h2>
-        <a href="/customer/${customer.id}" class="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600">กลับไปยังเมนู</a>
+        <a th:href="'/customer/' + ${customer.id}" class="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600">กลับไปยังเมนู</a>
     </div>
 
     <!-- Loading indicator -->
@@ -43,7 +43,7 @@
     <!-- Empty state -->
     <div id="emptyOrders" class="hidden text-center py-12 bg-white rounded-lg shadow">
         <p class="text-gray-500 text-lg mb-4">ยังไม่มีคำสั่งซื้อที่รอดำเนินการ</p>
-        <a href="/customer" class="inline-block bg-orange-500 text-white px-6 py-3 rounded hover:bg-orange-600">สั่งอาหารตอนนี้</a>
+        <a th:href="@{/customer/{id}(id=${customer.id})}" class="inline-block bg-orange-500 text-white px-6 py-3 rounded hover:bg-orange-600">สั่งอาหารตอนนี้</a>
     </div>
 
     <!-- Orders container -->
