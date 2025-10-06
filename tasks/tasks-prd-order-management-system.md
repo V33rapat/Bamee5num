@@ -14,11 +14,11 @@ Generated from: `prd-order-management-system.md`
 - `Project Principle/demo/src/main/java/com/restaurant/demo/repository/EmployeeRepository.java` - *CREATED* - Added findByUsername and existsByUsername methods for employee authentication
 
 ### Backend - DTOs
-- `Project Principle/demo/src/main/java/com/restaurant/demo/dto/OrderPlacementDto.java` - *NEW* - DTO for placing orders
-- `Project Principle/demo/src/main/java/com/restaurant/demo/dto/OrderResponseDto.java` - *NEW* - DTO for order responses
-- `Project Principle/demo/src/main/java/com/restaurant/demo/dto/EmployeeLoginDto.java` - *NEW* - DTO for employee login
-- `Project Principle/demo/src/main/java/com/restaurant/demo/dto/EmployeeRegistrationDto.java` - *NEW* - DTO for employee registration by manager
-- `Project Principle/demo/src/main/java/com/restaurant/demo/dto/OrderStatusUpdateDto.java` - *NEW* - DTO for updating order status
+- `Project Principle/demo/src/main/java/com/restaurant/demo/dto/OrderPlacementDto.java` - *CREATED* - DTO for placing orders with customerId validation
+- `Project Principle/demo/src/main/java/com/restaurant/demo/dto/OrderResponseDto.java` - *CREATED* - DTO for order responses with items list, totals, status, timestamps
+- `Project Principle/demo/src/main/java/com/restaurant/demo/dto/EmployeeLoginDto.java` - *CREATED* - DTO for employee login with username and password
+- `Project Principle/demo/src/main/java/com/restaurant/demo/dto/EmployeeRegistrationDto.java` - *CREATED* - DTO for employee registration by manager with name, position, credentials
+- `Project Principle/demo/src/main/java/com/restaurant/demo/dto/OrderStatusUpdateDto.java` - *CREATED* - DTO for updating order status with customerId and newStatus validation
 
 ### Backend - Services
 - `Project Principle/demo/src/main/java/com/restaurant/demo/service/OrderService.java` - *NEW* - Business logic for order management
@@ -82,13 +82,13 @@ Generated from: `prd-order-management-system.md`
   - [x] 3.4 Add `findByUsername(String username)` to EmployeeRepository
   - [x] 3.5 Add `existsByUsername(String username)` to EmployeeRepository for validation
   
-- [ ] 4.0 Backend - DTO Creation
-  - [ ] 4.1 Create `OrderPlacementDto.java` with customerId and optional fields
-  - [ ] 4.2 Create `OrderResponseDto.java` with order details, items list, total, status, timestamp
-  - [ ] 4.3 Create `EmployeeLoginDto.java` with username and password fields
-  - [ ] 4.4 Create `EmployeeRegistrationDto.java` with name, position, username, password (for manager use)
-  - [ ] 4.5 Create `OrderStatusUpdateDto.java` with orderId/customerId and newStatus
-  - [ ] 4.6 Add Jakarta validation annotations to all DTOs (@NotBlank, @Size, etc.)
+- [x] 4.0 Backend - DTO Creation
+  - [x] 4.1 Create `OrderPlacementDto.java` with customerId and optional fields
+  - [x] 4.2 Create `OrderResponseDto.java` with order details, items list, total, status, timestamp
+  - [x] 4.3 Create `EmployeeLoginDto.java` with username and password fields
+  - [x] 4.4 Create `EmployeeRegistrationDto.java` with name, position, username, password (for manager use)
+  - [x] 4.5 Create `OrderStatusUpdateDto.java` with orderId/customerId and newStatus
+  - [x] 4.6 Add Jakarta validation annotations to all DTOs (@NotBlank, @Size, etc.)
   
 - [ ] 5.0 Backend - Service Layer Development
   - [ ] 5.1 Create `OrderService.java` with method to place order (convert cart to pending order)
