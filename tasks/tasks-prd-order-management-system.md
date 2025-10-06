@@ -21,9 +21,10 @@ Generated from: `prd-order-management-system.md`
 - `Project Principle/demo/src/main/java/com/restaurant/demo/dto/OrderStatusUpdateDto.java` - *CREATED* - DTO for updating order status with customerId and newStatus validation
 
 ### Backend - Services
-- `Project Principle/demo/src/main/java/com/restaurant/demo/service/OrderService.java` - *NEW* - Business logic for order management
-- `Project Principle/demo/src/main/java/com/restaurant/demo/service/EmployeeAuthService.java` - *NEW* - Employee authentication logic
-- `Project Principle/demo/src/main/java/com/restaurant/demo/service/CartService.java` - Modify existing service to handle order placement
+- `Project Principle/demo/src/main/java/com/restaurant/demo/service/OrderService.java` - *CREATED* - Business logic for order management including place order, get pending orders, update status, and status transition validation
+- `Project Principle/demo/src/main/java/com/restaurant/demo/service/EmployeeAuthService.java` - *CREATED* - Employee authentication logic with BCrypt password verification
+- `Project Principle/demo/src/main/java/com/restaurant/demo/service/ManagerService.java` - *UPDATED* - Added employee registration method for managers to register new employees
+- `Project Principle/demo/src/main/java/com/restaurant/demo/service/CartService.java` - Existing service for cart management (no changes needed)
 
 ### Backend - Controllers
 - `Project Principle/demo/src/main/java/com/restaurant/demo/controller/OrderController.java` - *NEW* - REST endpoints for order operations
@@ -90,16 +91,16 @@ Generated from: `prd-order-management-system.md`
   - [x] 4.5 Create `OrderStatusUpdateDto.java` with orderId/customerId and newStatus
   - [x] 4.6 Add Jakarta validation annotations to all DTOs (@NotBlank, @Size, etc.)
   
-- [ ] 5.0 Backend - Service Layer Development
-  - [ ] 5.1 Create `OrderService.java` with method to place order (convert cart to pending order)
-  - [ ] 5.2 Add method in OrderService to get pending orders by customerId
-  - [ ] 5.3 Add method in OrderService to get all orders by status (for employee)
-  - [ ] 5.4 Add method in OrderService to update order status with validation (status transition rules)
-  - [ ] 5.5 Add method in OrderService to get order count by status (for notifications)
-  - [ ] 5.6 Create `EmployeeAuthService.java` with login authentication method (username + password check with BCrypt)
-  - [ ] 5.7 Add employee registration method to ManagerService or create dedicated service
-  - [ ] 5.8 Update CartService to integrate with OrderService for order placement
-  - [ ] 5.9 Add business logic validation for status transitions (Pending→In Progress→Finish, or →Cancelled)
+- [x] 5.0 Backend - Service Layer Development
+  - [x] 5.1 Create `OrderService.java` with method to place order (convert cart to pending order)
+  - [x] 5.2 Add method in OrderService to get pending orders by customerId
+  - [x] 5.3 Add method in OrderService to get all orders by status (for employee)
+  - [x] 5.4 Add method in OrderService to update order status with validation (status transition rules)
+  - [x] 5.5 Add method in OrderService to get order count by status (for notifications)
+  - [x] 5.6 Create `EmployeeAuthService.java` with login authentication method (username + password check with BCrypt)
+  - [x] 5.7 Add employee registration method to ManagerService or create dedicated service
+  - [x] 5.8 Update CartService to integrate with OrderService for order placement
+  - [x] 5.9 Add business logic validation for status transitions (Pending→In Progress→Finish, or →Cancelled)
   
 - [ ] 6.0 Backend - Controller Layer Development
   - [ ] 6.1 Create `OrderController.java` with @RestController and @RequestMapping("/api/orders")
