@@ -34,6 +34,7 @@ async function fetchWithTimeout(url, options = {}, timeout = 10000) {
     }
 }
 
+// Main setup function for manager dashboard
 export async function setupManagerDashboard() {
     // Check if manager is authenticated via server session
     // If not authenticated, user would be redirected by Spring Security or controller
@@ -60,6 +61,7 @@ export async function setupManagerDashboard() {
     hideAddMenuModal();
 }
 
+// Event listeners for DOMContentLoaded
 document.addEventListener("DOMContentLoaded", () => {
     document.getElementById('cancelAddMenu').addEventListener('click', hideAddMenuModal);
     document.getElementById('addMenuForm').addEventListener('submit', handleAddMenu);
@@ -113,6 +115,36 @@ document.addEventListener("DOMContentLoaded", () => {
     setupManagerDashboard();
 });
 
+// Load monthly report when button is clicked
+document.getElementById("loadReportBtn").addEventListener("click", async () => {
+    const month = document.getElementById("reportMonth").value;
+
+    try {
+        const resp = await fetch(`/api/reports/monthly?month=${month}`);
+        if (!resp.ok) throw new Error("โหลดข้อมูลไม่สำเร็จ");
+
+        const data = await resp.json();
+
+        // แสดงผลในหน้า
+        document.getElementById("reportResult").classList.remove("hidden");
+        document.getElementById("monthName").textContent = getMonthName(month);
+        document.getElementById("totalRevenue").textContent = data.totalRevenue;
+        document.getElementById("totalOrders").textContent = data.totalOrders;
+        document.getElementById("topMenu").textContent = data.topMenu;
+        document.getElementById("topCount").textContent = data.topCount;
+    } catch (err) {
+        alert("เกิดข้อผิดพลาดในการโหลดรายงาน");
+        console.error(err);
+    }
+});
+
+function getMonthName(month) {
+    const months = ["มกราคม", "กุมภาพันธ์", "มีนาคม", "เมษายน", "พฤษภาคม",
+        "มิถุนายน", "กรกฎาคม", "สิงหาคม", "กันยายน", "ตุลาคม", "พฤศจิกายน", "ธันวาคม"];
+    return months[month - 1];
+}
+
+/*
 async function updateManagerStats() {
     try {
         const resp = await fetch('/api/reports/sales');
@@ -133,7 +165,9 @@ async function updateManagerStats() {
         console.error(err);
     }
 }
+*/
 
+// Function to load menu items and apply filter
 async function loadMenuItems() {
     const menuList = document.getElementById("menuManagementList");
     if (!menuList) {
@@ -204,6 +238,7 @@ async function loadMenuItems() {
     });
 }
 
+// Function to show the Add Menu modal
 function showAddMenuModal() {
     const modal = document.getElementById('addMenuModal');
     if (modal) {
@@ -211,6 +246,7 @@ function showAddMenuModal() {
     }
 }
 
+// Reset and hide the Add Menu modal
 function hideAddMenuModal() {
     const modal = document.getElementById('addMenuModal');
     const form = document.getElementById('addMenuForm');
@@ -235,6 +271,7 @@ function hideAddMenuModal() {
     }
 }
 
+// Function to show the Edit Menu modal with pre-populated data
 async function showEditMenuModal(menuItemId) {
     try {
         // Fetch menu item data
@@ -290,6 +327,7 @@ async function showEditMenuModal(menuItemId) {
     }
 }
 
+// Handle Add/Edit Menu form submission
 async function handleAddMenu(event) {
     event.preventDefault();
     
@@ -407,6 +445,7 @@ async function handleAddMenu(event) {
     }
 }
 
+// Initialize tab functionality
 function initManagerTabs() {
     document.querySelectorAll('.manager-tab').forEach(tab => {
         tab.addEventListener('click', event => {
@@ -434,6 +473,7 @@ function switchManagerTab(event, tabName) {
     }
 }
 
+// Load and manage employee data
 async function loadEmployeeManagement() {
     const employeeList = document.getElementById('employeeList');
     if (!employeeList) {
@@ -493,6 +533,7 @@ async function loadEmployeeManagement() {
     });
 }
 
+// Open employee dialog for add or edit
 function openEmployeeDialog(employee) {
     if (!employeeModal || !employeeForm || !employeeModalTitle || !employeeNameInput || !employeePositionInput) {
         return;
@@ -576,6 +617,7 @@ async function handleEmployeeSubmit(event) {
     }
 }
 
+// Utility functions to show/hide success and error modals
 function showSuccessModal(message) {
     const modal = document.getElementById('successModal');
     const messageEl = document.getElementById('successMessage');
@@ -616,4 +658,5 @@ export async function fetchCartForUser(userId) {
     return resp.json();
 }
 
+// Expose fetchCartForUser globally for other scripts to use
 window.fetchCartForUser = fetchCartForUser;
