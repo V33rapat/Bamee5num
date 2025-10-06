@@ -175,8 +175,46 @@ public class PageController {
         return "employee-login";
     }
 
+    /**
+     * Employee orders page endpoint with session validation
+     * Displays order management interface for employees
+     * 
+     * @param model Model to pass data to Thymeleaf template
+     * @param session HttpSession for server-side session validation
+     * @return View name for Thymeleaf or redirect to login on error
+     */
+    @GetMapping("/employee-orders")
+    public String employeeOrders(Model model, HttpSession session) {
+        logger.info("Employee orders page requested, sessionId: {}", session.getId());
+        
+        // Session validation: Check if session contains employee ID
+        Long sessionEmployeeId = (Long) session.getAttribute("employeeId");
+        logger.info("Session employeeId: {}", sessionEmployeeId);
+        
+        // If no session exists, redirect to employee login page
+        if (sessionEmployeeId == null) {
+            logger.warn("Session validation failed - no employeeId in session");
+            return "redirect:/employee-login?error=unauthorized";
+        }
+        
+        logger.info("Employee orders page loaded successfully for employeeId: {}", sessionEmployeeId);
+        
+        // Add employee ID to model for Thymeleaf template rendering
+        model.addAttribute("employeeId", sessionEmployeeId);
+        
+        // Return "employee-orders" view name for Thymeleaf rendering
+        return "employee-orders";
+    }
+
     @GetMapping("/manager")
     public String manager(HttpSession session) {
+        // Check if employee is trying to access manager page (should be blocked)
+        Boolean isEmployeeAuthenticated = (Boolean) session.getAttribute("employeeAuthenticated");
+        if (isEmployeeAuthenticated != null && isEmployeeAuthenticated) {
+            logger.warn("Employee attempted to access manager page - access denied");
+            return "redirect:/employee-orders?error=unauthorized";
+        }
+        
         // Check if manager is authenticated via session
         Boolean isAuthenticated = (Boolean) session.getAttribute("managerAuthenticated");
         if (isAuthenticated == null || !isAuthenticated) {

@@ -34,16 +34,16 @@ Generated from: `prd-order-management-system.md`
 
 ### Frontend - HTML Templates
 - `Project Principle/demo/src/main/resources/templates/customer-orders.html` - *CREATED* - Customer pending orders view page
-- `Project Principle/demo/src/main/resources/templates/employee-orders.html` - *NEW* - Employee order management page
-- `Project Principle/demo/src/main/resources/templates/employee-login.html` - *NEW* - Employee login page
+- `Project Principle/demo/src/main/resources/templates/employee-orders.html` - *CREATED* - Employee order management page with filtering, statistics, and bill modal
+- `Project Principle/demo/src/main/resources/templates/employee-login.html` - *CREATED* - Employee login page with username and password authentication
 - `Project Principle/demo/src/main/resources/templates/manager.html` - *UPDATED* - Modified to add employee registration form with username/password fields and order statistics display
-- `Project Principle/demo/src/main/resources/templates/employee.html` - Modify existing page for order management
+- `Project Principle/demo/src/main/resources/templates/employee.html` - Existing employee page (not modified, new employee-orders.html created instead)
 - `Project Principle/demo/src/main/resources/templates/customer.html` - *UPDATED* - Modified to add navigation link to pending orders and change button text
 
 ### Frontend - JavaScript
 - `Project Principle/demo/src/main/resources/static/js/customer-orders.js` - *CREATED* - Customer pending orders functionality with order display, grouping, and status badges
-- `Project Principle/demo/src/main/resources/static/js/employee-orders.js` - *NEW* - Employee order management functionality
-- `Project Principle/demo/src/main/resources/static/js/employee-auth.js` - *NEW* - Employee login functionality
+- `Project Principle/demo/src/main/resources/static/js/employee-orders.js` - *CREATED* - Employee order management functionality with filtering, status updates, notification polling, and bill viewing
+- `Project Principle/demo/src/main/resources/static/js/employee-auth.js` - *CREATED* - Employee login functionality with session management and redirect
 - `Project Principle/demo/src/main/resources/static/js/customer.js` - *UPDATED* - Modified to change payment button to order button with place order API integration
 - `Project Principle/demo/src/main/resources/static/js/manager.js` - *UPDATED* - Modified to add employee registration UI handling with username/password fields, validation, and order statistics display
 
@@ -140,23 +140,23 @@ Generated from: `prd-order-management-system.md`
   - [x] 8.9 Update manager statistics to show order counts (pending, completed)
   - [x] 8.10 Integrate employee registration with existing manager.js functionality
   
-- [ ] 9.0 Frontend - Employee Side Features
-  - [ ] 9.1 Create `employee-login.html` template with login form (username, password)
-  - [ ] 9.2 Create `employee-auth.js` to handle employee login POST request
-  - [ ] 9.3 Store employee session data after successful login
-  - [ ] 9.4 Redirect to employee dashboard after login
-  - [ ] 9.5 Create `employee-orders.html` or modify existing `employee.html` for order management
-  - [ ] 9.6 Design order management UI (table or card layout grouped by customer)
-  - [ ] 9.7 Create `employee-orders.js` to fetch and display all orders
-  - [ ] 9.8 Implement order filtering by status (Pending, In Progress, Finish, Cancelled)
-  - [ ] 9.9 Display order details: customer ID/name, items list, quantities, prices, subtotals, total
-  - [ ] 9.10 Add status update dropdown/buttons for each order (Pending→In Progress→Finish, or →Cancelled)
-  - [ ] 9.11 Implement PUT request to update order status with confirmation
-  - [ ] 9.12 Add notification polling (setInterval) to check for new pending orders every 30 seconds
-  - [ ] 9.13 Display notification badge/alert when new orders detected
-  - [ ] 9.14 Implement bill viewing functionality for orders with any status
-  - [ ] 9.15 Add access control check to prevent employees from accessing manager pages
-  - [ ] 9.16 Style status badges with color coding (Pending: yellow, In Progress: blue, Finish: green, Cancelled: red)
+- [x] 9.0 Frontend - Employee Side Features
+  - [x] 9.1 Create `employee-login.html` template with login form (username, password)
+  - [x] 9.2 Create `employee-auth.js` to handle employee login POST request
+  - [x] 9.3 Store employee session data after successful login
+  - [x] 9.4 Redirect to employee dashboard after login
+  - [x] 9.5 Create `employee-orders.html` or modify existing `employee.html` for order management
+  - [x] 9.6 Design order management UI (table or card layout grouped by customer)
+  - [x] 9.7 Create `employee-orders.js` to fetch and display all orders
+  - [x] 9.8 Implement order filtering by status (Pending, In Progress, Finish, Cancelled)
+  - [x] 9.9 Display order details: customer ID/name, items list, quantities, prices, subtotals, total
+  - [x] 9.10 Add status update dropdown/buttons for each order (Pending→In Progress→Finish, or →Cancelled)
+  - [x] 9.11 Implement PUT request to update order status with confirmation
+  - [x] 9.12 Add notification polling (setInterval) to check for new pending orders every 30 seconds
+  - [x] 9.13 Display notification badge/alert when new orders detected
+  - [x] 9.14 Implement bill viewing functionality for orders with any status
+  - [x] 9.15 Add access control check to prevent employees from accessing manager pages
+  - [x] 9.16 Style status badges with color coding (Pending: yellow, In Progress: blue, Finish: green, Cancelled: red)
   
 - [ ] 10.0 Integration Testing and Validation
   - [ ] 10.1 Test customer can place order successfully (cart items get status "Pending")
