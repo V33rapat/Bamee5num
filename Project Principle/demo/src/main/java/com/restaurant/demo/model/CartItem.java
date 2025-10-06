@@ -120,7 +120,7 @@ public class CartItem {
         this.itemName = itemName;
     }
 
-    public BigDecimal getItemPrice() {
+    public @NotNull(message = "Item price is required") @DecimalMin(value = "0.01", message = "Item price must be greater than 0") @DecimalMax(value = "9999.99", message = "Item price must not exceed 9999.99") @Digits(integer = 4, fraction = 2, message = "Item price must have at most 4 integer digits and 2 decimal places") BigDecimal getItemPrice() {
         return itemPrice;
     }
 

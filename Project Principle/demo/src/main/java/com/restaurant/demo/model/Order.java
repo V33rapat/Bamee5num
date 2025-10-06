@@ -7,7 +7,7 @@ import java.util.List;
 @Entity
 @Table(name = "orders")
 public class Order {
-    
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -17,17 +17,20 @@ public class Order {
     @JoinColumn(name = "customer_id", nullable = false)
     private Customer customer;
 
-    // ความสัมพันธ์กับพนักงาน
+    // ความสัมพันธ์กับพนักงาน (optional)
     @ManyToOne
     @JoinColumn(name = "employee_id")
     private Employee employee;
 
+    // จำนวนเงินรวมของออเดอร์
     @Column(nullable = false)
-    private Double totalAmount;
+    private Double totalAmount = 0.0;
 
+    // สถานะออเดอร์ (Pending, In Progress, Finish, Cancelled)
     @Column(nullable = false, length = 20)
     private String status = "Pending";
 
+    // เวลาสร้าง / อัปเดต
     private LocalDateTime createdAt = LocalDateTime.now();
     private LocalDateTime updatedAt = LocalDateTime.now();
 
@@ -37,6 +40,7 @@ public class Order {
 
     // ====== Getter / Setter ======
     public Long getId() { return id; }
+
     public Customer getCustomer() { return customer; }
     public void setCustomer(Customer customer) { this.customer = customer; }
 
@@ -53,5 +57,8 @@ public class Order {
     public void setOrderItems(List<OrderItem> orderItems) { this.orderItems = orderItems; }
 
     public LocalDateTime getCreatedAt() { return createdAt; }
+    public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
+
     public LocalDateTime getUpdatedAt() { return updatedAt; }
+    public void setUpdatedAt(LocalDateTime updatedAt) { this.updatedAt = updatedAt; }
 }

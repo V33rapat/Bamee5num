@@ -18,8 +18,8 @@ public class OrderResponseDto {
     public OrderResponseDto() {}
 
     // Constructor with all fields
-    public OrderResponseDto(Long customerId, String customerName, List<OrderItemDto> items, 
-                           BigDecimal totalPrice, String status, LocalDateTime createdAt, LocalDateTime updatedAt) {
+    public OrderResponseDto(Long customerId, String customerName, List<OrderItemDto> items,
+                            BigDecimal totalPrice, String status, LocalDateTime createdAt, LocalDateTime updatedAt) {
         this.customerId = customerId;
         this.customerName = customerName;
         this.items = items;
@@ -29,68 +29,33 @@ public class OrderResponseDto {
         this.updatedAt = updatedAt;
     }
 
-    // Getters and Setters
-    public Long getCustomerId() {
-        return customerId;
-    }
+    // Getters & Setters
+    public Long getCustomerId() { return customerId; }
+    public void setCustomerId(Long customerId) { this.customerId = customerId; }
 
-    public void setCustomerId(Long customerId) {
-        this.customerId = customerId;
-    }
+    public String getCustomerName() { return customerName; }
+    public void setCustomerName(String customerName) { this.customerName = customerName; }
 
-    public String getCustomerName() {
-        return customerName;
-    }
+    public List<OrderItemDto> getItems() { return items; }
+    public void setItems(List<OrderItemDto> items) { this.items = items; }
 
-    public void setCustomerName(String customerName) {
-        this.customerName = customerName;
-    }
+    public BigDecimal getTotalPrice() { return totalPrice; }
+    public void setTotalPrice(BigDecimal totalPrice) { this.totalPrice = totalPrice; }
 
-    public List<OrderItemDto> getItems() {
-        return items;
-    }
+    public String getStatus() { return status; }
+    public void setStatus(String status) { this.status = status; }
 
-    public void setItems(List<OrderItemDto> items) {
-        this.items = items;
-    }
+    public LocalDateTime getCreatedAt() { return createdAt; }
+    public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
 
-    public BigDecimal getTotalPrice() {
-        return totalPrice;
-    }
+    public LocalDateTime getUpdatedAt() { return updatedAt; }
+    public void setUpdatedAt(LocalDateTime updatedAt) { this.updatedAt = updatedAt; }
 
-    public void setTotalPrice(BigDecimal totalPrice) {
-        this.totalPrice = totalPrice;
-    }
-
-    public String getStatus() {
-        return status;
-    }
-
-    public void setStatus(String status) {
-        this.status = status;
-    }
-
-    public LocalDateTime getCreatedAt() {
-        return createdAt;
-    }
-
-    public void setCreatedAt(LocalDateTime createdAt) {
-        this.createdAt = createdAt;
-    }
-
-    public LocalDateTime getUpdatedAt() {
-        return updatedAt;
-    }
-
-    public void setUpdatedAt(LocalDateTime updatedAt) {
-        this.updatedAt = updatedAt;
-    }
-
-    // Inner class for order items
+    // Inner DTO class for order items
     public static class OrderItemDto {
         private Long id;
         private String itemName;
-        private BigDecimal itemPrice;
+        private BigDecimal itemPrice;  // ใช้ BigDecimal แทน double
         private Integer quantity;
         private BigDecimal subtotal;
 
@@ -106,45 +71,20 @@ public class OrderResponseDto {
             this.subtotal = subtotal;
         }
 
-        // Getters and Setters
-        public Long getId() {
-            return id;
-        }
+        // Getters & Setters
+        public Long getId() { return id; }
+        public void setId(Long id) { this.id = id; }
 
-        public void setId(Long id) {
-            this.id = id;
-        }
+        public String getItemName() { return itemName; }
+        public void setItemName(String itemName) { this.itemName = itemName; }
 
-        public String getItemName() {
-            return itemName;
-        }
+        public BigDecimal getItemPrice() { return itemPrice; }
+        public void setItemPrice(BigDecimal itemPrice) { this.itemPrice = itemPrice; }
 
-        public void setItemName(String itemName) {
-            this.itemName = itemName;
-        }
+        public Integer getQuantity() { return quantity; }
+        public void setQuantity(Integer quantity) { this.quantity = quantity; }
 
-        public BigDecimal getItemPrice() {
-            return itemPrice;
-        }
-
-        public void setItemPrice(BigDecimal itemPrice) {
-            this.itemPrice = itemPrice;
-        }
-
-        public Integer getQuantity() {
-            return quantity;
-        }
-
-        public void setQuantity(Integer quantity) {
-            this.quantity = quantity;
-        }
-
-        public BigDecimal getSubtotal() {
-            return subtotal;
-        }
-
-        public void setSubtotal(BigDecimal subtotal) {
-            this.subtotal = subtotal;
-        }
+        public BigDecimal getSubtotal() { return subtotal; }
+        public void setSubtotal(BigDecimal subtotal) { this.subtotal = subtotal; }
     }
 }
