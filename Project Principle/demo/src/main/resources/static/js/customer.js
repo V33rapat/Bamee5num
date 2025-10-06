@@ -89,6 +89,9 @@ export async function setupCustomerDashboard() {
     });
     closeCart.addEventListener("click", () => cartSidebar.classList.add("translate-x-full"));
 
+    // Place Order button - Add event listener here since it's in the cart sidebar
+    // Note: The button is rendered by loadCart(), so we'll add listener in that function
+
     // Logout - Call server-side logout endpoint to clear session
     document.getElementById("logoutBtn").addEventListener("click", async () => {
         try {
@@ -360,15 +363,71 @@ async function loadCart(userId) {
                 decrementQuantity(cartItemId, userId);
             });
         });
+
+        // Event สั่งจอง (Place Order)
+        const placeOrderBtn = document.getElementById("placeOrderBtn");
+        if (placeOrderBtn) {
+            // Remove any existing event listeners by cloning the button
+            const newPlaceOrderBtn = placeOrderBtn.cloneNode(true);
+            placeOrderBtn.parentNode.replaceChild(newPlaceOrderBtn, placeOrderBtn);
+            
+            // Add new event listener
+            newPlaceOrderBtn.addEventListener("click", () => {
+                placeOrder(userId);
+            });
+        }
+    }
+}
+
+// ======== Place Order ========
+async function placeOrder(userId) {
+    try {
+        // First check if cart has items
+        const cart = await getCart(userId);
+        if (!cart || cart.length === 0) {
+            showNotification("ไม่มีสินค้าในตะกร้า กรุณาเพิ่มสินค้าก่อนสั่งจอง", "error");
+            return;
+        }
+
+        // Call place order API
+        const response = await fetch(`/api/customers/${userId}/place-order`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" }
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json().catch(() => ({ message: "ไม่สามารถสั่งจองได้" }));
+            throw new Error(errorData.message || "ไม่สามารถสั่งจองได้");
+        }
+
+        const orderResponse = await response.json();
+        
+        // Show success notification
+        showNotification("✅ สั่งจองเรียบร้อยแล้ว! คำสั่งซื้อของคุณอยู่ในสถานะรอดำเนินการ", "success");
+        
+        // Clear cart UI
+        await loadCart(userId);
+        
+        // Close cart sidebar after a short delay
+        setTimeout(() => {
+            document.getElementById("cartSidebar").classList.add("translate-x-full");
+        }, 2000);
+
+    } catch (error) {
+        console.error("Error placing order:", error);
+        showNotification(`เกิดข้อผิดพลาด: ${error.message}`, "error");
     }
 }
 
 // ======== Notification ========
-function showNotification(message) {
+function showNotification(message, type = "success") {
     const notifications = document.getElementById("notifications");
     const div = document.createElement("div");
     div.textContent = message;
-    div.className = "bg-orange-500 text-white p-2 rounded shadow mb-2";
+    
+    const bgColor = type === "error" ? "bg-red-500" : "bg-orange-500";
+    div.className = `${bgColor} text-white p-2 rounded shadow mb-2`;
+    
     notifications.appendChild(div);
-    setTimeout(() => div.remove(), 3000);
+    setTimeout(() => div.remove(), 4000);
 }

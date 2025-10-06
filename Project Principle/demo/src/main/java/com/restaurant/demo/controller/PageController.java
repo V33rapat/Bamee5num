@@ -130,6 +130,46 @@ public class PageController {
         return "employee";
     }
 
+    /**
+     * Customer orders page endpoint with session validation
+     * Displays customer's pending orders
+     * 
+     * @param model Model to pass data to Thymeleaf template
+     * @param session HttpSession for server-side session validation
+     * @return View name for Thymeleaf or redirect to login on error
+     */
+    @GetMapping("/customer-orders")
+    public String customerOrders(Model model, HttpSession session) {
+        logger.info("Customer orders page requested, sessionId: {}", session.getId());
+        
+        // Session validation: Check if session contains customer ID
+        Long sessionCustomerId = (Long) session.getAttribute("customerId");
+        logger.info("Session customerId: {}", sessionCustomerId);
+        
+        // If no session exists, redirect to login page
+        if (sessionCustomerId == null) {
+            logger.warn("Session validation failed - no customerId in session");
+            return "redirect:/login?error=unauthorized";
+        }
+        
+        // Fetch customer data from database using customer service
+        Optional<Customer> customerOpt = customerService.findCustomerById(sessionCustomerId);
+        
+        // Handle case when customer is not found in database
+        if (customerOpt.isEmpty()) {
+            logger.warn("Customer not found in database for customerId: {}", sessionCustomerId);
+            return "redirect:/login?error=notfound";
+        }
+        
+        logger.info("Customer orders page loaded successfully for customer: {}", customerOpt.get().getName());
+        
+        // Add customer object to model for Thymeleaf template rendering
+        model.addAttribute("customer", customerOpt.get());
+        
+        // Return "customer-orders" view name for Thymeleaf rendering
+        return "customer-orders";
+    }
+
     @GetMapping("/employee-login")
     public String employeeLogin() {
         return "employee-login";

@@ -33,19 +33,19 @@ Generated from: `prd-order-management-system.md`
 - `Project Principle/demo/src/main/java/com/restaurant/demo/controller/PageController.java` - *UPDATED* - Added employee login page route
 
 ### Frontend - HTML Templates
-- `Project Principle/demo/src/main/resources/templates/customer-orders.html` - *NEW* - Customer pending orders view page
+- `Project Principle/demo/src/main/resources/templates/customer-orders.html` - *CREATED* - Customer pending orders view page
 - `Project Principle/demo/src/main/resources/templates/employee-orders.html` - *NEW* - Employee order management page
 - `Project Principle/demo/src/main/resources/templates/employee-login.html` - *NEW* - Employee login page
 - `Project Principle/demo/src/main/resources/templates/manager.html` - Modify to add employee registration UI
 - `Project Principle/demo/src/main/resources/templates/employee.html` - Modify existing page for order management
-- `Project Principle/demo/src/main/resources/templates/customer.html` - Modify to change button text and add navigation
+- `Project Principle/demo/src/main/resources/templates/customer.html` - *UPDATED* - Modified to add navigation link to pending orders and change button text
 
 ### Frontend - JavaScript
-- `Project Principle/demo/src/main/resources/static/js/customer-orders.js` - *NEW* - Customer pending orders functionality
+- `Project Principle/demo/src/main/resources/static/js/customer-orders.js` - *CREATED* - Customer pending orders functionality with order display, grouping, and status badges
 - `Project Principle/demo/src/main/resources/static/js/employee-orders.js` - *NEW* - Employee order management functionality
 - `Project Principle/demo/src/main/resources/static/js/employee-auth.js` - *NEW* - Employee login functionality
 - `Project Principle/demo/src/main/resources/static/js/manager-employee-register.js` - *NEW* - Manager employee registration functionality
-- `Project Principle/demo/src/main/resources/static/js/customer.js` - Modify to change payment button to order button
+- `Project Principle/demo/src/main/resources/static/js/customer.js` - *UPDATED* - Modified to change payment button to order button with place order API integration
 - `Project Principle/demo/src/main/resources/static/js/manager.js` - Modify to add employee registration UI handling
 
 ### Database
@@ -116,18 +116,18 @@ Generated from: `prd-order-management-system.md`
   - [x] 6.11 Add proper CORS configuration and session management to all new endpoints
   - [x] 6.12 Implement role-based access control (employees cannot access manager endpoints)
   
-- [ ] 7.0 Frontend - Customer Side Features
-  - [ ] 7.1 Create `customer-orders.html` template with Thymeleaf structure
-  - [ ] 7.2 Design customer orders page layout (header, order cards, status indicators)
-  - [ ] 7.3 Create `customer-orders.js` to fetch and display pending orders
-  - [ ] 7.4 Implement order grouping by customer with item details (name, quantity, price)
-  - [ ] 7.5 Display order total calculation and status badge
-  - [ ] 7.6 Modify `customer.html` to add navigation link to pending orders page
-  - [ ] 7.7 Modify `customer.js` to change "ชำระเงิน" button text to "สั่งจอง"
-  - [ ] 7.8 Update button click handler to call place-order API instead of payment
-  - [ ] 7.9 Show success confirmation message after order placement
-  - [ ] 7.10 Clear cart UI after successful order placement
-  - [ ] 7.11 Add error handling for order placement failures
+- [x] 7.0 Frontend - Customer Side Features
+  - [x] 7.1 Create `customer-orders.html` template with Thymeleaf structure
+  - [x] 7.2 Design customer orders page layout (header, order cards, status indicators)
+  - [x] 7.3 Create `customer-orders.js` to fetch and display pending orders
+  - [x] 7.4 Implement order grouping by customer with item details (name, quantity, price)
+  - [x] 7.5 Display order total calculation and status badge
+  - [x] 7.6 Modify `customer.html` to add navigation link to pending orders page
+  - [x] 7.7 Modify `customer.js` to change "ชำระเงิน" button text to "สั่งจอง"
+  - [x] 7.8 Update button click handler to call place-order API instead of payment
+  - [x] 7.9 Show success confirmation message after order placement
+  - [x] 7.10 Clear cart UI after successful order placement
+  - [x] 7.11 Add error handling for order placement failures
   
 - [ ] 8.0 Frontend - Manager Side Features
   - [ ] 8.1 Create employee registration form section in `manager.html` or separate modal
