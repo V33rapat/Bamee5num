@@ -10,6 +10,11 @@ import java.util.Optional;
 public interface CartItemRepository extends JpaRepository<CartItem, Long> {
     List<CartItem> findByCustomer(Customer customer);
     Optional<CartItem> findByCustomerAndItemName(Customer customer, String itemName);
+    
+    // Order management query methods
+    List<CartItem> findByCustomerAndStatus(Customer customer, String status);
+    List<CartItem> findByStatus(String status);
+    List<CartItem> findAllByOrderByCreatedAtDesc();
 
     // Deprecated methods for backward compatibility
     @Deprecated

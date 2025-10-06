@@ -10,8 +10,8 @@ Generated from: `prd-order-management-system.md`
 - `Project Principle/demo/src/main/java/com/restaurant/demo/model/Order.java` - *NEW* - Optional: Create dedicated Order entity if needed for better grouping
 
 ### Backend - Repositories
-- `Project Principle/demo/src/main/java/com/restaurant/demo/repository/CartItemRepository.java` - Add query methods for order status filtering
-- `Project Principle/demo/src/main/java/com/restaurant/demo/repository/EmployeeRepository.java` - Add findByUsername method for employee login
+- `Project Principle/demo/src/main/java/com/restaurant/demo/repository/CartItemRepository.java` - Added query methods for order status filtering and chronological ordering
+- `Project Principle/demo/src/main/java/com/restaurant/demo/repository/EmployeeRepository.java` - *CREATED* - Added findByUsername and existsByUsername methods for employee authentication
 
 ### Backend - DTOs
 - `Project Principle/demo/src/main/java/com/restaurant/demo/dto/OrderPlacementDto.java` - *NEW* - DTO for placing orders
@@ -75,12 +75,12 @@ Generated from: `prd-order-management-system.md`
   - [x] 2.4 Update CartItem constructor to accept status parameter (optional, defaults to "Pending")
   - [x] 2.5 Add getters/setters for new fields in both entities
   
-- [ ] 3.0 Backend - Repository Layer Updates
-  - [ ] 3.1 Add `findByCustomerAndStatus(Customer customer, String status)` to CartItemRepository
-  - [ ] 3.2 Add `findByStatus(String status)` to CartItemRepository for employee view
-  - [ ] 3.3 Add `findAllByOrderByCreatedAtDesc()` to CartItemRepository for chronological order
-  - [ ] 3.4 Add `findByUsername(String username)` to EmployeeRepository
-  - [ ] 3.5 Add `existsByUsername(String username)` to EmployeeRepository for validation
+- [x] 3.0 Backend - Repository Layer Updates
+  - [x] 3.1 Add `findByCustomerAndStatus(Customer customer, String status)` to CartItemRepository
+  - [x] 3.2 Add `findByStatus(String status)` to CartItemRepository for employee view
+  - [x] 3.3 Add `findAllByOrderByCreatedAtDesc()` to CartItemRepository for chronological order
+  - [x] 3.4 Add `findByUsername(String username)` to EmployeeRepository
+  - [x] 3.5 Add `existsByUsername(String username)` to EmployeeRepository for validation
   
 - [ ] 4.0 Backend - DTO Creation
   - [ ] 4.1 Create `OrderPlacementDto.java` with customerId and optional fields
