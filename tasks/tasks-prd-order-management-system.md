@@ -68,12 +68,12 @@ Generated from: `prd-order-management-system.md`
   - [x] 1.4 Create indexes on `cart_items.status` for performance
   - [x] 1.5 Test database schema changes with sample data
   
-- [ ] 2.0 Backend - Model Layer Updates
-  - [ ] 2.1 Add `status` field to `CartItem.java` entity with validation annotations (@NotBlank, enum validation)
-  - [ ] 2.2 Add `username` field to `Employee.java` with @Column(unique=true) and validation
-  - [ ] 2.3 Add `password` field to `Employee.java` with appropriate length constraints
-  - [ ] 2.4 Update CartItem constructor to accept status parameter (optional, defaults to "Pending")
-  - [ ] 2.5 Add getters/setters for new fields in both entities
+- [x] 2.0 Backend - Model Layer Updates
+  - [x] 2.1 Add `status` field to `CartItem.java` entity with validation annotations (@NotBlank, enum validation)
+  - [x] 2.2 Add `username` field to `Employee.java` with @Column(unique=true) and validation
+  - [x] 2.3 Add `password` field to `Employee.java` with appropriate length constraints
+  - [x] 2.4 Update CartItem constructor to accept status parameter (optional, defaults to "Pending")
+  - [x] 2.5 Add getters/setters for new fields in both entities
   
 - [ ] 3.0 Backend - Repository Layer Updates
   - [ ] 3.1 Add `findByCustomerAndStatus(Customer customer, String status)` to CartItemRepository
