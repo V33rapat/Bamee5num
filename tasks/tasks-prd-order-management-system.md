@@ -1,0 +1,176 @@
+# Task List: Order Management System Enhancement
+
+Generated from: `prd-order-management-system.md`
+
+## Relevant Files
+
+### Backend - Models
+- `Project Principle/demo/src/main/java/com/restaurant/demo/model/CartItem.java` - Add status field to existing CartItem entity
+- `Project Principle/demo/src/main/java/com/restaurant/demo/model/Employee.java` - Add username and password fields for authentication
+- `Project Principle/demo/src/main/java/com/restaurant/demo/model/Order.java` - *NEW* - Optional: Create dedicated Order entity if needed for better grouping
+
+### Backend - Repositories
+- `Project Principle/demo/src/main/java/com/restaurant/demo/repository/CartItemRepository.java` - Add query methods for order status filtering
+- `Project Principle/demo/src/main/java/com/restaurant/demo/repository/EmployeeRepository.java` - Add findByUsername method for employee login
+
+### Backend - DTOs
+- `Project Principle/demo/src/main/java/com/restaurant/demo/dto/OrderPlacementDto.java` - *NEW* - DTO for placing orders
+- `Project Principle/demo/src/main/java/com/restaurant/demo/dto/OrderResponseDto.java` - *NEW* - DTO for order responses
+- `Project Principle/demo/src/main/java/com/restaurant/demo/dto/EmployeeLoginDto.java` - *NEW* - DTO for employee login
+- `Project Principle/demo/src/main/java/com/restaurant/demo/dto/EmployeeRegistrationDto.java` - *NEW* - DTO for employee registration by manager
+- `Project Principle/demo/src/main/java/com/restaurant/demo/dto/OrderStatusUpdateDto.java` - *NEW* - DTO for updating order status
+
+### Backend - Services
+- `Project Principle/demo/src/main/java/com/restaurant/demo/service/OrderService.java` - *NEW* - Business logic for order management
+- `Project Principle/demo/src/main/java/com/restaurant/demo/service/EmployeeAuthService.java` - *NEW* - Employee authentication logic
+- `Project Principle/demo/src/main/java/com/restaurant/demo/service/CartService.java` - Modify existing service to handle order placement
+
+### Backend - Controllers
+- `Project Principle/demo/src/main/java/com/restaurant/demo/controller/OrderController.java` - *NEW* - REST endpoints for order operations
+- `Project Principle/demo/src/main/java/com/restaurant/demo/controller/EmployeeController.java` - *NEW* - REST endpoints for employee operations
+- `Project Principle/demo/src/main/java/com/restaurant/demo/controller/ManagerApiController.java` - Add employee registration endpoint
+- `Project Principle/demo/src/main/java/com/restaurant/demo/controller/PageController.java` - Add employee login page route
+
+### Frontend - HTML Templates
+- `Project Principle/demo/src/main/resources/templates/customer-orders.html` - *NEW* - Customer pending orders view page
+- `Project Principle/demo/src/main/resources/templates/employee-orders.html` - *NEW* - Employee order management page
+- `Project Principle/demo/src/main/resources/templates/employee-login.html` - *NEW* - Employee login page
+- `Project Principle/demo/src/main/resources/templates/manager.html` - Modify to add employee registration UI
+- `Project Principle/demo/src/main/resources/templates/employee.html` - Modify existing page for order management
+- `Project Principle/demo/src/main/resources/templates/customer.html` - Modify to change button text and add navigation
+
+### Frontend - JavaScript
+- `Project Principle/demo/src/main/resources/static/js/customer-orders.js` - *NEW* - Customer pending orders functionality
+- `Project Principle/demo/src/main/resources/static/js/employee-orders.js` - *NEW* - Employee order management functionality
+- `Project Principle/demo/src/main/resources/static/js/employee-auth.js` - *NEW* - Employee login functionality
+- `Project Principle/demo/src/main/resources/static/js/manager-employee-register.js` - *NEW* - Manager employee registration functionality
+- `Project Principle/demo/src/main/resources/static/js/customer.js` - Modify to change payment button to order button
+- `Project Principle/demo/src/main/resources/static/js/manager.js` - Modify to add employee registration UI handling
+
+### Database
+- `Project Principle/demo/database-setup.sql` - Add ALTER TABLE statements for status column and employee authentication fields
+
+### Notes
+- The system uses existing Jakarta Bean Validation for DTOs
+- BCrypt password encoding is already configured in the system (PasswordEncoder bean exists)
+- Follow existing patterns for REST API endpoints (e.g., `/api/customers`, `/api/cart`)
+- Use existing CORS configuration pattern: `@CrossOrigin(origins = "http://localhost:8080", allowCredentials = "true", maxAge = 3600)`
+- Session management already exists for customers; implement similar pattern for employees
+- Status transitions: Pending → In Progress → Finish, or any status → Cancelled
+- Consider simple polling (JavaScript setInterval) for order notifications rather than WebSocket
+
+## Tasks
+
+- [x] 1.0 Database Schema Updates
+  - [x] 1.1 Add `status` column to `cart_items` table (VARCHAR/ENUM, default 'Pending', values: 'Pending', 'In Progress', 'Cancelled', 'Finish')
+  - [x] 1.2 Add `username` column to `employees` table (VARCHAR(50), UNIQUE, NOT NULL)
+  - [x] 1.3 Add `password` column to `employees` table (VARCHAR(255), NOT NULL for BCrypt hashes)
+  - [x] 1.4 Create indexes on `cart_items.status` for performance
+  - [x] 1.5 Test database schema changes with sample data
+  
+- [ ] 2.0 Backend - Model Layer Updates
+  - [ ] 2.1 Add `status` field to `CartItem.java` entity with validation annotations (@NotBlank, enum validation)
+  - [ ] 2.2 Add `username` field to `Employee.java` with @Column(unique=true) and validation
+  - [ ] 2.3 Add `password` field to `Employee.java` with appropriate length constraints
+  - [ ] 2.4 Update CartItem constructor to accept status parameter (optional, defaults to "Pending")
+  - [ ] 2.5 Add getters/setters for new fields in both entities
+  
+- [ ] 3.0 Backend - Repository Layer Updates
+  - [ ] 3.1 Add `findByCustomerAndStatus(Customer customer, String status)` to CartItemRepository
+  - [ ] 3.2 Add `findByStatus(String status)` to CartItemRepository for employee view
+  - [ ] 3.3 Add `findAllByOrderByCreatedAtDesc()` to CartItemRepository for chronological order
+  - [ ] 3.4 Add `findByUsername(String username)` to EmployeeRepository
+  - [ ] 3.5 Add `existsByUsername(String username)` to EmployeeRepository for validation
+  
+- [ ] 4.0 Backend - DTO Creation
+  - [ ] 4.1 Create `OrderPlacementDto.java` with customerId and optional fields
+  - [ ] 4.2 Create `OrderResponseDto.java` with order details, items list, total, status, timestamp
+  - [ ] 4.3 Create `EmployeeLoginDto.java` with username and password fields
+  - [ ] 4.4 Create `EmployeeRegistrationDto.java` with name, position, username, password (for manager use)
+  - [ ] 4.5 Create `OrderStatusUpdateDto.java` with orderId/customerId and newStatus
+  - [ ] 4.6 Add Jakarta validation annotations to all DTOs (@NotBlank, @Size, etc.)
+  
+- [ ] 5.0 Backend - Service Layer Development
+  - [ ] 5.1 Create `OrderService.java` with method to place order (convert cart to pending order)
+  - [ ] 5.2 Add method in OrderService to get pending orders by customerId
+  - [ ] 5.3 Add method in OrderService to get all orders by status (for employee)
+  - [ ] 5.4 Add method in OrderService to update order status with validation (status transition rules)
+  - [ ] 5.5 Add method in OrderService to get order count by status (for notifications)
+  - [ ] 5.6 Create `EmployeeAuthService.java` with login authentication method (username + password check with BCrypt)
+  - [ ] 5.7 Add employee registration method to ManagerService or create dedicated service
+  - [ ] 5.8 Update CartService to integrate with OrderService for order placement
+  - [ ] 5.9 Add business logic validation for status transitions (Pending→In Progress→Finish, or →Cancelled)
+  
+- [ ] 6.0 Backend - Controller Layer Development
+  - [ ] 6.1 Create `OrderController.java` with @RestController and @RequestMapping("/api/orders")
+  - [ ] 6.2 Add POST `/api/customers/{customerId}/place-order` endpoint to place order
+  - [ ] 6.3 Add GET `/api/customers/{customerId}/pending-orders` endpoint for customer pending orders
+  - [ ] 6.4 Create `EmployeeController.java` with @RestController and @RequestMapping("/api/employees")
+  - [ ] 6.5 Add POST `/api/employees/login` endpoint for employee authentication
+  - [ ] 6.6 Add GET `/api/employees/orders` endpoint with optional status query parameter
+  - [ ] 6.7 Add GET `/api/employees/orders/{orderId}` endpoint for specific order details
+  - [ ] 6.8 Add PUT `/api/employees/orders/{orderId}/status` endpoint to update order status
+  - [ ] 6.9 Add GET `/api/employees/orders/pending/count` endpoint for notification polling
+  - [ ] 6.10 Add POST `/api/managers/employees` endpoint in ManagerApiController for employee registration
+  - [ ] 6.11 Add proper CORS configuration and session management to all new endpoints
+  - [ ] 6.12 Implement role-based access control (employees cannot access manager endpoints)
+  
+- [ ] 7.0 Frontend - Customer Side Features
+  - [ ] 7.1 Create `customer-orders.html` template with Thymeleaf structure
+  - [ ] 7.2 Design customer orders page layout (header, order cards, status indicators)
+  - [ ] 7.3 Create `customer-orders.js` to fetch and display pending orders
+  - [ ] 7.4 Implement order grouping by customer with item details (name, quantity, price)
+  - [ ] 7.5 Display order total calculation and status badge
+  - [ ] 7.6 Modify `customer.html` to add navigation link to pending orders page
+  - [ ] 7.7 Modify `customer.js` to change "ชำระเงิน" button text to "สั่งจอง"
+  - [ ] 7.8 Update button click handler to call place-order API instead of payment
+  - [ ] 7.9 Show success confirmation message after order placement
+  - [ ] 7.10 Clear cart UI after successful order placement
+  - [ ] 7.11 Add error handling for order placement failures
+  
+- [ ] 8.0 Frontend - Manager Side Features
+  - [ ] 8.1 Create employee registration form section in `manager.html` or separate modal
+  - [ ] 8.2 Add input fields for name, position (dropdown), username, password
+  - [ ] 8.3 Create `manager-employee-register.js` to handle form submission
+  - [ ] 8.4 Implement client-side validation (required fields, username uniqueness check)
+  - [ ] 8.5 Call POST `/api/managers/employees` endpoint with form data
+  - [ ] 8.6 Display success message with generated credentials (if applicable)
+  - [ ] 8.7 Display error messages for duplicate username or validation failures
+  - [ ] 8.8 Add employee registration to manager dashboard navigation/tabs
+  - [ ] 8.9 Update manager statistics to show order counts (pending, completed)
+  - [ ] 8.10 Integrate employee registration with existing manager.js functionality
+  
+- [ ] 9.0 Frontend - Employee Side Features
+  - [ ] 9.1 Create `employee-login.html` template with login form (username, password)
+  - [ ] 9.2 Create `employee-auth.js` to handle employee login POST request
+  - [ ] 9.3 Store employee session data after successful login
+  - [ ] 9.4 Redirect to employee dashboard after login
+  - [ ] 9.5 Create `employee-orders.html` or modify existing `employee.html` for order management
+  - [ ] 9.6 Design order management UI (table or card layout grouped by customer)
+  - [ ] 9.7 Create `employee-orders.js` to fetch and display all orders
+  - [ ] 9.8 Implement order filtering by status (Pending, In Progress, Finish, Cancelled)
+  - [ ] 9.9 Display order details: customer ID/name, items list, quantities, prices, subtotals, total
+  - [ ] 9.10 Add status update dropdown/buttons for each order (Pending→In Progress→Finish, or →Cancelled)
+  - [ ] 9.11 Implement PUT request to update order status with confirmation
+  - [ ] 9.12 Add notification polling (setInterval) to check for new pending orders every 30 seconds
+  - [ ] 9.13 Display notification badge/alert when new orders detected
+  - [ ] 9.14 Implement bill viewing functionality for orders with any status
+  - [ ] 9.15 Add access control check to prevent employees from accessing manager pages
+  - [ ] 9.16 Style status badges with color coding (Pending: yellow, In Progress: blue, Finish: green, Cancelled: red)
+  
+- [ ] 10.0 Integration Testing and Validation
+  - [ ] 10.1 Test customer can place order successfully (cart items get status "Pending")
+  - [ ] 10.2 Test customer can view their pending orders with correct item details
+  - [ ] 10.3 Test manager can register new employee with username and password
+  - [ ] 10.4 Test employee can login with credentials
+  - [ ] 10.5 Test employee can see all pending orders from all customers
+  - [ ] 10.6 Test employee can update order status (Pending→In Progress→Finish)
+  - [ ] 10.7 Test employee can cancel orders from any status
+  - [ ] 10.8 Test order notification polling detects new orders
+  - [ ] 10.9 Test role-based access control (employees cannot access manager endpoints)
+  - [ ] 10.10 Test multiple customers can place orders independently
+  - [ ] 10.11 Test order totals calculate correctly with multiple items
+  - [ ] 10.12 Test status transition validation (invalid transitions are rejected)
+  - [ ] 10.13 Test concurrent order handling (multiple pending orders per customer)
+  - [ ] 10.14 Test error handling for all edge cases (missing data, invalid IDs, etc.)
+  - [ ] 10.15 Verify database constraints and indexes are working correctly

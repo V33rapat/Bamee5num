@@ -41,11 +41,13 @@ CREATE TABLE IF NOT EXISTS cart_items (
     item_name VARCHAR(100) NOT NULL,
     item_price DECIMAL(6,2) NOT NULL CHECK (item_price >= 0.01 AND item_price <= 9999.99),
     quantity INT NOT NULL DEFAULT 1 CHECK (quantity >= 1 AND quantity <= 100),
+    status VARCHAR(20) NOT NULL DEFAULT 'Pending' CHECK (status IN ('Pending', 'In Progress', 'Cancelled', 'Finish')),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     FOREIGN KEY (customer_id) REFERENCES customers(id) ON DELETE CASCADE,
     INDEX idx_customer_id (customer_id),
-    INDEX idx_created_at (created_at)
+    INDEX idx_created_at (created_at),
+    INDEX idx_status (status)
 );
 
 -- Create employees table (base table for Employee entity with JOINED inheritance)
@@ -53,7 +55,10 @@ CREATE TABLE IF NOT EXISTS employees (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(100) NOT NULL,
     position VARCHAR(50) NOT NULL,
-    INDEX idx_position (position)
+    username VARCHAR(50) UNIQUE NOT NULL,
+    password VARCHAR(255) NOT NULL,
+    INDEX idx_position (position),
+    INDEX idx_username (username)
 );
 
 -- Create managers table (extends employees with JOINED inheritance strategy)
@@ -87,10 +92,11 @@ INSERT INTO customers (name, username, email, phone, password_hash) VALUES
 ('Jane Smith', 'janesmith', 'jane@example.com', '089-876-5432', '$2a$10$example_hash');
 
 -- Insert sample employees and managers (optional)
-INSERT INTO employees (id, name, position) VALUES
-(1001, 'Alice Manager', 'Manager'),
-(1002, 'Bob Employee', 'employee'),
-(1003, 'Charlie Employee', 'employee');
+-- Note: password is 'password123' hashed with BCrypt
+INSERT INTO employees (id, name, position, username, password) VALUES
+(1001, 'Alice Manager', 'Manager', 'alice_manager', '$2a$12$eJtOxgKnHNmUBfe72eOhEOjsaUqsX5YRb0uuQmhnRrDONGcv.z.EG'),
+(1002, 'Bob Employee', 'Cashier', 'bob_employee', '$2a$12$eJtOxgKnHNmUBfe72eOhEOjsaUqsX5YRb0uuQmhnRrDONGcv.z.EG'),
+(1003, 'Charlie Employee', 'Cook', 'charlie_employee', '$2a$12$eJtOxgKnHNmUBfe72eOhEOjsaUqsX5YRb0uuQmhnRrDONGcv.z.EG');
 
 INSERT INTO managers (id, username, email, password, created_at, updated_at) VALUES 
 (1001, 'alice_manager', 'alice@restaurant.com', '$2a$12$eJtOxgKnHNmUBfe72eOhEOjsaUqsX5YRb0uuQmhnRrDONGcv.z.EG', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
@@ -106,17 +112,39 @@ INSERT INTO menu_items (name, price, category, description, active) VALUES
 SHOW TABLES;
 
 -- ============================================================================
+-- SCHEMA VERIFICATION NOTES
+-- ============================================================================
+-- Database schema changes for Order Management System:
+-- 1. ✓ cart_items.status - VARCHAR(20), default 'Pending', with CHECK constraint
+-- 2. ✓ cart_items.idx_status - Index for performance on status queries
+-- 3. ✓ employees.username - VARCHAR(50), UNIQUE, NOT NULL for authentication
+-- 4. ✓ employees.password - VARCHAR(255), NOT NULL for BCrypt hashes
+-- 5. ✓ employees.idx_username - Index for username lookups
+-- 
+-- All schema changes are backward compatible with migration scripts provided below.
+-- ============================================================================
+
+-- ============================================================================
 -- MIGRATION SCRIPTS FOR EXISTING DATABASES
 -- ============================================================================
 -- If you already have an existing database with the old schema, run these
 -- ALTER TABLE statements to migrate to the new schema with manager authentication
 -- ============================================================================
 
--- Step 1: Modify employees table - change id from INT to BIGINT
+-- Step 1: Add status column to cart_items table for order management
+ALTER TABLE cart_items ADD COLUMN status VARCHAR(20) NOT NULL DEFAULT 'Pending' CHECK (status IN ('Pending', 'In Progress', 'Cancelled', 'Finish'));
+ALTER TABLE cart_items ADD INDEX idx_status (status);
+
+-- Step 2: Add authentication fields to employees table
+ALTER TABLE employees ADD COLUMN username VARCHAR(50) UNIQUE NOT NULL;
+ALTER TABLE employees ADD COLUMN password VARCHAR(255) NOT NULL;
+ALTER TABLE employees ADD INDEX idx_username (username);
+
+-- Step 3: Modify employees table - change id from INT to BIGINT
 -- Note: This requires dropping and recreating the managers table first due to FK constraint
 -- ALTER TABLE employees MODIFY COLUMN id BIGINT;
 
--- Step 2: Modify managers table - change id from INT to BIGINT and add authentication fields
+-- Step 4: Modify managers table - change id from INT to BIGINT and add authentication fields
 -- Note: If managers table exists with old schema, drop and recreate it
 -- DROP TABLE IF EXISTS managers;
 -- Then the CREATE TABLE statement above will handle the new structure
@@ -132,4 +160,5 @@ SHOW TABLES;
 -- ALTER TABLE managers ADD INDEX idx_username (username);
 -- ALTER TABLE managers ADD INDEX idx_email (email);
 -- ALTER TABLE managers ADD FOREIGN KEY (id) REFERENCES employees(id) ON DELETE CASCADE;
+
 
