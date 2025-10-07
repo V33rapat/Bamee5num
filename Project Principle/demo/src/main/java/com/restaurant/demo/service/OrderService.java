@@ -222,64 +222,63 @@ public class OrderService {
      * @return OrderResponseDto with updated order
      * @throws RuntimeException if customer not found or validation fails
      */
-    public OrderResponseDto updateOrderStatus(OrderStatusUpdateDto updateDto) {
-        Long customerId = updateDto.getCustomerId();
-        String newStatus = updateDto.getNewStatus();
+    public OrderResponseDto updateOrderStatus(Long orderId, String newStatus) {
+    // ใช้ orderId จาก path variable
+    Customer customer = customerRepository.findById(orderId)
+            .orElseThrow(() -> new RuntimeException("Customer not found with ID: " + orderId));
 
-        Customer customer = customerRepository.findById(customerId)
-                .orElseThrow(() -> new RuntimeException("Customer not found with ID: " + customerId));
+    List<CartItem> customerItems = cartItemRepository.findByCustomer(customer);
 
-        List<CartItem> customerItems = cartItemRepository.findByCustomer(customer);
+    if (customerItems.isEmpty()) {
+        throw new RuntimeException("No items found for customer ID: " + orderId);
+    }
 
-        if (customerItems.isEmpty()) {
-            throw new RuntimeException("No items found for customer ID: " + customerId);
-        }
+    String currentStatus = customerItems.get(0).getStatus();
 
-        String currentStatus = customerItems.get(0).getStatus();
-
-        if (!isValidStatusTransition(currentStatus, newStatus)) {
-            throw new IllegalArgumentException(
-                    String.format("Invalid status transition from %s to %s", currentStatus, newStatus)
-            );
-        }
-
-        customerItems.forEach(item -> item.setStatus(newStatus));
-        cartItemRepository.saveAll(customerItems);
-
-        BigDecimal totalPrice = customerItems.stream()
-                .map(CartItem::getTotalPrice)
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
-
-        List<OrderResponseDto.OrderItemDto> orderItems = customerItems.stream()
-                .map(item -> new OrderResponseDto.OrderItemDto(
-                        item.getId(),
-                        item.getItemName(),
-                        item.getItemPrice(),
-                        item.getQuantity(),
-                        item.getTotalPrice()
-                ))
-                .collect(Collectors.toList());
-
-        LocalDateTime createdAt = customerItems.stream()
-                .map(CartItem::getCreatedAt)
-                .min(LocalDateTime::compareTo)
-                .orElse(LocalDateTime.now());
-
-        LocalDateTime updatedAt = customerItems.stream()
-                .map(CartItem::getUpdatedAt)
-                .max(LocalDateTime::compareTo)
-                .orElse(LocalDateTime.now());
-
-        return new OrderResponseDto(
-                customer.getId(),
-                customer.getName(),
-                orderItems,
-                totalPrice,
-                newStatus,
-                createdAt,
-                updatedAt
+    if (!isValidStatusTransition(currentStatus, newStatus)) {
+        throw new IllegalArgumentException(
+                String.format("Invalid status transition from %s to %s", currentStatus, newStatus)
         );
     }
+
+    customerItems.forEach(item -> item.setStatus(newStatus));
+    cartItemRepository.saveAll(customerItems);
+
+    BigDecimal totalPrice = customerItems.stream()
+            .map(CartItem::getTotalPrice)
+            .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+    List<OrderResponseDto.OrderItemDto> orderItems = customerItems.stream()
+            .map(item -> new OrderResponseDto.OrderItemDto(
+                    item.getId(),
+                    item.getItemName(),
+                    item.getItemPrice(),
+                    item.getQuantity(),
+                    item.getTotalPrice()
+            ))
+            .collect(Collectors.toList());
+
+    LocalDateTime createdAt = customerItems.stream()
+            .map(CartItem::getCreatedAt)
+            .min(LocalDateTime::compareTo)
+            .orElse(LocalDateTime.now());
+
+    LocalDateTime updatedAt = customerItems.stream()
+            .map(CartItem::getUpdatedAt)
+            .max(LocalDateTime::compareTo)
+            .orElse(LocalDateTime.now());
+
+    return new OrderResponseDto(
+            customer.getId(),
+            customer.getName(),
+            orderItems,
+            totalPrice,
+            newStatus,
+            createdAt,
+            updatedAt
+    );
+}
+
 
     /**
      * Get count of orders by status (for notification polling)
