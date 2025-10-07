@@ -4,10 +4,12 @@ import com.restaurant.demo.dto.OrderResponseDto;
 import com.restaurant.demo.dto.OrderStatusUpdateDto;
 import com.restaurant.demo.model.CartItem;
 import com.restaurant.demo.model.Customer;
+import com.restaurant.demo.model.Employee;
 import com.restaurant.demo.model.OrderItem;
 import com.restaurant.demo.model.Order;
 import com.restaurant.demo.repository.CartItemRepository;
 import com.restaurant.demo.repository.CustomerRepository;
+import com.restaurant.demo.repository.EmployeeRepository;
 import com.restaurant.demo.repository.OrderRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -18,6 +20,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+
+
 @Service
 @Transactional
 public class OrderService {
@@ -25,76 +29,93 @@ public class OrderService {
     private final CartItemRepository cartItemRepository;
     private final CustomerRepository customerRepository;
     private final OrderRepository orderRepository;
+    private final EmployeeRepository employeeRepository;
 
-    public OrderService(CartItemRepository cartItemRepository, CustomerRepository customerRepository, OrderRepository orderRepository) {
+    public OrderService(CartItemRepository cartItemRepository,
+                        CustomerRepository customerRepository,
+                        OrderRepository orderRepository,
+                        EmployeeRepository employeeRepository) {
         this.cartItemRepository = cartItemRepository;
         this.customerRepository = customerRepository;
         this.orderRepository = orderRepository;
+        this.employeeRepository = employeeRepository;
     }
 
-    /**
-     * Place an order by converting cart items to pending orders
-     * 
-     * @param customerId The ID of the customer placing the order
-     * @return OrderResponseDto containing the placed order details
-     * @throws RuntimeException if customer not found or cart is empty
-     */
     @Transactional
-    public OrderResponseDto placeOrder(Long customerId) {
+    public OrderResponseDto placeOrder(Long customerId, Long employeeId) {
+        LocalDateTime now = LocalDateTime.now();
+
         Customer customer = customerRepository.findById(customerId)
                 .orElseThrow(() -> new RuntimeException("Customer not found with ID: " + customerId));
 
-        List<CartItem> cartItems = cartItemRepository.findByCustomerAndStatus(customer, "Cart");
+        Employee employee = null;
+        if (employeeId != null) {
+            employee = employeeRepository.findById(employeeId)
+                    .orElseThrow(() -> new RuntimeException("Employee not found with ID: " + employeeId));
+        }
 
+        List<CartItem> cartItems = cartItemRepository.findByCustomerAndStatus(customer, CartItem.STATUS_PENDING);
         if (cartItems.isEmpty()) {
-            throw new RuntimeException("Cart is empty. Cannot place order.");
+            throw new RuntimeException("Cart is empty for customer ID: " + customerId);
         }
 
         Order order = new Order();
         order.setCustomer(customer);
-        order.setStatus("Pending");
-        order.setCreatedAt(LocalDateTime.now());
-        order.setUpdatedAt(LocalDateTime.now());
+        order.setEmployee(employee);
+        order.setStatus("PENDING");
+        order.setCreatedAt(now);
+        order.setUpdatedAt(now);
 
         List<OrderItem> orderItems = cartItems.stream().map(cart -> {
             OrderItem item = new OrderItem();
             item.setOrder(order);
             item.setItemName(cart.getItemName());
-            item.setQuantity(cart.getQuantity());
-            item.setTotalPrice(cart.getItemPrice().multiply(BigDecimal.valueOf(cart.getQuantity())));
+            item.setQuantity(cart.getQuantity() != null ? cart.getQuantity() : 0);
+            BigDecimal price = cart.getItemPrice() != null ? cart.getItemPrice() : BigDecimal.ZERO;
+            item.setItemPrice(price);
+            item.setTotalPrice(price.multiply(BigDecimal.valueOf(cart.getQuantity())));
+
             return item;
         }).collect(Collectors.toList());
 
-        order.setOrderItems(orderItems);
-        orderRepository.save(order); // cascade save OrderItem
+        order.getOrderItems().addAll(orderItems);
 
-        cartItems.forEach(c -> c.setStatus("Ordered"));
+        order.setTotalPrice(orderItems.stream()
+                .map(i -> i.getTotalPrice() != null ? i.getTotalPrice() : BigDecimal.ZERO)
+                .reduce(BigDecimal.ZERO, BigDecimal::add));
+        System.out.println("Order totalPrice: " + order.getTotalPrice());
+        order.getOrderItems().forEach(i -> 
+                System.out.println("Item totalPrice: " + i.getTotalPrice() + " | itemName: " + i.getItemName())
+        );
+        orderRepository.save(order);
+
+        cartItems.forEach(c -> {
+            c.setStatus(CartItem.STATUS_ORDERED);
+            c.setUpdatedAt(now);
+        });
         cartItemRepository.saveAll(cartItems);
-
-        BigDecimal totalPrice = orderItems.stream()
-                .map(OrderItem::getTotalPrice)
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
 
         List<OrderResponseDto.OrderItemDto> dtoItems = orderItems.stream()
                 .map(i -> new OrderResponseDto.OrderItemDto(
                         i.getId(),
                         i.getItemName(),
-                        i.getTotalPrice(),
+                        i.getItemPrice(),
                         i.getQuantity(),
                         i.getTotalPrice()
-                ))
-                .collect(Collectors.toList());
+                )).collect(Collectors.toList());
 
         return new OrderResponseDto(
                 customer.getId(),
                 customer.getName(),
                 dtoItems,
-                totalPrice,
+                order.getTotalPrice(),
                 order.getStatus(),
                 order.getCreatedAt(),
                 order.getUpdatedAt()
         );
     }
+
+
 
     /**
      * Get pending orders for a specific customer
@@ -167,7 +188,7 @@ public class OrderService {
             throw new IllegalArgumentException("Invalid status: " + status);
         }
 
-        List<CartItem> items = cartItemRepository.findByStatus(status);
+        List<CartItem> items = cartItemRepository.findByStatusIgnoreCase(status);
 
 
         Map<Customer, List<CartItem>> itemsByCustomer = items.stream()

@@ -20,7 +20,7 @@ public class OrderItem {
     private String itemName;
 
     @Column(nullable = false)
-    private double itemPrice;
+    private BigDecimal itemPrice;
 
     @Column(nullable = false)
     private Integer quantity;
@@ -37,8 +37,8 @@ public class OrderItem {
     public String getItemName() { return itemName; }
     public void setItemName(String itemName) { this.itemName = itemName; }
 
-    public double getItemPrice() { return itemPrice; }
-    public void setItemPrice(double itemPrice) { this.itemPrice = itemPrice; }
+    public BigDecimal getItemPrice() { return itemPrice; }
+    public void setItemPrice(BigDecimal itemPrice) { this.itemPrice = itemPrice; }
 
     public Integer getQuantity() { return quantity; }
     public void setQuantity(Integer quantity) { this.quantity = quantity; }

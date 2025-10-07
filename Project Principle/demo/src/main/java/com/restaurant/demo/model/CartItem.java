@@ -17,6 +17,7 @@ public class CartItem {
     public static final String STATUS_IN_PROGRESS = "In Progress";
     public static final String STATUS_CANCELLED = "Cancelled";
     public static final String STATUS_FINISH = "Finish";
+    public static final String STATUS_ORDERED = "Ordered";
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -57,6 +58,18 @@ public class CartItem {
     @UpdateTimestamp
     @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt;
+
+    @ManyToOne
+    @JoinColumn(name = "order_id")
+    private Order order;
+
+    public Order getOrder() {
+        return order;
+    }
+
+    public void setOrder(Order order) {
+        this.order = order;
+    }
 
     // Default constructor
     public CartItem() {}

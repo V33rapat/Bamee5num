@@ -37,16 +37,21 @@ public class OrderController {
      */
     @PostMapping("/customers/{customerId}/place-order")
     public ResponseEntity<OrderResponseDto> placeOrder(
-            @PathVariable @NotNull(message = "Customer ID is required") @Positive(message = "Customer ID must be positive") Long customerId) {
-        
-        logger.info("Placing order for customer ID: {}", customerId);
-        
-        OrderResponseDto orderResponse = orderService.placeOrder(customerId);
-        
+            @PathVariable 
+            @NotNull(message = "Customer ID is required") 
+            @Positive(message = "Customer ID must be positive") Long customerId,
+            @RequestParam(required = false) Long employeeId) { // employeeId ส่งมาหรือไม่ก็ได้
+
+        logger.info("Placing order for customer ID: {}, employee ID: {}", customerId, employeeId);
+
+        // เรียก service แบบสองพารามิเตอร์
+        OrderResponseDto orderResponse = orderService.placeOrder(customerId, employeeId);
+
         logger.info("Order placed successfully for customer ID: {}, Total: {}", customerId, orderResponse.getTotalPrice());
-        
+
         return new ResponseEntity<>(orderResponse, HttpStatus.CREATED);
-    }
+}
+
 
     /**
      * Get pending orders for a customer
