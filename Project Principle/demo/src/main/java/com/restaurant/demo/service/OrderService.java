@@ -41,79 +41,89 @@ public class OrderService {
         this.employeeRepository = employeeRepository;
     }
 
-    @Transactional
-    public OrderResponseDto placeOrder(Long customerId, Long employeeId) {
-        LocalDateTime now = LocalDateTime.now();
 
-        Customer customer = customerRepository.findById(customerId)
-                .orElseThrow(() -> new RuntimeException("Customer not found with ID: " + customerId));
+@Transactional
+public OrderResponseDto placeOrder(Long customerId, Long employeeId) {
+    LocalDateTime now = LocalDateTime.now();
 
-        Employee employee = null;
-        if (employeeId != null) {
-            employee = employeeRepository.findById(employeeId)
-                    .orElseThrow(() -> new RuntimeException("Employee not found with ID: " + employeeId));
-        }
+    // 🧩 ดึงข้อมูลลูกค้า
+    Customer customer = customerRepository.findById(customerId)
+            .orElseThrow(() -> new RuntimeException("Customer not found"));
 
-        List<CartItem> cartItems = cartItemRepository.findByCustomerAndStatus(customer, CartItem.STATUS_PENDING);
-        if (cartItems.isEmpty()) {
-            throw new RuntimeException("Cart is empty for customer ID: " + customerId);
-        }
-
-        Order order = new Order();
-        order.setCustomer(customer);
-        order.setEmployee(employee);
-        order.setStatus("PENDING");
-        order.setCreatedAt(now);
-        order.setUpdatedAt(now);
-
-        List<OrderItem> orderItems = cartItems.stream().map(cart -> {
-            OrderItem item = new OrderItem();
-            item.setOrder(order);
-            item.setItemName(cart.getItemName());
-            item.setQuantity(cart.getQuantity() != null ? cart.getQuantity() : 0);
-            BigDecimal price = cart.getItemPrice() != null ? cart.getItemPrice() : BigDecimal.ZERO;
-            item.setItemPrice(price);
-            item.setTotalPrice(price.multiply(BigDecimal.valueOf(cart.getQuantity())));
-
-            return item;
-        }).collect(Collectors.toList());
-
-        order.getOrderItems().addAll(orderItems);
-
-        order.setTotalPrice(orderItems.stream()
-                .map(i -> i.getTotalPrice() != null ? i.getTotalPrice() : BigDecimal.ZERO)
-                .reduce(BigDecimal.ZERO, BigDecimal::add));
-        System.out.println("Order totalPrice: " + order.getTotalPrice());
-        order.getOrderItems().forEach(i -> 
-                System.out.println("Item totalPrice: " + i.getTotalPrice() + " | itemName: " + i.getItemName())
-        );
-        orderRepository.save(order);
-
-        cartItems.forEach(c -> {
-            c.setStatus(CartItem.STATUS_ORDERED);
-            c.setUpdatedAt(now);
-        });
-        cartItemRepository.saveAll(cartItems);
-
-        List<OrderResponseDto.OrderItemDto> dtoItems = orderItems.stream()
-                .map(i -> new OrderResponseDto.OrderItemDto(
-                        i.getId(),
-                        i.getItemName(),
-                        i.getItemPrice(),
-                        i.getQuantity(),
-                        i.getTotalPrice()
-                )).collect(Collectors.toList());
-
-        return new OrderResponseDto(
-                customer.getId(),
-                customer.getName(),
-                dtoItems,
-                order.getTotalPrice(),
-                order.getStatus(),
-                order.getCreatedAt(),
-                order.getUpdatedAt()
-        );
+    // 🧩 ดึงพนักงาน (ถ้ามี)
+    Employee employee = null;
+    if (employeeId != null) {
+        employee = employeeRepository.findById(employeeId)
+                .orElseThrow(() -> new RuntimeException("Employee not found"));
     }
+
+    // 🧩 ดึง cart items ที่ยัง pending
+    List<CartItem> cartItems = cartItemRepository.findByCustomerAndStatus(customer, "Pending");
+    if (cartItems.isEmpty()) throw new RuntimeException("Cart is empty");
+
+    // 🧩 สร้าง Order ใหม่
+    Order order = new Order();
+    order.setCustomer(customer);
+    order.setEmployee(employee);
+    order.setStatus("Pending");
+    order.setCreatedAt(now);
+    order.setUpdatedAt(now);
+    order.setTotalAmount(BigDecimal.ZERO);
+
+    BigDecimal totalAmount = BigDecimal.ZERO;
+
+    // 🧩 แปลง CartItem → OrderItem
+    for (CartItem ci : cartItems) {
+        OrderItem oi = new OrderItem();
+        oi.setItemName(ci.getItemName());
+        oi.setItemPrice(ci.getItemPrice() != null ? ci.getItemPrice() : BigDecimal.ZERO);
+        oi.setQuantity(ci.getQuantity() != null ? ci.getQuantity() : 1);
+        oi.setCreatedAt(now);
+        oi.setUpdatedAt(now);
+
+        // ✅ ผูก relation ทั้งสองฝั่ง
+        oi.setOrder(order);
+        order.getOrderItems().add(oi);
+
+        // ✅ คำนวณ total
+        BigDecimal itemTotal = oi.getItemPrice().multiply(BigDecimal.valueOf(oi.getQuantity()));
+        oi.setTotal(itemTotal);
+        totalAmount = totalAmount.add(itemTotal);
+
+        // ✅ เปลี่ยนสถานะ cart item
+        ci.setStatus("Ordered");
+        ci.setUpdatedAt(now);
+    }
+
+    order.setTotalAmount(totalAmount);
+
+    // 🧩 บันทึก order (cascade = insert order_items ด้วย)
+    orderRepository.save(order);
+
+    // 🧩 อัปเดต cart items
+    cartItemRepository.saveAll(cartItems);
+
+    // 🧩 map เป็น DTO ส่งกลับ
+    List<OrderResponseDto.OrderItemDto> dtoItems = order.getOrderItems().stream()
+            .map(i -> new OrderResponseDto.OrderItemDto(
+                    i.getId(),
+                    i.getItemName(),
+                    i.getItemPrice(),
+                    i.getQuantity(),
+                    i.getTotal()
+            ))
+            .toList();
+
+    return new OrderResponseDto(
+            customer.getId(),
+            customer.getName(),
+            dtoItems,
+            order.getTotalAmount(),
+            order.getStatus(),
+            order.getCreatedAt(),
+            order.getUpdatedAt()
+    );
+}
 
 
 

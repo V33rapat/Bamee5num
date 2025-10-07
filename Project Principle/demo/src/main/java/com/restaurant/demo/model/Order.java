@@ -14,40 +14,67 @@ public class Order {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    // ความสัมพันธ์กับลูกค้า
     @ManyToOne
     @JoinColumn(name = "customer_id", nullable = false)
     private Customer customer;
 
-    // ความสัมพันธ์กับพนักงาน (optional)
     @ManyToOne
     @JoinColumn(name = "employee_id")
     private Employee employee;
 
-    // ความสัมพันธ์กับ order_items
+    // ใช้ OrderItem แทน CartItem
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<OrderItem> orderItems = new ArrayList<>();
 
     @Column(nullable = false, length = 20)
-    private String status;
+    private String status = "Pending";
 
-    @Column(name = "total_price", nullable = false, precision = 10, scale = 2)
-    private BigDecimal totalPrice;
+    @Column(name = "total_amount", nullable = false, precision = 10, scale = 2)
+    private BigDecimal totalAmount = BigDecimal.ZERO;
 
-    @Column(nullable = false)
+    @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
     @Column(nullable = false)
     private LocalDateTime updatedAt;
 
-    // ===== Constructor =====
     public Order() {
-        this.status = "PENDING";
-        this.totalPrice = BigDecimal.ZERO;
         LocalDateTime now = LocalDateTime.now();
         this.createdAt = now;
         this.updatedAt = now;
     }
+
+    @PrePersist
+    protected void onCreate() {
+        createdAt = LocalDateTime.now();
+        updatedAt = LocalDateTime.now();
+        calculateTotalAmount();
+    }
+
+    @PreUpdate
+    protected void onUpdate() {
+        updatedAt = LocalDateTime.now();
+        calculateTotalAmount();
+    }
+
+    public void addOrderItem(OrderItem item) {
+    item.setOrder(this); // สำคัญมาก!!
+    this.orderItems.add(item);
+    calculateTotalAmount();
+    }
+
+    public void removeOrderItem(OrderItem item) {
+        this.orderItems.remove(item);
+        item.setOrder(null);
+        calculateTotalAmount();
+    }
+
+   public void calculateTotalAmount() {
+    this.totalAmount = orderItems.stream()
+        .map(OrderItem::getTotal)
+        .reduce(BigDecimal.ZERO, BigDecimal::add);
+}
+
 
     // ===== Getter / Setter =====
     public Long getId() { return id; }
@@ -59,17 +86,30 @@ public class Order {
     public void setEmployee(Employee employee) { this.employee = employee; }
 
     public List<OrderItem> getOrderItems() { return orderItems; }
-    public void setOrderItems(List<OrderItem> orderItems) { this.orderItems = orderItems; }
+    public void setOrderItems(List<OrderItem> orderItems) { 
+        this.orderItems = orderItems; 
+        calculateTotalAmount();
+    }
 
     public String getStatus() { return status; }
     public void setStatus(String status) { this.status = status; }
 
-    public BigDecimal getTotalPrice() { return totalPrice; }
-    public void setTotalPrice(BigDecimal totalPrice) { this.totalPrice = totalPrice; }
+    public BigDecimal getTotalAmount() { 
+    calculateTotalAmount(); 
+    return totalAmount; 
+    }
+    public void setTotalAmount(BigDecimal totalAmount) { this.totalAmount = totalAmount; }
+
+    public void setTotalPrice(BigDecimal totalAmount) { this.totalAmount = totalAmount; }
 
     public LocalDateTime getCreatedAt() { return createdAt; }
     public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
 
     public LocalDateTime getUpdatedAt() { return updatedAt; }
     public void setUpdatedAt(LocalDateTime updatedAt) { this.updatedAt = updatedAt; }
+
+    public BigDecimal getTotalPrice() {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'getTotalPrice'");
+    }
 }
