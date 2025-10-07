@@ -41,7 +41,7 @@ CREATE TABLE IF NOT EXISTS cart_items (
     item_name VARCHAR(100) NOT NULL,
     item_price DECIMAL(6,2) NOT NULL CHECK (item_price >= 0.01 AND item_price <= 9999.99),
     quantity INT NOT NULL DEFAULT 1 CHECK (quantity >= 1 AND quantity <= 100),
-    status VARCHAR(20) NOT NULL DEFAULT 'Pending' CHECK (status IN ('Pending', 'In Progress', 'Cancelled', 'Finish')),
+    status VARCHAR(20) NOT NULL DEFAULT 'Pending' CHECK (status IN ('Pending')),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     FOREIGN KEY (customer_id) REFERENCES customers(id) ON DELETE CASCADE,
@@ -97,7 +97,7 @@ CREATE TABLE IF NOT EXISTS orders (
     employee_id BIGINT NULL,
     total_amount DECIMAL(10, 2) NOT NULL CHECK (total_amount >= 0),
     status VARCHAR(20) NOT NULL DEFAULT 'Pending'
-        CHECK (status IN ('Pending', 'In Progress', 'Completed', 'Cancelled')),
+        CHECK (status IN ('Pending', 'In Progress', 'Finish', 'Cancelled')),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     
@@ -174,34 +174,25 @@ SHOW TABLES;
 -- ALTER TABLE statements to migrate to the new schema with manager authentication
 -- ============================================================================
 
--- Step 1: Add status column to cart_items table for order management
-ALTER TABLE cart_items ADD COLUMN status VARCHAR(20) NOT NULL DEFAULT 'Pending' CHECK (status IN ('Pending', 'In Progress', 'Cancelled', 'Finish'));
-ALTER TABLE cart_items ADD INDEX idx_status (status);
+-- ⚠️ IMPORTANT: Run these migrations for existing databases
 
--- Step 2: Add authentication fields to employees table
-ALTER TABLE employees ADD COLUMN username VARCHAR(50) UNIQUE NOT NULL;
-ALTER TABLE employees ADD COLUMN password VARCHAR(255) NOT NULL;
-ALTER TABLE employees ADD INDEX idx_username (username);
+-- Step 1: Fix orders table CHECK constraint (change 'Completed' to 'Finish')
+-- First, drop the existing constraint
+ALTER TABLE orders DROP CHECK orders_chk_1;
+-- Add the corrected constraint
+ALTER TABLE orders ADD CONSTRAINT orders_chk_status 
+    CHECK (status IN ('Pending', 'In Progress', 'Finish', 'Cancelled'));
 
--- Step 3: Modify employees table - change id from INT to BIGINT
--- Note: This requires dropping and recreating the managers table first due to FK constraint
--- ALTER TABLE employees MODIFY COLUMN id BIGINT;
+-- Step 2: Simplify cart_items status constraint (only 'Pending' needed now)
+-- Drop old constraint
+ALTER TABLE cart_items DROP CHECK cart_items_chk_1;
+-- Add simplified constraint (cart items are only for shopping, not order tracking)
+ALTER TABLE cart_items ADD CONSTRAINT cart_items_chk_status 
+    CHECK (status IN ('Pending'));
 
--- Step 4: Modify managers table - change id from INT to BIGINT and add authentication fields
--- Note: If managers table exists with old schema, drop and recreate it
--- DROP TABLE IF EXISTS managers;
--- Then the CREATE TABLE statement above will handle the new structure
-
--- Alternative: If you want to preserve existing manager data, use these ALTER statements:
--- ALTER TABLE managers DROP FOREIGN KEY managers_ibfk_1; -- Drop the old FK first
--- ALTER TABLE managers MODIFY COLUMN id BIGINT;
--- ALTER TABLE managers ADD COLUMN username VARCHAR(50) UNIQUE NOT NULL AFTER id;
--- ALTER TABLE managers ADD COLUMN email VARCHAR(100) UNIQUE NOT NULL AFTER username;
--- ALTER TABLE managers ADD COLUMN password VARCHAR(255) NOT NULL AFTER email;
--- ALTER TABLE managers ADD COLUMN created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP AFTER password;
--- ALTER TABLE managers ADD COLUMN updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP AFTER created_at;
--- ALTER TABLE managers ADD INDEX idx_username (username);
--- ALTER TABLE managers ADD INDEX idx_email (email);
--- ALTER TABLE managers ADD FOREIGN KEY (id) REFERENCES employees(id) ON DELETE CASCADE;
+-- Step 3: Add authentication fields to employees table (if not exists)
+-- ALTER TABLE employees ADD COLUMN username VARCHAR(50) UNIQUE NOT NULL;
+-- ALTER TABLE employees ADD COLUMN password VARCHAR(255) NOT NULL;
+-- ALTER TABLE employees ADD INDEX idx_username (username);
 
 

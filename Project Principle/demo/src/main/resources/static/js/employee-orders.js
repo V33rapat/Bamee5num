@@ -258,8 +258,8 @@ function createOrderCard(order) {
     card.innerHTML = `
         <div class="flex justify-between items-start mb-4">
             <div>
-                <h3 class="text-xl font-bold text-gray-800">คำสั่งซื้อ #${order.customerId}</h3>
-                <p class="text-sm text-gray-500 mt-1">👤 ลูกค้า ID: ${order.customerId}</p>
+                <h3 class="text-xl font-bold text-gray-800">คำสั่งซื้อ #${order.orderId || order.customerId}</h3>
+                <p class="text-sm text-gray-500 mt-1">👤 ${escapeHtml(order.customerName)} (ID: ${order.customerId})</p>
                 <p class="text-sm text-gray-500">📅 ${orderDate}</p>
             </div>
             ${statusBadge}
@@ -290,8 +290,8 @@ function createOrderCard(order) {
     statusButtons.forEach(btn => {
         btn.addEventListener('click', async () => {
             const newStatus = btn.getAttribute('data-new-status');
-            const customerId = btn.getAttribute('data-customer-id');
-            await updateOrderStatus(customerId, newStatus);
+            const orderId = btn.getAttribute('data-order-id');
+            await updateOrderStatus(orderId, newStatus);
         });
     });
 
@@ -344,28 +344,28 @@ function getStatusBadge(status) {
 
 // ======== Get Status Actions ========
 function getStatusActions(order) {
-    const customerId = order.customerId;
+    const orderId = order.orderId || order.customerId; // Use orderId, fallback to customerId for compatibility
     const status = order.status;
 
     if (status === 'Pending') {
         return `
             <button class="status-update-btn bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition" 
-                    data-customer-id="${customerId}" data-new-status="In Progress">
+                    data-order-id="${orderId}" data-new-status="In Progress">
                 ▶️ เริ่มดำเนินการ
             </button>
             <button class="status-update-btn bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 transition" 
-                    data-customer-id="${customerId}" data-new-status="Cancelled">
+                    data-order-id="${orderId}" data-new-status="Cancelled">
                 ❌ ยกเลิก
             </button>
         `;
     } else if (status === 'In Progress') {
         return `
             <button class="status-update-btn bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 transition" 
-                    data-customer-id="${customerId}" data-new-status="Finish">
+                    data-order-id="${orderId}" data-new-status="Finish">
                 ✅ เสร็จสิ้น
             </button>
             <button class="status-update-btn bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 transition" 
-                    data-customer-id="${customerId}" data-new-status="Cancelled">
+                    data-order-id="${orderId}" data-new-status="Cancelled">
                 ❌ ยกเลิก
             </button>
         `;
@@ -379,22 +379,21 @@ function getStatusActions(order) {
 }
 
 // ======== Update Order Status ========
-async function updateOrderStatus(customerId, newStatus) {
+async function updateOrderStatus(orderId, newStatus) {
     try {
         // Confirm action
-        const confirmMessage = `คุณต้องการเปลี่ยนสถานะคำสั่งซื้อ #${customerId} เป็น "${newStatus}" ใช่หรือไม่?`;
+        const confirmMessage = `คุณต้องการเปลี่ยนสถานะคำสั่งซื้อ #${orderId} เป็น "${newStatus}" ใช่หรือไม่?`;
         if (!confirm(confirmMessage)) {
             return;
         }
 
-        const response = await fetch(`/api/employees/orders/${customerId}/status`, {
+        const response = await fetch(`/api/employees/orders/${orderId}/status`, {
             method: 'PUT',
             headers: {
                 'Content-Type': 'application/json'
             },
             credentials: 'include',
             body: JSON.stringify({
-                customerId: customerId,
                 newStatus: newStatus
             })
         });
@@ -412,7 +411,7 @@ async function updateOrderStatus(customerId, newStatus) {
 
         const updatedOrder = await response.json();
         
-        showNotification(`อัปเดตสถานะคำสั่งซื้อ #${customerId} เป็น "${newStatus}" สำเร็จ`, "success");
+        showNotification(`อัปเดตสถานะคำสั่งซื้อ #${orderId} เป็น "${newStatus}" สำเร็จ`, "success");
         
         // Reload orders to reflect changes
         await loadOrders();
@@ -480,7 +479,11 @@ function showBillModal(order) {
         <div class="mb-4 text-sm">
             <div class="flex justify-between mb-1">
                 <span class="text-gray-600">เลขที่คำสั่งซื้อ:</span>
-                <span class="font-semibold">#${order.customerId}</span>
+                <span class="font-semibold">#${order.orderId || order.customerId}</span>
+            </div>
+            <div class="flex justify-between mb-1">
+                <span class="text-gray-600">ลูกค้า:</span>
+                <span>${escapeHtml(order.customerName || 'ไม่ระบุ')}</span>
             </div>
             <div class="flex justify-between mb-1">
                 <span class="text-gray-600">วันที่:</span>

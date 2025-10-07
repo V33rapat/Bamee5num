@@ -1,12 +1,12 @@
 package com.restaurant.demo.service;
 
 import com.restaurant.demo.dto.OrderResponseDto;
-import com.restaurant.demo.dto.OrderStatusUpdateDto;
 import com.restaurant.demo.model.CartItem;
 import com.restaurant.demo.model.Customer;
 import com.restaurant.demo.model.Employee;
 import com.restaurant.demo.model.OrderItem;
 import com.restaurant.demo.model.Order;
+import com.restaurant.demo.model.OrderStatus;
 import com.restaurant.demo.repository.CartItemRepository;
 import com.restaurant.demo.repository.CustomerRepository;
 import com.restaurant.demo.repository.EmployeeRepository;
@@ -17,7 +17,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
@@ -43,78 +42,69 @@ public class OrderService {
         public OrderResponseDto placeOrder(Long customerId, Long employeeId) {
                 LocalDateTime now = LocalDateTime.now();
 
-                // 🧩 ดึงข้อมูลลูกค้า
+                // Fetch customer
                 Customer customer = customerRepository.findById(customerId)
                                 .orElseThrow(() -> new RuntimeException("Customer not found"));
 
-                // 🧩 ดึงพนักงาน (ถ้ามี)
+                // Fetch employee (optional)
                 Employee employee = null;
                 if (employeeId != null) {
                         employee = employeeRepository.findById(employeeId)
                                         .orElseThrow(() -> new RuntimeException("Employee not found"));
                 }
 
-                // 🧩 ดึง cart items ที่ยัง pending
+                // Get cart items (only those still in cart, not ordered)
                 List<CartItem> cartItems = cartItemRepository.findByCustomerAndStatus(customer, "Pending");
                 if (cartItems.isEmpty())
                         throw new RuntimeException("Cart is empty");
 
-                // 🧩 สร้าง Order ใหม่
+                // Create new Order entity
                 Order order = new Order();
                 order.setCustomer(customer);
                 order.setEmployee(employee);
-                order.setStatus("Pending");
+                order.setStatus(OrderStatus.PENDING.getValue());
                 order.setCreatedAt(now);
                 order.setUpdatedAt(now);
-                // 🛑 ลบ order.setTotalAmount(BigDecimal.ZERO); ออก หรือปล่อยไว้ก็ได้
-                // 🛑 ลบ order = orderRepository.save(order); บรรทัดนี้ออก!
 
                 BigDecimal totalAmount = BigDecimal.ZERO;
 
-                // 🧩 แปลง CartItem → OrderItem
+                // Convert CartItem → OrderItem
                 for (CartItem ci : cartItems) {
                         OrderItem oi = new OrderItem();
 
-                        // 1. กำหนดค่า Price & Quantity (พร้อมป้องกัน NULL)
+                        // Set values with null protection
                         BigDecimal price = ci.getItemPrice() != null ? ci.getItemPrice() : BigDecimal.ZERO;
                         int qty = ci.getQuantity() != null ? ci.getQuantity() : 1;
 
                         oi.setItemName(ci.getItemName());
-                        oi.setItemPrice(price); // เรียก Setter ซึ่งเรียก calculateTotal()
-                        oi.setQuantity(qty); // เรียก Setter ซึ่งเรียก calculateTotal()
+                        oi.setItemPrice(price);
+                        oi.setQuantity(qty);
                         oi.setCreatedAt(now);
                         oi.setUpdatedAt(now);
 
-                        // 2. คำนวณ itemTotal ด้วยตัวเองเพื่อนำไปรวม
-                        // (ใช้ตัวแปรที่คำนวณเองเพื่อความมั่นใจ)
-                        BigDecimal itemTotal = price.multiply(BigDecimal.valueOf(qty)); // คำนวณตรงๆ
-                        // (ตอนนี้ oi.getTotal() ควรจะมีค่าเท่ากับ itemTotal แล้ว)
+                        // Calculate item total
+                        BigDecimal itemTotal = price.multiply(BigDecimal.valueOf(qty));
 
-                        // 3. ผูก relation
+                        // Link to order
                         oi.setOrder(order);
                         order.getOrderItems().add(oi);
 
-                        // 4. รวมเข้า totalAmount
-                        totalAmount = totalAmount.add(itemTotal); // 🛑 ตอนนี้ itemTotal ไม่ใช่ NULL แน่นอน
-
-                        // 5. เปลี่ยนสถานะ cart item
-                        ci.setStatus("Ordered");
-                        ci.setUpdatedAt(now);
+                        // Add to total
+                        totalAmount = totalAmount.add(itemTotal);
                 }
 
-                
-                // 🧩 กำหนด TotalAmount ขั้นสุดท้าย
+                // Set total amount
                 order.setTotalAmount(totalAmount);
                 order.setUpdatedAt(now);
-                
 
-                // 🧩 บันทึก Order และ OrderItems (Cascade) ในครั้งเดียว
-                order = orderRepository.save(order); // ใช้งานเฉพาะการ Save ครั้งนี้
+                // Save Order and OrderItems (Cascade)
+                order = orderRepository.save(order);
 
-                // 🧩 อัปเดต cart items
-                cartItemRepository.saveAll(cartItems);
+                // 🔥 CRITICAL FIX: Clear cart after successful order placement
+                // Delete cart items to prevent accumulation
+                cartItemRepository.deleteAll(cartItems);
 
-                // 🧩 map เป็น DTO ส่งกลับ
+                // Map to DTO for response
                 List<OrderResponseDto.OrderItemDto> dtoItems = order.getOrderItems().stream()
                                 .map(i -> new OrderResponseDto.OrderItemDto(
                                                 i.getId(),
@@ -125,245 +115,150 @@ public class OrderService {
                                 .toList();
 
                 return new OrderResponseDto(
-                                customer.getId(),
-                                customer.getName(),
-                                dtoItems,
-                                order.getTotalAmount(),
-                                order.getStatus(),
-                                order.getCreatedAt(),
-                                order.getUpdatedAt());
+                                order.getId(),           // orderId
+                                customer.getId(),        // customerId
+                                customer.getName(),      // customerName
+                                dtoItems,                // items
+                                order.getTotalAmount(),  // totalPrice
+                                order.getStatus(),       // status
+                                order.getCreatedAt(),    // createdAt
+                                order.getUpdatedAt());   // updatedAt
+        }
+
+        /**
+         * Get all orders for a specific customer (all statuses)
+         * 
+         * @param customerId The ID of the customer
+         * @return List of OrderResponseDto containing customer's orders
+         * @throws RuntimeException if customer not found
+         */
+        public List<OrderResponseDto> getOrdersByCustomerId(Long customerId) {
+                // Validate customer exists
+                customerRepository.findById(customerId)
+                                .orElseThrow(() -> new RuntimeException("Customer not found with ID: " + customerId));
+
+                List<Order> orders = orderRepository.findByCustomer_Id(customerId);
+
+                return orders.stream()
+                                .map(this::mapOrderToDto)
+                                .collect(Collectors.toList());
         }
 
         /**
          * Get pending orders for a specific customer
          * 
          * @param customerId The ID of the customer
-         * @return OrderResponseDto containing pending order details
+         * @return List of OrderResponseDto containing pending orders
          * @throws RuntimeException if customer not found
          */
-        public OrderResponseDto getPendingOrdersByCustomerId(Long customerId) {
+        public List<OrderResponseDto> getPendingOrdersByCustomerId(Long customerId) {
                 Customer customer = customerRepository.findById(customerId)
                                 .orElseThrow(() -> new RuntimeException("Customer not found with ID: " + customerId));
 
-                List<CartItem> pendingItems = cartItemRepository.findByCustomerAndStatus(customer, "Pending");
+                List<Order> pendingOrders = orderRepository.findByCustomerAndStatus(customer, OrderStatus.PENDING.getValue());
 
-                if (pendingItems.isEmpty()) {
-                        return new OrderResponseDto(
-                                        customer.getId(),
-                                        customer.getName(),
-                                        List.of(),
-                                        BigDecimal.ZERO,
-                                        "Pending",
-                                        LocalDateTime.now(),
-                                        LocalDateTime.now());
-                }
-
-                BigDecimal totalPrice = pendingItems.stream()
-                                .map(CartItem::getTotalPrice)
-                                .reduce(BigDecimal.ZERO, BigDecimal::add);
-
-                List<OrderResponseDto.OrderItemDto> orderItems = pendingItems.stream()
-                                .map(item -> new OrderResponseDto.OrderItemDto(
-                                                item.getId(),
-                                                item.getItemName(),
-                                                item.getItemPrice(),
-                                                item.getQuantity(),
-                                                item.getTotalPrice()))
+                return pendingOrders.stream()
+                                .map(this::mapOrderToDto)
                                 .collect(Collectors.toList());
-
-                LocalDateTime createdAt = pendingItems.stream()
-                                .map(CartItem::getCreatedAt)
-                                .min(LocalDateTime::compareTo)
-                                .orElse(LocalDateTime.now());
-
-                LocalDateTime updatedAt = pendingItems.stream()
-                                .map(CartItem::getUpdatedAt)
-                                .max(LocalDateTime::compareTo)
-                                .orElse(LocalDateTime.now());
-
-                return new OrderResponseDto(
-                                customer.getId(),
-                                customer.getName(),
-                                orderItems,
-                                totalPrice,
-                                "Pending",
-                                createdAt,
-                                updatedAt);
         }
 
         /**
          * Get all orders filtered by status (for employee view)
          * 
-         * @param status The status to filter by (Pending, In Progress, Cancelled,
-         *               Finish)
-         * @return List of OrderResponseDto grouped by customer
+         * @param status The status to filter by (Pending, In Progress, Finish, Cancelled)
+         * @return List of OrderResponseDto
          */
         public List<OrderResponseDto> getAllOrdersByStatus(String status) {
-                if (!isValidStatus(status)) {
+                if (!OrderStatus.isValid(status)) {
                         throw new IllegalArgumentException("Invalid status: " + status);
                 }
 
-                List<CartItem> items = cartItemRepository.findByStatusIgnoreCase(status);
+                List<Order> orders = orderRepository.findByStatusIgnoreCase(status);
 
-                Map<Customer, List<CartItem>> itemsByCustomer = items.stream()
-                                .collect(Collectors.groupingBy(CartItem::getCustomer));
-
-                return itemsByCustomer.entrySet().stream()
-                                .map(entry -> {
-                                        Customer customer = entry.getKey();
-                                        List<CartItem> customerItems = entry.getValue();
-
-                                        BigDecimal totalPrice = customerItems.stream()
-                                                        .map(CartItem::getTotalPrice)
-                                                        .reduce(BigDecimal.ZERO, BigDecimal::add);
-
-                                        List<OrderResponseDto.OrderItemDto> orderItems = customerItems.stream()
-                                                        .map(item -> new OrderResponseDto.OrderItemDto(
-                                                                        item.getId(),
-                                                                        item.getItemName(),
-                                                                        item.getItemPrice(),
-                                                                        item.getQuantity(),
-                                                                        item.getTotalPrice()))
-                                                        .collect(Collectors.toList());
-
-                                        LocalDateTime createdAt = customerItems.stream()
-                                                        .map(CartItem::getCreatedAt)
-                                                        .min(LocalDateTime::compareTo)
-                                                        .orElse(LocalDateTime.now());
-
-                                        LocalDateTime updatedAt = customerItems.stream()
-                                                        .map(CartItem::getUpdatedAt)
-                                                        .max(LocalDateTime::compareTo)
-                                                        .orElse(LocalDateTime.now());
-
-                                        return new OrderResponseDto(
-                                                        customer.getId(),
-                                                        customer.getName(),
-                                                        orderItems,
-                                                        totalPrice,
-                                                        status,
-                                                        createdAt,
-                                                        updatedAt);
-                                })
+                return orders.stream()
+                                .map(this::mapOrderToDto)
                                 .collect(Collectors.toList());
+        }
+
+        /**
+         * Get order by ID
+         * 
+         * @param orderId The order ID
+         * @return OrderResponseDto containing order details
+         * @throws RuntimeException if order not found
+         */
+        public OrderResponseDto getOrderById(Long orderId) {
+                Order order = orderRepository.findById(orderId)
+                                .orElseThrow(() -> new RuntimeException("Order not found with ID: " + orderId));
+
+                return mapOrderToDto(order);
         }
 
         /**
          * Update order status with validation
          * 
-         * @param updateDto OrderStatusUpdateDto containing customerId and new status
+         * @param orderId The order ID
+         * @param newStatus The new status
          * @return OrderResponseDto with updated order
-         * @throws RuntimeException if customer not found or validation fails
+         * @throws RuntimeException if order not found or validation fails
          */
         public OrderResponseDto updateOrderStatus(Long orderId, String newStatus) {
-                // ใช้ orderId จาก path variable
-                Customer customer = customerRepository.findById(orderId)
-                                .orElseThrow(() -> new RuntimeException("Customer not found with ID: " + orderId));
+                Order order = orderRepository.findById(orderId)
+                                .orElseThrow(() -> new RuntimeException("Order not found with ID: " + orderId));
 
-                List<CartItem> customerItems = cartItemRepository.findByCustomer(customer);
+                String currentStatus = order.getStatus();
 
-                if (customerItems.isEmpty()) {
-                        throw new RuntimeException("No items found for customer ID: " + orderId);
-                }
-
-                String currentStatus = customerItems.get(0).getStatus();
-
-                if (!isValidStatusTransition(currentStatus, newStatus)) {
+                if (!OrderStatus.isValidTransition(currentStatus, newStatus)) {
                         throw new IllegalArgumentException(
                                         String.format("Invalid status transition from %s to %s", currentStatus,
                                                         newStatus));
                 }
 
-                customerItems.forEach(item -> item.setStatus(newStatus));
-                cartItemRepository.saveAll(customerItems);
+                order.setStatus(newStatus);
+                order.setUpdatedAt(LocalDateTime.now());
+                orderRepository.save(order);
 
-                BigDecimal totalPrice = customerItems.stream()
-                                .map(CartItem::getTotalPrice)
-                                .reduce(BigDecimal.ZERO, BigDecimal::add);
-
-                List<OrderResponseDto.OrderItemDto> orderItems = customerItems.stream()
-                                .map(item -> new OrderResponseDto.OrderItemDto(
-                                                item.getId(),
-                                                item.getItemName(),
-                                                item.getItemPrice(),
-                                                item.getQuantity(),
-                                                item.getTotalPrice()))
-                                .collect(Collectors.toList());
-
-                LocalDateTime createdAt = customerItems.stream()
-                                .map(CartItem::getCreatedAt)
-                                .min(LocalDateTime::compareTo)
-                                .orElse(LocalDateTime.now());
-
-                LocalDateTime updatedAt = customerItems.stream()
-                                .map(CartItem::getUpdatedAt)
-                                .max(LocalDateTime::compareTo)
-                                .orElse(LocalDateTime.now());
-
-                return new OrderResponseDto(
-                                customer.getId(),
-                                customer.getName(),
-                                orderItems,
-                                totalPrice,
-                                newStatus,
-                                createdAt,
-                                updatedAt);
+                return mapOrderToDto(order);
         }
 
         /**
          * Get count of orders by status (for notification polling)
          * 
          * @param status The status to count
-         * @return Count of orders with the specified status (grouped by customer)
+         * @return Count of orders with the specified status
          */
         public Long getOrderCountByStatus(String status) {
-                if (!isValidStatus(status)) {
+                if (!OrderStatus.isValid(status)) {
                         throw new IllegalArgumentException("Invalid status: " + status);
                 }
 
-                List<CartItem> items = cartItemRepository.findByStatus(status);
-
-                return items.stream()
-                                .map(CartItem::getCustomer)
-                                .map(Customer::getId)
-                                .distinct()
-                                .count();
+                return orderRepository.countByStatus(status);
         }
 
         /**
-         * Validate if the status is valid
+         * Helper method to map Order entity to OrderResponseDto
+         * 
+         * @param order The Order entity
+         * @return OrderResponseDto
          */
-        private boolean isValidStatus(String status) {
-                return status != null &&
-        (status.equals("Pending") || status.equals("In Progress") ||
-         status.equals("Cancelled") || status.equals("Finish") || 
-         status.equals("Ordered")); // ✅ เพิ่ม "Ordered" เข้ามา
-        }
+        private OrderResponseDto mapOrderToDto(Order order) {
+                List<OrderResponseDto.OrderItemDto> orderItems = order.getOrderItems().stream()
+                                .map(item -> new OrderResponseDto.OrderItemDto(
+                                                item.getId(),
+                                                item.getItemName(),
+                                                item.getItemPrice(),
+                                                item.getQuantity(),
+                                                item.getTotal()))
+                                .collect(Collectors.toList());
 
-        /**
-         * Validate status transition rules
-         * Status transitions: Pending → In Progress → Finish
-         * Any status can transition to Cancelled
-         */
-        private boolean isValidStatusTransition(String currentStatus, String newStatus) {
-                if (currentStatus == null || newStatus == null) {
-                        return false;
-                }
-
-                if (newStatus.equals("Cancelled")) {
-                        return true;
-                }
-
-                switch (currentStatus) {
-                        case "Pending":
-                                return newStatus.equals("In Progress") || newStatus.equals("Cancelled");
-                        case "In Progress":
-                                return newStatus.equals("Finish") || newStatus.equals("Cancelled");
-                        case "Finish":
-                        case "Cancelled":
-                                return false;
-                        default:
-                                return false;
-                }
+                return new OrderResponseDto(
+                                order.getId(),                    // orderId
+                                order.getCustomer().getId(),      // customerId
+                                order.getCustomer().getName(),    // customerName
+                                orderItems,                       // items
+                                order.getTotalAmount(),           // totalPrice
+                                order.getStatus(),                // status
+                                order.getCreatedAt(),             // createdAt
+                                order.getUpdatedAt());            // updatedAt
         }
 }

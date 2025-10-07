@@ -187,6 +187,12 @@ public class ManagerApiController {
         return cartService.getCartItems(Long.valueOf(userId));
     }
 
+    /**
+     * GET /api/reports/sales - Get daily sales report
+     * Returns revenue calculated from completed orders (status = "Finish")
+     * This uses Order data, not CartItem data, to ensure accurate revenue reporting
+     * even after cart items are deleted upon order placement.
+     */
     @GetMapping("/reports/sales")
     public Manager.SalesReport getSalesReport() {
         return salesReportService.getDailySalesReport();

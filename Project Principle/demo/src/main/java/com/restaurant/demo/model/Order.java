@@ -43,42 +43,32 @@ public class Order {
         this.createdAt = now;
         this.updatedAt = now;
     }
-    /* 
     @PrePersist
     protected void onCreate() {
         createdAt = LocalDateTime.now();
         updatedAt = LocalDateTime.now();
-        calculateTotalAmount();
     }
 
     @PreUpdate
     protected void onUpdate() {
         updatedAt = LocalDateTime.now();
-        calculateTotalAmount();
-    }*/
-
-    @PreUpdate
-        protected void onUpdate() {
-        updatedAt = LocalDateTime.now();
-     }
+    }
 
     public void addOrderItem(OrderItem item) {
-    item.setOrder(this); // สำคัญมาก!!
-    this.orderItems.add(item);
-        //calculateTotalAmount();
+        item.setOrder(this);
+        this.orderItems.add(item);
     }
 
     public void removeOrderItem(OrderItem item) {
         this.orderItems.remove(item);
         item.setOrder(null);
-        //calculateTotalAmount();
     }
 
-   public void calculateTotalAmount() {
-    this.totalAmount = orderItems.stream()
-        .map(OrderItem::getTotal)
-        .reduce(BigDecimal.ZERO, BigDecimal::add);
-}
+    public void calculateTotalAmount() {
+        this.totalAmount = orderItems.stream()
+            .map(OrderItem::getTotal)
+            .reduce(BigDecimal.ZERO, BigDecimal::add);
+    }
 
 
     // ===== Getter / Setter =====
@@ -92,29 +82,27 @@ public class Order {
 
     public List<OrderItem> getOrderItems() { return orderItems; }
     public void setOrderItems(List<OrderItem> orderItems) { 
-        this.orderItems = orderItems; 
-        calculateTotalAmount();
+        this.orderItems = orderItems;
     }
 
     public String getStatus() { return status; }
     public void setStatus(String status) { this.status = status; }
 
     public BigDecimal getTotalAmount() { 
-        //calculateTotalAmount(); 
-    return totalAmount; 
+        return totalAmount; 
     }
-    public void setTotalAmount(BigDecimal totalAmount) { this.totalAmount = totalAmount; }
+    public void setTotalAmount(BigDecimal totalAmount) { 
+        this.totalAmount = totalAmount; 
+    }
 
-    public void setTotalPrice(BigDecimal totalAmount) { this.totalAmount = totalAmount; }
+    // Alias for getTotalAmount() for consistency
+    public BigDecimal getTotalPrice() { 
+        return this.totalAmount; 
+    }
 
     public LocalDateTime getCreatedAt() { return createdAt; }
     public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
 
     public LocalDateTime getUpdatedAt() { return updatedAt; }
     public void setUpdatedAt(LocalDateTime updatedAt) { this.updatedAt = updatedAt; }
-
-    public BigDecimal getTotalPrice() {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'getTotalPrice'");
-    }
 }

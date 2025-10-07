@@ -141,9 +141,9 @@ public class EmployeeController {
     }
 
     /**
-     * Get specific order details by customer ID (order ID)
+     * Get specific order details by order ID
      * 
-     * @param orderId The customer ID (used as order identifier)
+     * @param orderId The actual order ID (not customer ID)
      * @param session HTTP session for authentication check
      * @return ResponseEntity containing order details
      */
@@ -161,12 +161,12 @@ public class EmployeeController {
             return new ResponseEntity<>(errorResponse, HttpStatus.UNAUTHORIZED);
         }
         
-        logger.info("Fetching order details for orderId (customerId): {}, employeeId: {}", 
+        logger.info("Fetching order details for orderId: {}, employeeId: {}", 
                 orderId, session.getAttribute("employeeId"));
         
         try {
-            // Get order by customer ID (pending orders)
-            OrderResponseDto order = orderService.getPendingOrdersByCustomerId(orderId);
+            // Get order by actual order ID
+            OrderResponseDto order = orderService.getOrderById(orderId);
             
             logger.info("Order details fetched for orderId: {}", orderId);
             
@@ -183,7 +183,7 @@ public class EmployeeController {
     /**
      * Update order status
      * 
-     * @param orderId The customer ID (used as order identifier)
+     * @param orderId The actual order ID (not customer ID)
      * @param updateDto OrderStatusUpdateDto containing new status
      * @param session HTTP session for authentication check
      * @return ResponseEntity containing updated order details
@@ -201,10 +201,26 @@ public ResponseEntity<?> updateOrderStatus(
         return new ResponseEntity<>(errorResponse, HttpStatus.UNAUTHORIZED);
     }
 
-    // อัปเดตสถานะโดยใช้ orderId จาก path variable
-    OrderResponseDto updatedOrder = orderService.updateOrderStatus(orderId, updateDto.getNewStatus());
+    logger.info("Updating order status for orderId: {}, newStatus: {}", orderId, updateDto.getNewStatus());
 
-    return new ResponseEntity<>(updatedOrder, HttpStatus.OK);
+    try {
+        // Update order status using actual order ID
+        OrderResponseDto updatedOrder = orderService.updateOrderStatus(orderId, updateDto.getNewStatus());
+        
+        logger.info("Order status updated successfully for orderId: {}", orderId);
+
+        return new ResponseEntity<>(updatedOrder, HttpStatus.OK);
+    } catch (IllegalArgumentException e) {
+        logger.warn("Invalid status transition for orderId: {} - {}", orderId, e.getMessage());
+        Map<String, String> errorResponse = new HashMap<>();
+        errorResponse.put("error", e.getMessage());
+        return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
+    } catch (RuntimeException e) {
+        logger.error("Error updating order status for orderId: {} - {}", orderId, e.getMessage());
+        Map<String, String> errorResponse = new HashMap<>();
+        errorResponse.put("error", e.getMessage());
+        return new ResponseEntity<>(errorResponse, HttpStatus.NOT_FOUND);
+    }
 }
 
 
