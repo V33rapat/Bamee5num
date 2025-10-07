@@ -80,35 +80,68 @@
 
             <div id="reportsManagement" class="manager-content hidden">
                 <h4 class="text-2xl font-semibold mb-4">รายงานยอดขายรายเดือน</h4>
-                
-                <div class="mb-4">
-                    <label class="font-semibold mr-2">เลือกเดือน:</label>
-                    <select id="reportMonth" class="border px-2 py-1 rounded">
-                        <option value="1">มกราคม</option>
-                        <option value="2">กุมภาพันธ์</option>
-                        <option value="3">มีนาคม</option>
-                        <option value="4">เมษายน</option>
-                        <option value="5">พฤษภาคม</option>
-                        <option value="6">มิถุนายน</option>
-                        <option value="7">กรกฎาคม</option>
-                        <option value="8">สิงหาคม</option>
-                        <option value="9">กันยายน</option>
-                        <option value="10">ตุลาคม</option>
-                        <option value="11">พฤศจิกายน</option>
-                        <option value="12">ธันวาคม</option>
-                    </select>
+              
+                 <div class="flex flex-wrap items-center gap-4 mb-6 bg-white p-4 rounded-xl shadow-sm">
+                    <div>
+                        <label class="font-semibold text-gray-700 mr-2">เลือกเดือน:</label>
+                        <select id="reportMonth" class="border px-3 py-2 rounded-lg focus:ring-2 focus:ring-orange-400">
+                            <option value="all">ทุกเดือน</option>
+                            <option value="1">มกราคม</option>
+                            <option value="2">กุมภาพันธ์</option>
+                            <option value="3">มีนาคม</option>
+                            <option value="4">เมษายน</option>
+                            <option value="5">พฤษภาคม</option>
+                            <option value="6">มิถุนายน</option>
+                            <option value="7">กรกฎาคม</option>
+                            <option value="8">สิงหาคม</option>
+                            <option value="9">กันยายน</option>
+                            <option value="10">ตุลาคม</option>
+                            <option value="11">พฤศจิกายน</option>
+                            <option value="12">ธันวาคม</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label class="font-semibold text-gray-700 mr-2">เลือกปี:</label>
+                        <select id="reportYear" class="border px-3 py-2 rounded-lg focus:ring-2 focus:ring-orange-400">
+                            <!-- จะใส่ค่าแบบ Dynamic จาก JS -->
+                        </select>
+                    </div>
+
                     <button id="loadReportBtn" 
-                            class="bg-orange-500 text-white px-3 py-1 rounded hover:bg-orange-600">
+                            class="bg-orange-500 text-white px-5 py-2 rounded-lg hover:bg-orange-600 transition-all">
                         แสดงรายงาน
                     </button>
                 </div>
 
                 <!-- 🧾 พื้นที่แสดงผลรายงาน -->
-                <div id="reportResult" class="bg-white shadow-md rounded-lg p-4 hidden">
-                    <h5 class="text-lg font-semibold mb-3">สรุปยอดขายเดือน <span id="monthName"></span></h5>
-                    <p>ยอดขายรวม: <span id="totalRevenue" class="font-bold text-green-600"></span> บาท</p>
-                    <p>จำนวนออเดอร์: <span id="totalOrders" class="font-bold"></span> รายการ</p>
-                    <p>เมนูขายดีที่สุด: <span id="topMenu" class="font-bold text-orange-500"></span> (<span id="topCount"></span> จาน)</p>
+                <div id="reportResult" class="bg-white shadow-md rounded-xl p-6 hidden">
+                    <h5 class="text-2xl font-semibold mb-4 text-gray-800">
+                        สรุปยอดขาย <span id="monthName"></span> <span id="yearName"></span>
+                    </h5>
+
+                    <div class="grid md:grid-cols-3 gap-6 mb-6">
+                        <div class="p-4 bg-green-50 rounded-lg border border-green-200">
+                            <p class="text-gray-600">💰 ยอดขายรวม</p>
+                            <p id="totalRevenue" class="text-3xl font-bold text-green-600">-</p>
+                            <p class="text-sm text-gray-500">บาท</p>
+                        </div>
+                        <div class="p-4 bg-blue-50 rounded-lg border border-blue-200">
+                            <p class="text-gray-600">🧾 จำนวนออเดอร์</p>
+                            <p id="totalOrders" class="text-3xl font-bold text-blue-600">-</p>
+                            <p class="text-sm text-gray-500">รายการ</p>
+                        </div>
+                        <div class="p-4 bg-orange-50 rounded-lg border border-orange-200">
+                            <p class="text-gray-600">🏆 เมนูขายดีที่สุด</p>
+                            <p id="topMenu" class="text-xl font-semibold text-orange-500">-</p>
+                            <p class="text-sm text-gray-500"><span id="topCount"></span> จาน</p>
+                        </div>
+                    </div>
+
+                    <!-- 📈 กราฟรายเดือน -->
+                    <div class="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                        <canvas id="monthlySalesChart" height="100"></canvas>
+                    </div>
                 </div>
             </div>
         </div>

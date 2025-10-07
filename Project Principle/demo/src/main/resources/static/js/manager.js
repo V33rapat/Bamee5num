@@ -4,7 +4,9 @@ let employeeModalTitle;
 let employeeNameInput;
 let employeePositionInput;
 let currentMenuFilter = 'all'; // Track current filter: 'all' or 'active'
+let salesChart = null; // To hold the Chart.js instance
 
+// Utility functions to get CSRF token and header from meta tags
 function getCsrfToken() {
     return document.querySelector('meta[name="_csrf"]')?.content;
 }
@@ -56,7 +58,7 @@ export async function setupManagerDashboard() {
 
     await loadMenuItems();
     await loadEmployeeManagement();
-    await updateManagerStats();
+    //await updateManagerStats();
     initManagerTabs();
     hideAddMenuModal();
 }
@@ -118,30 +120,88 @@ document.addEventListener("DOMContentLoaded", () => {
 // Load monthly report when button is clicked
 document.getElementById("loadReportBtn").addEventListener("click", async () => {
     const month = document.getElementById("reportMonth").value;
+    const monthSelect = document.getElementById("reportMonth");
+    const yearSelect = document.getElementById("reportYear");
 
-    try {
-        const resp = await fetch(`/api/reports/monthly?month=${month}`);
-        if (!resp.ok) throw new Error("โหลดข้อมูลไม่สำเร็จ");
-
-        const data = await resp.json();
-
-        // แสดงผลในหน้า
-        document.getElementById("reportResult").classList.remove("hidden");
-        document.getElementById("monthName").textContent = getMonthName(month);
-        document.getElementById("totalRevenue").textContent = data.totalRevenue;
-        document.getElementById("totalOrders").textContent = data.totalOrders;
-        document.getElementById("topMenu").textContent = data.topMenu;
-        document.getElementById("topCount").textContent = data.topCount;
-    } catch (err) {
-        alert("เกิดข้อผิดพลาดในการโหลดรายงาน");
-        console.error(err);
+        const currentYear = new Date().getFullYear();
+    for (let y = currentYear; y >= currentYear - 5; y--) {
+        const opt = document.createElement("option");
+        opt.value = y;
+        opt.textContent = y;
+        yearSelect.appendChild(opt);
     }
+
+    // ✅ เมื่อคลิกปุ่ม "แสดงรายงาน"
+    loadReportBtn.addEventListener("click", async () => {
+        const month = monthSelect.value;
+        const year = yearSelect.value;
+
+        try {
+            // 🔹 เรียก API จาก Spring Boot
+            const resp = await fetch(`/api/reports/monthly?month=${month}&year=${year}`);
+            if (!resp.ok) throw new Error("โหลดข้อมูลไม่สำเร็จ");
+
+            const data = await resp.json();
+
+            // ✅ แสดงผลข้อมูลในหน้า HTML
+            document.getElementById("reportResult").classList.remove("hidden");
+
+            document.getElementById("monthName").textContent =
+                month === "all" ? "ทั้งหมด" : getMonthName(month);
+            document.getElementById("yearName").textContent = year;
+            document.getElementById("totalRevenue").textContent = 
+                data.totalRevenue?.toLocaleString() || "0";
+            document.getElementById("totalOrders").textContent = 
+                data.totalOrders || "0";
+            document.getElementById("topMenu").textContent = 
+                data.topMenu || "-";
+            document.getElementById("topCount").textContent = 
+                data.topCount || "0";
+
+            // ✅ วาดกราฟยอดขายรายเดือน
+            if (data.monthlySales) renderChart(data.monthlySales);
+
+        } catch (err) {
+            alert("❌ เกิดข้อผิดพลาดในการโหลดรายงาน");
+            console.error(err);
+        }
+    });
 });
 
 function getMonthName(month) {
     const months = ["มกราคม", "กุมภาพันธ์", "มีนาคม", "เมษายน", "พฤษภาคม",
         "มิถุนายน", "กรกฎาคม", "สิงหาคม", "กันยายน", "ตุลาคม", "พฤศจิกายน", "ธันวาคม"];
     return months[month - 1];
+}
+
+function renderChart(monthlySales) {
+    const ctx = document.getElementById("monthlySalesChart").getContext("2d");
+
+    // ถ้ามีกราฟอยู่แล้ว ลบก่อน
+    if (salesChart) salesChart.destroy();
+
+    salesChart = new Chart(ctx, {
+        type: "bar",
+        data: {
+            labels: ["ม.ค.", "ก.พ.", "มี.ค.", "เม.ย.", "พ.ค.", "มิ.ย.", 
+                        "ก.ค.", "ส.ค.", "ก.ย.", "ต.ค.", "พ.ย.", "ธ.ค."],
+            datasets: [{
+                label: "ยอดขาย (บาท)",
+                data: monthlySales,
+                backgroundColor: "rgba(255, 159, 64, 0.8)",
+                borderRadius: 6
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: { display: false }
+            },
+            scales: {
+                y: { beginAtZero: true }
+            }
+        }
+    });
 }
 
 /*
