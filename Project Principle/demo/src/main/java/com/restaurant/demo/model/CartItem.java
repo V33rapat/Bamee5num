@@ -17,6 +17,7 @@ public class CartItem {
     public static final String STATUS_IN_PROGRESS = "In Progress";
     public static final String STATUS_CANCELLED = "Cancelled";
     public static final String STATUS_FINISH = "Finish";
+    public static final String STATUS_ORDERED = "Ordered";
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -46,7 +47,7 @@ public class CartItem {
     private Integer quantity;
 
     @NotBlank(message = "Status is required")
-    @Pattern(regexp = "Pending|In Progress|Cancelled|Finish", message = "Status must be one of: Pending, In Progress, Cancelled, Finish")
+    @Pattern(regexp = "Pending|In Progress|Cancelled|Finish|Ordered", message = "Status must be one of: Pending, In Progress, Cancelled, Finish, Ordered")
     @Column(name = "status", nullable = false, length = 20)
     private String status = STATUS_PENDING; // ใช้ constant แทน string ตรงนี้
 
@@ -58,8 +59,21 @@ public class CartItem {
     @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt;
 
+    @ManyToOne
+    @JoinColumn(name = "order_id")
+    private Order order;
+
+    public Order getOrder() {
+        return order;
+    }
+
+    public void setOrder(Order order) {
+        this.order = order;
+    }
+
     // Default constructor
-    public CartItem() {}
+    public CartItem() {
+    }
 
     // Constructor with required fields (backward compatible)
     public CartItem(Customer customer, String itemName, BigDecimal itemPrice, Integer quantity) {

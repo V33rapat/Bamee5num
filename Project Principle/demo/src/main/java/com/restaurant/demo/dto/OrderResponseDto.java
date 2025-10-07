@@ -17,9 +17,22 @@ public class OrderResponseDto {
     // Default constructor
     public OrderResponseDto() {}
 
-    // Constructor with all fields
+    // Constructor with all fields (backward compatible - orderId optional)
     public OrderResponseDto(Long customerId, String customerName, List<OrderItemDto> items,
                             BigDecimal totalPrice, String status, LocalDateTime createdAt, LocalDateTime updatedAt) {
+        this.customerId = customerId;
+        this.customerName = customerName;
+        this.items = items;
+        this.totalPrice = totalPrice;
+        this.status = status;
+        this.createdAt = createdAt;
+        this.updatedAt = updatedAt;
+    }
+
+    // Constructor with orderId for proper order tracking
+    public OrderResponseDto(Long orderId, Long customerId, String customerName, List<OrderItemDto> items,
+                            BigDecimal totalPrice, String status, LocalDateTime createdAt, LocalDateTime updatedAt) {
+        this.orderId = orderId;
         this.customerId = customerId;
         this.customerName = customerName;
         this.items = items;
@@ -50,6 +63,20 @@ public class OrderResponseDto {
 
     public LocalDateTime getUpdatedAt() { return updatedAt; }
     public void setUpdatedAt(LocalDateTime updatedAt) { this.updatedAt = updatedAt; }
+
+    // Alias for frontend compatibility (employee-orders.js expects orderDate)
+    public LocalDateTime getOrderDate() { 
+        return this.createdAt; 
+    }
+    public void setOrderDate(LocalDateTime orderDate) { 
+        this.createdAt = orderDate; 
+    }
+
+    // Added orderId field for proper order tracking
+    private Long orderId;
+    
+    public Long getOrderId() { return orderId; }
+    public void setOrderId(Long orderId) { this.orderId = orderId; }
 
     // Inner DTO class for order items
     public static class OrderItemDto {

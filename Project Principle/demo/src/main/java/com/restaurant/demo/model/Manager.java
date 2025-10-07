@@ -85,6 +85,48 @@ public class Manager extends Employee {
         return new SalesReport(orderCount, revenue, newCustomers, avgRating);
     }
     
+    /**
+     * Generate sales report from Order data (NEW METHOD - FIXES REVENUE BUG)
+     * This method correctly calculates revenue from completed orders instead of deleted cart items.
+     * 
+     * @param orders List of orders (should be filtered by date before calling)
+     * @param users List of all users (for new customer calculation)
+     * @return SalesReport containing order count, revenue, new customers, and average rating
+     */
+    public SalesReport viewSalesReportFromOrders(List<Order> orders, List<User> users) {
+        LocalDate today = LocalDate.now();
+        
+        // Filter only completed/finished orders for revenue calculation
+        List<Order> completedOrders = orders.stream()
+                .filter(order -> "Finish".equalsIgnoreCase(order.getStatus()))
+                .toList();
+        
+        // Count unique customers who placed orders today (regardless of status)
+        long orderCount = orders.stream()
+                .map(order -> order.getCustomer().getId())
+                .distinct()
+                .count();
+        
+        // Calculate revenue from COMPLETED orders only
+        double revenue = completedOrders.stream()
+                .mapToDouble(order -> order.getTotalAmount() != null ? order.getTotalAmount().doubleValue() : 0.0)
+                .sum();
+        
+        // Count new customers who registered today
+        int newCustomers = 0;
+        for (User user : users) {
+            if ("customer".equalsIgnoreCase(user.getRole()) && user.getCreatedAt() != null) {
+                if (user.getCreatedAt().startsWith(today.toString())) {
+                    newCustomers++;
+                }
+            }
+        }
+        
+        double avgRating = 0; // TODO: Implement rating system in future
+        
+        return new SalesReport((int) orderCount, revenue, newCustomers, avgRating);
+    }
+    
     // helper class -> sales report data
     public static class SalesReport {
         public final int orderCount;

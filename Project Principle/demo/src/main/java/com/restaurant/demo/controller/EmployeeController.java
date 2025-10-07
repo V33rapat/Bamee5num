@@ -141,9 +141,9 @@ public class EmployeeController {
     }
 
     /**
-     * Get specific order details by customer ID (order ID)
+     * Get specific order details by order ID
      * 
-     * @param orderId The customer ID (used as order identifier)
+     * @param orderId The actual order ID (not customer ID)
      * @param session HTTP session for authentication check
      * @return ResponseEntity containing order details
      */
@@ -161,12 +161,12 @@ public class EmployeeController {
             return new ResponseEntity<>(errorResponse, HttpStatus.UNAUTHORIZED);
         }
         
-        logger.info("Fetching order details for orderId (customerId): {}, employeeId: {}", 
+        logger.info("Fetching order details for orderId: {}, employeeId: {}", 
                 orderId, session.getAttribute("employeeId"));
         
         try {
-            // Get order by customer ID (pending orders)
-            OrderResponseDto order = orderService.getPendingOrdersByCustomerId(orderId);
+            // Get order by actual order ID
+            OrderResponseDto order = orderService.getOrderById(orderId);
             
             logger.info("Order details fetched for orderId: {}", orderId);
             
@@ -183,55 +183,46 @@ public class EmployeeController {
     /**
      * Update order status
      * 
-     * @param orderId The customer ID (used as order identifier)
+     * @param orderId The actual order ID (not customer ID)
      * @param updateDto OrderStatusUpdateDto containing new status
      * @param session HTTP session for authentication check
      * @return ResponseEntity containing updated order details
      */
-    @PutMapping("/orders/{orderId}/status")
-    public ResponseEntity<?> updateOrderStatus(
-            @PathVariable @NotNull(message = "Order ID is required") @Positive(message = "Order ID must be positive") Long orderId,
-            @Valid @RequestBody OrderStatusUpdateDto updateDto,
-            HttpSession session) {
-        
-        // Check if employee is authenticated
-        Boolean isAuthenticated = (Boolean) session.getAttribute("employeeAuthenticated");
-        if (isAuthenticated == null || !isAuthenticated) {
-            logger.warn("Unauthorized access attempt to update order status for orderId: {}", orderId);
-            Map<String, String> errorResponse = new HashMap<>();
-            errorResponse.put("error", "Unauthorized. Please login first.");
-            return new ResponseEntity<>(errorResponse, HttpStatus.UNAUTHORIZED);
-        }
-        
-        logger.info("Updating order status for orderId: {}, new status: {}, employeeId: {}", 
-                orderId, updateDto.getNewStatus(), session.getAttribute("employeeId"));
-        
-        try {
-            // Set the customer ID from path variable if not already set in DTO
-            if (updateDto.getCustomerId() == null) {
-                updateDto.setCustomerId(orderId);
-            }
-            
-            // Verify that the orderId matches the customerId in the DTO
-            if (!orderId.equals(updateDto.getCustomerId())) {
-                throw new IllegalArgumentException("Order ID in path does not match customer ID in request body");
-            }
-            
-            // Update order status
-            OrderResponseDto updatedOrder = orderService.updateOrderStatus(updateDto);
-            
-            logger.info("Order status updated successfully for orderId: {}, new status: {}", 
-                    orderId, updateDto.getNewStatus());
-            
-            return new ResponseEntity<>(updatedOrder, HttpStatus.OK);
-            
-        } catch (RuntimeException e) {
-            logger.warn("Failed to update order status for orderId: {} - {}", orderId, e.getMessage());
-            Map<String, String> errorResponse = new HashMap<>();
-            errorResponse.put("error", e.getMessage());
-            return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
-        }
+   @PutMapping("/orders/{orderId}/status")
+public ResponseEntity<?> updateOrderStatus(
+        @PathVariable @NotNull @Positive Long orderId,
+        @Valid @RequestBody OrderStatusUpdateDto updateDto,
+        HttpSession session) {
+
+    Boolean isAuthenticated = (Boolean) session.getAttribute("employeeAuthenticated");
+    if (isAuthenticated == null || !isAuthenticated) {
+        Map<String, String> errorResponse = new HashMap<>();
+        errorResponse.put("error", "Unauthorized. Please login first.");
+        return new ResponseEntity<>(errorResponse, HttpStatus.UNAUTHORIZED);
     }
+
+    logger.info("Updating order status for orderId: {}, newStatus: {}", orderId, updateDto.getNewStatus());
+
+    try {
+        // Update order status using actual order ID
+        OrderResponseDto updatedOrder = orderService.updateOrderStatus(orderId, updateDto.getNewStatus());
+        
+        logger.info("Order status updated successfully for orderId: {}", orderId);
+
+        return new ResponseEntity<>(updatedOrder, HttpStatus.OK);
+    } catch (IllegalArgumentException e) {
+        logger.warn("Invalid status transition for orderId: {} - {}", orderId, e.getMessage());
+        Map<String, String> errorResponse = new HashMap<>();
+        errorResponse.put("error", e.getMessage());
+        return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
+    } catch (RuntimeException e) {
+        logger.error("Error updating order status for orderId: {} - {}", orderId, e.getMessage());
+        Map<String, String> errorResponse = new HashMap<>();
+        errorResponse.put("error", e.getMessage());
+        return new ResponseEntity<>(errorResponse, HttpStatus.NOT_FOUND);
+    }
+}
+
 
     /**
      * Get count of pending orders for notification polling
@@ -292,4 +283,5 @@ public class EmployeeController {
         
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
+    
 }

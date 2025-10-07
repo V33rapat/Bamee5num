@@ -40,21 +40,17 @@ async function loadPendingOrders(customerId) {
         emptyOrders.classList.add("hidden");
         ordersContainer.classList.add("hidden");
 
-        const response = await fetch(`/api/orders/customers/${customerId}/pending-orders`);
+        const response = await fetch(`/api/orders/customers/${customerId}/orders`);
         
         if (!response.ok) {
             throw new Error(`Failed to fetch orders: ${response.status} ${response.statusText}`);
         }
 
-        const orderData = await response.json();
+        const orders = await response.json();
         
         loadingIndicator.classList.add("hidden");
 
-        // Backend returns a single OrderResponseDto object, not an array
-        // Convert to array format expected by displayOrders function
-        const orders = (orderData && orderData.items && orderData.items.length > 0) ? [orderData] : [];
-
-        if (orders.length === 0) {
+        if (!orders || orders.length === 0) {
             emptyOrders.classList.remove("hidden");
             return;
         }
@@ -121,7 +117,7 @@ function createOrderCard(order) {
     card.innerHTML = `
         <div class="flex justify-between items-start mb-4">
             <div>
-                <h3 class="text-xl font-bold text-gray-800">คำสั่งซื้อ #${order.customerId}-${new Date(order.createdAt).getTime()}</h3>
+                <h3 class="text-xl font-bold text-gray-800">คำสั่งซื้อ #${order.orderId || order.customerId}</h3>
                 <p class="text-sm text-gray-500 mt-1">${orderDate}</p>
             </div>
             ${statusBadge}
@@ -136,7 +132,7 @@ function createOrderCard(order) {
 
         <div class="flex justify-between items-center pt-4 border-t-2 border-gray-200">
             <span class="text-lg font-bold text-gray-800">รวมทั้งหมด:</span>
-            <span class="text-2xl font-bold text-orange-600">฿${order.totalPrice || 0}</span>
+            <span class="text-2xl font-bold text-orange-600">฿${order.totalPrice ? order.totalPrice.toFixed(2) : '0.00'}</span>
         </div>
     `;
 

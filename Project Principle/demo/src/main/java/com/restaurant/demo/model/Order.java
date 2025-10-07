@@ -1,7 +1,9 @@
 package com.restaurant.demo.model;
 
 import jakarta.persistence.*;
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -12,33 +14,64 @@ public class Order {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    // ความสัมพันธ์กับลูกค้า
     @ManyToOne
     @JoinColumn(name = "customer_id", nullable = false)
     private Customer customer;
 
-    // ความสัมพันธ์กับพนักงาน (optional)
     @ManyToOne
     @JoinColumn(name = "employee_id")
     private Employee employee;
 
-    // จำนวนเงินรวมของออเดอร์
-    @Column(nullable = false)
-    private Double totalAmount = 0.0;
+    // ใช้ OrderItem แทน CartItem
+    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<OrderItem> orderItems = new ArrayList<>();
 
-    // สถานะออเดอร์ (Pending, In Progress, Finish, Cancelled)
     @Column(nullable = false, length = 20)
     private String status = "Pending";
 
-    // เวลาสร้าง / อัปเดต
-    private LocalDateTime createdAt = LocalDateTime.now();
-    private LocalDateTime updatedAt = LocalDateTime.now();
+    @Column(name = "total_amount", nullable = false, precision = 10, scale = 2)
+    private BigDecimal totalAmount = BigDecimal.ZERO;
 
-    // ความสัมพันธ์กับ order_items
-    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<OrderItem> orderItems;
+    @Column(nullable = false, updatable = false)
+    private LocalDateTime createdAt;
 
-    // ====== Getter / Setter ======
+    @Column(nullable = false)
+    private LocalDateTime updatedAt;
+
+    public Order() {
+        LocalDateTime now = LocalDateTime.now();
+        this.createdAt = now;
+        this.updatedAt = now;
+    }
+    @PrePersist
+    protected void onCreate() {
+        createdAt = LocalDateTime.now();
+        updatedAt = LocalDateTime.now();
+    }
+
+    @PreUpdate
+    protected void onUpdate() {
+        updatedAt = LocalDateTime.now();
+    }
+
+    public void addOrderItem(OrderItem item) {
+        item.setOrder(this);
+        this.orderItems.add(item);
+    }
+
+    public void removeOrderItem(OrderItem item) {
+        this.orderItems.remove(item);
+        item.setOrder(null);
+    }
+
+    public void calculateTotalAmount() {
+        this.totalAmount = orderItems.stream()
+            .map(OrderItem::getTotal)
+            .reduce(BigDecimal.ZERO, BigDecimal::add);
+    }
+
+
+    // ===== Getter / Setter =====
     public Long getId() { return id; }
 
     public Customer getCustomer() { return customer; }
@@ -47,14 +80,25 @@ public class Order {
     public Employee getEmployee() { return employee; }
     public void setEmployee(Employee employee) { this.employee = employee; }
 
-    public Double getTotalAmount() { return totalAmount; }
-    public void setTotalAmount(Double totalAmount) { this.totalAmount = totalAmount; }
+    public List<OrderItem> getOrderItems() { return orderItems; }
+    public void setOrderItems(List<OrderItem> orderItems) { 
+        this.orderItems = orderItems;
+    }
 
     public String getStatus() { return status; }
     public void setStatus(String status) { this.status = status; }
 
-    public List<OrderItem> getOrderItems() { return orderItems; }
-    public void setOrderItems(List<OrderItem> orderItems) { this.orderItems = orderItems; }
+    public BigDecimal getTotalAmount() { 
+        return totalAmount; 
+    }
+    public void setTotalAmount(BigDecimal totalAmount) { 
+        this.totalAmount = totalAmount; 
+    }
+
+    // Alias for getTotalAmount() for consistency
+    public BigDecimal getTotalPrice() { 
+        return this.totalAmount; 
+    }
 
     public LocalDateTime getCreatedAt() { return createdAt; }
     public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }

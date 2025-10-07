@@ -12,6 +12,7 @@ import org.slf4j.LoggerFactory;
 
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
+import java.util.List;
 
 /**
  * REST Controller for Order Management Operations
@@ -37,33 +38,57 @@ public class OrderController {
      */
     @PostMapping("/customers/{customerId}/place-order")
     public ResponseEntity<OrderResponseDto> placeOrder(
-            @PathVariable @NotNull(message = "Customer ID is required") @Positive(message = "Customer ID must be positive") Long customerId) {
-        
-        logger.info("Placing order for customer ID: {}", customerId);
-        
-        OrderResponseDto orderResponse = orderService.placeOrder(customerId);
-        
+            @PathVariable 
+            @NotNull(message = "Customer ID is required") 
+            @Positive(message = "Customer ID must be positive") Long customerId,
+            @RequestParam(required = false) Long employeeId) { // employeeId ส่งมาหรือไม่ก็ได้
+
+        logger.info("Placing order for customer ID: {}, employee ID: {}", customerId, employeeId);
+
+        // เรียก service แบบสองพารามิเตอร์
+        OrderResponseDto orderResponse = orderService.placeOrder(customerId, employeeId);
+
         logger.info("Order placed successfully for customer ID: {}, Total: {}", customerId, orderResponse.getTotalPrice());
-        
+
         return new ResponseEntity<>(orderResponse, HttpStatus.CREATED);
-    }
+}
+
 
     /**
      * Get pending orders for a customer
      * 
      * @param customerId The ID of the customer
-     * @return ResponseEntity containing pending order details
+     * @return ResponseEntity containing list of pending orders
      */
     @GetMapping("/customers/{customerId}/pending-orders")
-    public ResponseEntity<OrderResponseDto> getPendingOrders(
+    public ResponseEntity<List<OrderResponseDto>> getPendingOrders(
             @PathVariable @NotNull(message = "Customer ID is required") @Positive(message = "Customer ID must be positive") Long customerId) {
         
         logger.info("Fetching pending orders for customer ID: {}", customerId);
         
-        OrderResponseDto pendingOrders = orderService.getPendingOrdersByCustomerId(customerId);
+        List<OrderResponseDto> pendingOrders = orderService.getPendingOrdersByCustomerId(customerId);
         
-        logger.info("Fetched pending orders for customer ID: {}", customerId);
+        logger.info("Fetched {} pending orders for customer ID: {}", pendingOrders.size(), customerId);
         
         return new ResponseEntity<>(pendingOrders, HttpStatus.OK);
+    }
+
+    /**
+     * Get all orders for a customer (all statuses)
+     * 
+     * @param customerId The ID of the customer
+     * @return ResponseEntity containing list of all customer orders
+     */
+    @GetMapping("/customers/{customerId}/orders")
+    public ResponseEntity<List<OrderResponseDto>> getAllOrders(
+            @PathVariable @NotNull(message = "Customer ID is required") @Positive(message = "Customer ID must be positive") Long customerId) {
+        
+        logger.info("Fetching all orders for customer ID: {}", customerId);
+        
+        List<OrderResponseDto> orders = orderService.getOrdersByCustomerId(customerId);
+        
+        logger.info("Fetched {} orders for customer ID: {}", orders.size(), customerId);
+        
+        return new ResponseEntity<>(orders, HttpStatus.OK);
     }
 }
