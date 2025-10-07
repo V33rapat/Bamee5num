@@ -43,7 +43,7 @@ public class Order {
         this.createdAt = now;
         this.updatedAt = now;
     }
-
+    /* 
     @PrePersist
     protected void onCreate() {
         createdAt = LocalDateTime.now();
@@ -55,18 +55,23 @@ public class Order {
     protected void onUpdate() {
         updatedAt = LocalDateTime.now();
         calculateTotalAmount();
-    }
+    }*/
+
+    @PreUpdate
+        protected void onUpdate() {
+        updatedAt = LocalDateTime.now();
+     }
 
     public void addOrderItem(OrderItem item) {
     item.setOrder(this); // สำคัญมาก!!
     this.orderItems.add(item);
-    calculateTotalAmount();
+        //calculateTotalAmount();
     }
 
     public void removeOrderItem(OrderItem item) {
         this.orderItems.remove(item);
         item.setOrder(null);
-        calculateTotalAmount();
+        //calculateTotalAmount();
     }
 
    public void calculateTotalAmount() {
@@ -95,7 +100,7 @@ public class Order {
     public void setStatus(String status) { this.status = status; }
 
     public BigDecimal getTotalAmount() { 
-    calculateTotalAmount(); 
+        //calculateTotalAmount(); 
     return totalAmount; 
     }
     public void setTotalAmount(BigDecimal totalAmount) { this.totalAmount = totalAmount; }

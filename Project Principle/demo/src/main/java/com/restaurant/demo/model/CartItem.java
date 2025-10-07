@@ -47,7 +47,7 @@ public class CartItem {
     private Integer quantity;
 
     @NotBlank(message = "Status is required")
-    @Pattern(regexp = "Pending|In Progress|Cancelled|Finish", message = "Status must be one of: Pending, In Progress, Cancelled, Finish")
+    @Pattern(regexp = "Pending|In Progress|Cancelled|Finish|Ordered", message = "Status must be one of: Pending, In Progress, Cancelled, Finish, Ordered")
     @Column(name = "status", nullable = false, length = 20)
     private String status = STATUS_PENDING; // ใช้ constant แทน string ตรงนี้
 
@@ -72,7 +72,8 @@ public class CartItem {
     }
 
     // Default constructor
-    public CartItem() {}
+    public CartItem() {
+    }
 
     // Constructor with required fields (backward compatible)
     public CartItem(Customer customer, String itemName, BigDecimal itemPrice, Integer quantity) {
