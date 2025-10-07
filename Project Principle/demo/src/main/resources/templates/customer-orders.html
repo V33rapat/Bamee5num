@@ -4,22 +4,17 @@
     <meta charset="UTF-8">
     <meta name="_csrf" th:content="${_csrf.token}"/>
     <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
-    <title>Customer - Bamee 5 Num</title>
+    <title>คำสั่งซื้อของฉัน - Bamee 5 Num</title>
     <link rel="stylesheet" href="/css/style.css">
     <script src="https://cdn.tailwindcss.com"></script>
-
 </head>
 <body class="bg-gray-50" th:data-customer-id="${customer != null ? customer.id : ''}" th:data-customer-username="${customer != null ? customer.username : ''}">
 
 <header class="bg-white shadow py-4 px-6 flex justify-between items-center">
     <h1 class="text-xl font-bold text-orange-600">Bamee 5 Num</h1>
-    <div id="navButtons" class="space-x-4">
-        <a href="/" class="text-gray-700 hover:text-orange-600">เข้าสู่ระบบ</a>
-    </div>
-    <div id="userNav" class="hidden flex items-center space-x-4" th:if="${customer != null}">
-        <span id="welcomeText" class="font-semibold text-gray-700" th:text="'สวัสดี, ' + ${customer.name}">สวัสดี, ผู้ใช้</span>
-        <a href="/customer-orders" class="text-gray-700 hover:text-orange-600 font-medium">📋 คำสั่งซื้อของฉัน</a>
-        <button id="cartBtn" class="bg-orange-500 text-white px-3 py-1 rounded">🛒 ตะกร้า (<span id="cartCount" class="hidden">0</span>)</button>
+    <div id="userNav" class="flex items-center space-x-4" th:if="${customer != null}">
+        <a th:href="@{/customer/{id}(id=${customer.id})}" class="text-gray-700 hover:text-orange-600">เมนูอาหาร</a>
+        <span id="welcomeText" class="font-semibold text-gray-700" th:text="'สวัสดี, ' + ${customer.username}">สวัสดี, ผู้ใช้</span>
         <button id="logoutBtn" class="text-red-500 hover:text-red-700">Logout</button>
     </div>
     <!-- Error message when customer is null or invalid -->
@@ -35,8 +30,26 @@
 <input type="hidden" id="customerUsername" th:value="${customer != null ? customer.username : ''}" />
 
 <div class="max-w-7xl mx-auto px-4 py-8" th:if="${customer != null}">
-    <h2 class="text-3xl font-bold text-orange-600 mb-6">📋 เมนูอาหาร</h2>
-    <div id="menuGrid" class="grid grid-cols-1 md:grid-cols-3 gap-6"></div>
+    <div class="flex justify-between items-center mb-6">
+        <h2 class="text-3xl font-bold text-orange-600">📋 คำสั่งซื้อของฉัน</h2>
+        <a th:href="'/customer/' + ${customer.id}" class="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600">กลับไปยังเมนู</a>
+    </div>
+
+    <!-- Loading indicator -->
+    <div id="loadingIndicator" class="text-center py-8">
+        <p class="text-gray-500">กำลังโหลดคำสั่งซื้อ...</p>
+    </div>
+
+    <!-- Empty state -->
+    <div id="emptyOrders" class="hidden text-center py-12 bg-white rounded-lg shadow">
+        <p class="text-gray-500 text-lg mb-4">ยังไม่มีคำสั่งซื้อที่รอดำเนินการ</p>
+        <a th:href="@{/customer/{id}(id=${customer.id})}" class="inline-block bg-orange-500 text-white px-6 py-3 rounded hover:bg-orange-600">สั่งอาหารตอนนี้</a>
+    </div>
+
+    <!-- Orders container -->
+    <div id="ordersContainer" class="hidden space-y-6">
+        <!-- Orders will be dynamically inserted here -->
+    </div>
 </div>
 
 <!-- Error page content when customer is not found -->
@@ -46,24 +59,9 @@
     <a href="/login" class="inline-block bg-orange-500 text-white px-6 py-3 rounded hover:bg-orange-600">กลับไปหน้าเข้าสู่ระบบ</a>
 </div>
 
-<div id="cartSidebar" class="fixed top-0 right-0 w-80 h-full bg-white shadow-lg p-6 transform translate-x-full transition-transform" th:if="${customer != null}">
-    <div class="flex justify-between items-center mb-4">
-        <h2 class="font-bold text-lg">ตะกร้าของฉัน</h2>
-        <button id="closeCart" class="text-gray-500 hover:text-gray-700">&times;</button>
-    </div>
-    <div id="cartItems" class="space-y-2"></div>
-    <p id="emptyCart" class="text-gray-500 text-center">ยังไม่มีสินค้า</p>
-    <div id="cartFooter" class="mt-4 hidden">
-        <p class="font-bold">รวม: <span id="cartTotal">0</span></p>
-        <button id="placeOrderBtn" class="bg-green-500 text-white w-full py-2 rounded mt-2 hover:bg-green-600">สั่งจอง</button>
-    </div>
-</div>
-
 <div id="notifications" class="fixed top-4 right-4 space-y-2 z-50"></div>
 
-<script type="module" src="/js/db.js"></script>
-<script type="module" src="/js/landing.js"></script>
-<script type="module" src="/js/customer.js"></script>
+<script type="module" src="/js/customer-orders.js"></script>
 
 </body>
 </html>

@@ -12,6 +12,12 @@ import java.time.LocalDateTime;
 @Table(name = "cart_items")
 public class CartItem {
 
+    // --- เพิ่ม constant สำหรับสถานะ ---
+    public static final String STATUS_PENDING = "Pending";
+    public static final String STATUS_IN_PROGRESS = "In Progress";
+    public static final String STATUS_CANCELLED = "Cancelled";
+    public static final String STATUS_FINISH = "Finish";
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -39,6 +45,11 @@ public class CartItem {
     @Column(name = "quantity", nullable = false)
     private Integer quantity;
 
+    @NotBlank(message = "Status is required")
+    @Pattern(regexp = "Pending|In Progress|Cancelled|Finish", message = "Status must be one of: Pending, In Progress, Cancelled, Finish")
+    @Column(name = "status", nullable = false, length = 20)
+    private String status = STATUS_PENDING; // ใช้ constant แทน string ตรงนี้
+
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
@@ -50,18 +61,31 @@ public class CartItem {
     // Default constructor
     public CartItem() {}
 
-    // Constructor with required fields
+    // Constructor with required fields (backward compatible)
     public CartItem(Customer customer, String itemName, BigDecimal itemPrice, Integer quantity) {
         this.customer = customer;
         this.itemName = itemName;
         this.itemPrice = itemPrice;
         this.quantity = quantity;
+        this.status = STATUS_PENDING; // ใช้ constant
+    }
+
+    // Constructor with status parameter
+    public CartItem(Customer customer, String itemName, BigDecimal itemPrice, Integer quantity, String status) {
+        this.customer = customer;
+        this.itemName = itemName;
+        this.itemPrice = itemPrice;
+        this.quantity = quantity;
+        this.status = status != null ? status : STATUS_PENDING; // ใช้ constant
     }
 
     @PrePersist
     protected void onCreate() {
         createdAt = LocalDateTime.now();
         updatedAt = LocalDateTime.now();
+        if (status == null || status.isEmpty()) {
+            status = STATUS_PENDING; // ใช้ constant
+        }
     }
 
     @PreUpdate
@@ -118,6 +142,14 @@ public class CartItem {
         this.quantity = quantity;
     }
 
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
+    }
+
     public LocalDateTime getCreatedAt() {
         return createdAt;
     }
@@ -134,7 +166,7 @@ public class CartItem {
         this.updatedAt = updatedAt;
     }
 
-    // Compatibility methods for Manager features (from main branch)
+    // Compatibility methods for Manager features
     public LocalDateTime getAddedAt() {
         return this.createdAt;
     }

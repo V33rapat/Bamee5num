@@ -1,9 +1,12 @@
 package com.restaurant.demo.service;
 
+import com.restaurant.demo.dto.EmployeeRegistrationDto;
 import com.restaurant.demo.dto.ManagerRegistrationDto;
 import com.restaurant.demo.exception.InvalidManagerCredentialsException;
 import com.restaurant.demo.exception.ManagerAlreadyExistsException;
+import com.restaurant.demo.model.Employee;
 import com.restaurant.demo.model.Manager;
+import com.restaurant.demo.repository.EmployeeRepository;
 import com.restaurant.demo.repository.ManagerRepository;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -16,10 +19,14 @@ import java.util.Optional;
 public class ManagerService {
 
     private final ManagerRepository managerRepository;
+    private final EmployeeRepository employeeRepository;
     private final PasswordEncoder passwordEncoder;
 
-    public ManagerService(ManagerRepository managerRepository, PasswordEncoder passwordEncoder) {
+    public ManagerService(ManagerRepository managerRepository, 
+                         EmployeeRepository employeeRepository,
+                         PasswordEncoder passwordEncoder) {
         this.managerRepository = managerRepository;
+        this.employeeRepository = employeeRepository;
         this.passwordEncoder = passwordEncoder;
     }
 
@@ -114,5 +121,76 @@ public class ManagerService {
      */
     public Optional<Manager> getManagerById(Long id) {
         return managerRepository.findById(id);
+    }
+
+    /**
+     * Register a new employee (by manager)
+     * 
+     * @param dto EmployeeRegistrationDto containing employee registration details
+     * @return Employee the saved employee entity
+     * @throws RuntimeException if username already exists
+     * @throws IllegalArgumentException if validation fails
+     */
+    public Employee registerEmployee(EmployeeRegistrationDto dto) {
+        // Check if username already exists
+        if (employeeRepository.existsByUsername(dto.getUsername())) {
+            throw new RuntimeException("Username already exists: " + dto.getUsername());
+        }
+
+        // Validate position (additional validation beyond DTO validation)
+        String position = dto.getPosition();
+        if (position == null || position.trim().isEmpty()) {
+            throw new IllegalArgumentException("Position is required");
+        }
+
+        // Create new Employee entity
+        Employee employee = new Employee();
+        
+        // Set Employee fields
+        employee.setName(dto.getName());
+        employee.setPosition(dto.getPosition());
+        employee.setUsername(dto.getUsername());
+        
+        // Hash password using passwordEncoder
+        String hashedPassword = passwordEncoder.encode(dto.getPassword());
+        employee.setPassword(hashedPassword);
+
+        // Save employee to database
+        Employee savedEmployee = employeeRepository.save(employee);
+
+        return savedEmployee;
+    }
+
+    /**
+     * Get all employees
+     * 
+     * @return List of all employees
+     */
+    public java.util.List<Employee> getAllEmployees() {
+        return employeeRepository.findAll();
+    }
+
+    /**
+     * Get employee by ID
+     * 
+     * @param id Employee's ID
+     * @return Optional<Employee> containing the employee if found
+     */
+    public Optional<Employee> getEmployeeById(Long id) {
+        return employeeRepository.findById(id);
+    }
+
+    /**
+     * Delete employee by ID
+     * 
+     * @param id Employee's ID
+     * @return true if employee was deleted, false if not found
+     */
+    public boolean deleteEmployee(Long id) {
+        if (employeeRepository.existsById(id)) {
+            employeeRepository.deleteById(id);
+            return true;
+        }
+        return false;
     }
 }

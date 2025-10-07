@@ -3,6 +3,8 @@ let employeeForm;
 let employeeModalTitle;
 let employeeNameInput;
 let employeePositionInput;
+let employeeUsernameInput;
+let employeePasswordInput;
 let currentMenuFilter = 'all'; // Track current filter: 'all' or 'active'
 let salesChart = null; // To hold the Chart.js instance
 
@@ -105,6 +107,8 @@ document.addEventListener("DOMContentLoaded", () => {
     employeeModalTitle = document.getElementById('employeeModalTitle');
     employeeNameInput = document.getElementById('employeeName');
     employeePositionInput = document.getElementById('employeePosition');
+    employeeUsernameInput = document.getElementById('employeeUsername');
+    employeePasswordInput = document.getElementById('employeePassword');
     const cancelEmployeeBtn = document.getElementById('cancelEmployee');
 
     if (employeeForm) {
@@ -207,6 +211,7 @@ function renderChart(monthlySales) {
 /*
 async function updateManagerStats() {
     try {
+        // Fetch sales report
         const resp = await fetch('/api/reports/sales');
         if (!resp.ok) {
             throw new Error('ไม่สามารถโหลดรายงานยอดขาย');
@@ -220,6 +225,26 @@ async function updateManagerStats() {
         if (revenueEl) {
             const revenueValue = typeof report.revenue === 'number' ? report.revenue.toFixed(2) : '0.00';
             revenueEl.textContent = `฿${revenueValue}`;
+        }
+
+        // Fetch order statistics
+        try {
+            const orderStatsResp = await fetch('/api/managers/order-stats');
+            if (orderStatsResp.ok) {
+                const orderStats = await orderStatsResp.json();
+                const pendingEl = document.getElementById('pendingOrders');
+                const completedEl = document.getElementById('completedOrders');
+                
+                if (pendingEl) {
+                    pendingEl.textContent = orderStats.pendingOrders ?? 0;
+                }
+                if (completedEl) {
+                    completedEl.textContent = orderStats.completedOrders ?? 0;
+                }
+            }
+        } catch (orderErr) {
+            console.error('Failed to load order statistics:', orderErr);
+            // Don't throw, just log the error
         }
     } catch (err) {
         console.error(err);
@@ -559,33 +584,42 @@ async function loadEmployeeManagement() {
     employees.forEach(employee => {
         const employeeItem = document.createElement('div');
         employeeItem.className = 'flex items-center justify-between p-4 bg-gray-50 rounded-lg';
+        
+        // Display username if available
+        const usernameDisplay = employee.username ? `<p class="text-xs text-gray-500">Username: ${employee.username}</p>` : '';
+        
         employeeItem.innerHTML = `
             <div>
                 <h5 class="font-semibold">${employee.name}</h5>
                 <p class="text-sm text-gray-600">${employee.position || ''}</p>
+                ${usernameDisplay}
             </div>
             <div class="flex items-center space-x-2">
-                <button class="text-sm text-blue-600 hover:text-blue-800 edit-employee">แก้ไข</button>
                 <button class="text-sm text-red-600 hover:text-red-800 delete-employee">ลบ</button>
             </div>
         `;
-
-        employeeItem.querySelector('.edit-employee').addEventListener('click', () => {
-            openEmployeeDialog(employee);
-        });
 
         employeeItem.querySelector('.delete-employee').addEventListener('click', async () => {
             const confirmDelete = confirm(`ต้องการลบ ${employee.name} หรือไม่?`);
             if (!confirmDelete) {
                 return;
             }
+            
+            // Get CSRF token
+            const csrfToken = getCsrfToken();
+            const csrfHeader = getCsrfHeader();
+            
             const resp = await fetch(`/api/employees/${employee.id}`, {
-                method: 'DELETE'
+                method: 'DELETE',
+                headers: {
+                    [csrfHeader]: csrfToken
+                }
             });
             if (resp.ok || resp.status === 204) {
                 await loadEmployeeManagement();
+                showSuccessModal('ลบพนักงานสำเร็จ');
             } else {
-                alert('ลบพนักงานไม่สำเร็จ');
+                showErrorModal('ลบพนักงานไม่สำเร็จ');
             }
         });
 
@@ -600,16 +634,25 @@ function openEmployeeDialog(employee) {
     }
 
     if (employee) {
-        employeeForm.dataset.mode = 'edit';
-        employeeForm.dataset.id = String(employee.id);
-        employeeModalTitle.textContent = 'แก้ไขพนักงาน';
-        employeeNameInput.value = employee.name || '';
-        employeePositionInput.value = employee.position || '';
+        // Edit mode is not supported for employee registration with credentials
+        showErrorModal('การแก้ไขพนักงานยังไม่รองรับในเวอร์ชันนี้\nกรุณาลบและสร้างใหม่หากต้องการเปลี่ยนแปลง');
+        return;
     } else {
+        // Create mode
         employeeForm.dataset.mode = 'create';
         delete employeeForm.dataset.id;
         employeeModalTitle.textContent = 'เพิ่มพนักงาน';
         employeeForm.reset();
+        
+        // Make sure username and password fields are visible and required
+        if (employeeUsernameInput) {
+            employeeUsernameInput.required = true;
+            employeeUsernameInput.value = '';
+        }
+        if (employeePasswordInput) {
+            employeePasswordInput.required = true;
+            employeePasswordInput.value = '';
+        }
     }
 
     showEmployeeModal();
@@ -638,42 +681,89 @@ async function handleEmployeeSubmit(event) {
         return;
     }
 
-    const payload = {
-        name: employeeNameInput.value.trim(),
-        position: employeePositionInput.value.trim()
-    };
+    const name = employeeNameInput.value.trim();
+    const position = employeePositionInput.value.trim();
+    const username = employeeUsernameInput.value.trim();
+    const password = employeePasswordInput.value.trim();
 
-    if (!payload.name) {
-        alert('กรุณาระบุชื่อพนักงาน');
+    // Validation
+    if (!name) {
+        showErrorModal('กรุณาระบุชื่อพนักงาน');
         return;
     }
 
+    if (!position) {
+        showErrorModal('กรุณาเลือกตำแหน่ง');
+        return;
+    }
+
+    if (!username) {
+        showErrorModal('กรุณาระบุชื่อผู้ใช้');
+        return;
+    }
+
+    if (!password) {
+        showErrorModal('กรุณาระบุรหัสผ่าน');
+        return;
+    }
+
+    if (password.length < 6) {
+        showErrorModal('รหัสผ่านต้องมีอย่างน้อย 6 ตัวอักษร');
+        return;
+    }
+
+    const payload = {
+        name: name,
+        position: position,
+        username: username,
+        password: password
+    };
+
     const mode = employeeForm.dataset.mode;
     try {
+        // Get CSRF token
+        const csrfToken = getCsrfToken();
+        const csrfHeader = getCsrfHeader();
+
         let resp;
         if (mode === 'edit' && employeeForm.dataset.id) {
-            resp = await fetch(`/api/employees/${employeeForm.dataset.id}`, {
-                method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(payload)
-            });
+            // For edit mode, we might need different logic
+            // For now, we'll just support creating new employees
+            showErrorModal('การแก้ไขพนักงานยังไม่รองรับในเวอร์ชันนี้');
+            return;
         } else {
-            resp = await fetch('/api/employees', {
+            // Use the manager employee registration endpoint
+            resp = await fetchWithTimeout('/api/managers/employees', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: { 
+                    'Content-Type': 'application/json',
+                    [csrfHeader]: csrfToken
+                },
                 body: JSON.stringify(payload)
-            });
+            }, 10000);
         }
 
         if (!resp.ok) {
-            throw new Error('Request failed');
+            const errorData = await resp.json().catch(() => null);
+            let errorMessage = 'บันทึกข้อมูลพนักงานไม่สำเร็จ';
+            
+            if (resp.status === 409 || (errorData && errorData.message && errorData.message.includes('duplicate'))) {
+                errorMessage = 'ชื่อผู้ใช้นี้มีอยู่ในระบบแล้ว กรุณาเลือกชื่อผู้ใช้อื่น';
+            } else if (errorData && errorData.message) {
+                errorMessage = errorData.message;
+            }
+            
+            showErrorModal(errorMessage);
+            return;
         }
 
+        const result = await resp.json();
         await loadEmployeeManagement();
         hideEmployeeModal();
+        showSuccessModal('เพิ่มพนักงานสำเร็จ!\n\nชื่อผู้ใช้: ' + username + '\nรหัสผ่าน: ' + password + '\n\nกรุณาบันทึกข้อมูลนี้');
     } catch (err) {
         console.error(err);
-        alert('บันทึกข้อมูลพนักงานไม่สำเร็จ');
+        showErrorModal(err.message || 'บันทึกข้อมูลพนักงานไม่สำเร็จ');
     }
 }
 

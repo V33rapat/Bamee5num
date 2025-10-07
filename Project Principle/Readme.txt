@@ -12,3 +12,9 @@ Manager Dashboard Overview
 - มี helper etchCartForUser(userId) ที่เรียก /api/carts/{userId} สำหรับดูตะกร้าของลูกค้าแต่ละคน
 - ระบบ seed ตัวอย่าง CartItem/พนักงาน/feedback ด้วย DataInitializer ทำให้สามารถทดสอบ Dashboard ได้ทันทีหลังรัน
 
+
+กูไม่ไหวแล้วช่วยกูด้วยยย ตอนนี้ยังstackอยู่
+Fix CartService and CartItemRepository: 
+- Correct JPA repository methods to match entity fields
+- Replace findByCustomerId / findByCustomerIdAndItemName with findByCustomer_Id
+- Adjust CartService methods to use correct repository methods"
