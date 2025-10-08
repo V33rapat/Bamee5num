@@ -12,6 +12,7 @@ import com.restaurant.demo.service.CartService;
 import com.restaurant.demo.service.ManagerService;
 import com.restaurant.demo.service.MenuItemService;
 import com.restaurant.demo.service.OrderService;
+import com.restaurant.demo.service.ReportService;
 import com.restaurant.demo.service.employee.EmployeeService;
 import com.restaurant.demo.service.employee.dto.EmployeeCredentials;
 import com.restaurant.demo.service.employee.dto.EmployeeRegistrationRequest;
@@ -31,12 +32,16 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+
+// Add the import for ReportSummary
+import com.restaurant.demo.dto.ReportSummary;
 
 @RestController
 // URL จะอยู่ภายใต้ /api/...
@@ -51,14 +56,18 @@ public class ManagerApiController {
     private final MenuItemService menuItemService;
     private final ManagerService managerService;
     private final OrderService orderService;
+    private final ReportService reportService;
 
+    // Constructor-based dependency injection
+    // (Spring จะสร้าง instance ของคลาสนี้และฉีด service ที่ต้องการ
     public ManagerApiController(ManagerContext managerContext,
                                 EmployeeService employeeService,
                                 CartService cartService,
                                 SalesReportService salesReportService,
                                 MenuItemService menuItemService,
                                 ManagerService managerService,
-                                OrderService orderService) {
+                                OrderService orderService,
+                                ReportService reportService) {
         this.managerContext = managerContext;
         this.employeeService = employeeService;
         this.cartService = cartService;
@@ -66,6 +75,7 @@ public class ManagerApiController {
         this.menuItemService = menuItemService;
         this.managerService = managerService;
         this.orderService = orderService;
+        this.reportService = reportService;
     }
 
     /**
@@ -198,6 +208,14 @@ public class ManagerApiController {
         return salesReportService.getDailySalesReport();
     }
 
+    @GetMapping({"/monthly", "/reports/monthly"})
+    public ResponseEntity<?> getMonthlyReport(
+            @RequestParam(required = false) Integer month,
+            @RequestParam Integer year) {
+
+        ReportSummary summary = reportService.getMonthlyReport(month, year);
+        return ResponseEntity.ok(summary);
+    }
     // ===== Menu Management Endpoints =====
 
     // Task 3.1: POST /api/manager/menu-items - Create new menu item

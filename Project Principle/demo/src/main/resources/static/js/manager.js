@@ -38,6 +38,26 @@ async function fetchWithTimeout(url, options = {}, timeout = 10000) {
     }
 }
 
+// Parse a Response safely and provide helpful error text when it's not JSON
+async function parseJsonSafe(response) {
+    const text = await response.text();
+    const contentType = (response.headers.get('content-type') || '').toLowerCase();
+    const trimmed = text.trim();
+
+    // If content-type indicates JSON or the body looks like JSON, try to parse
+    if (contentType.includes('application/json') || trimmed.startsWith('{') || trimmed.startsWith('[')) {
+        try {
+            return JSON.parse(trimmed);
+        } catch (e) {
+            // Include a snippet of the invalid JSON to help debugging
+            throw new Error('Invalid JSON response from ' + response.url + ': ' + (trimmed.length > 300 ? trimmed.slice(0, 300) + '...' : trimmed));
+        }
+    }
+
+    // Not JSON: return a helpful error including the status and beginning of body
+    throw new Error('Expected JSON response but got status ' + response.status + ' from ' + response.url + '. Response preview: ' + (trimmed.length > 300 ? trimmed.slice(0, 300) + '...' : trimmed));
+}
+
 // Main setup function for manager dashboard
 export async function setupManagerDashboard() {
     // Check if manager is authenticated via server session
@@ -60,7 +80,7 @@ export async function setupManagerDashboard() {
 
     await loadMenuItems();
     await loadEmployeeManagement();
-    //await updateManagerStats();
+    await updateManagerStats();
     initManagerTabs();
     hideAddMenuModal();
 }
@@ -121,53 +141,59 @@ document.addEventListener("DOMContentLoaded", () => {
     setupManagerDashboard();
 });
 
-// Load monthly report when button is clicked
-document.getElementById("loadReportBtn").addEventListener("click", async () => {
-    const month = document.getElementById("reportMonth").value;
-    const monthSelect = document.getElementById("reportMonth");
-    const yearSelect = document.getElementById("reportYear");
+// Setup report controls after DOM is ready: populate year options and attach click handler
+document.addEventListener('DOMContentLoaded', () => {
+    const monthSelect = document.getElementById('reportMonth');
+    const yearSelect = document.getElementById('reportYear');
+    const loadReportBtn = document.getElementById('loadReportBtn');
 
+    if (yearSelect) {
         const currentYear = new Date().getFullYear();
-    for (let y = currentYear; y >= currentYear - 5; y--) {
-        const opt = document.createElement("option");
-        opt.value = y;
-        opt.textContent = y;
-        yearSelect.appendChild(opt);
+        // populate recent 6 years
+        for (let y = currentYear; y >= currentYear - 5; y--) {
+            const opt = document.createElement('option');
+            opt.value = y;
+            opt.textContent = y;
+            yearSelect.appendChild(opt);
+        }
     }
 
-    // ✅ เมื่อคลิกปุ่ม "แสดงรายงาน"
-    loadReportBtn.addEventListener("click", async () => {
-        const month = monthSelect.value;
-        const year = yearSelect.value;
+    if (!loadReportBtn) return;
+
+    loadReportBtn.addEventListener('click', async () => {
+        const month = monthSelect ? monthSelect.value : 'all';
+        const year = yearSelect ? yearSelect.value : new Date().getFullYear();
 
         try {
-            // 🔹 เรียก API จาก Spring Boot
             const resp = await fetch(`/api/reports/monthly?month=${month}&year=${year}`);
-            if (!resp.ok) throw new Error("โหลดข้อมูลไม่สำเร็จ");
+            if (!resp.ok) throw new Error('โหลดข้อมูลไม่สำเร็จ: ' + resp.status + ' ' + resp.statusText);
 
-            const data = await resp.json();
+            const data = await parseJsonSafe(resp);
 
-            // ✅ แสดงผลข้อมูลในหน้า HTML
-            document.getElementById("reportResult").classList.remove("hidden");
+            const resultEl = document.getElementById('reportResult');
+            if (resultEl) resultEl.classList.remove('hidden');
 
-            document.getElementById("monthName").textContent =
-                month === "all" ? "ทั้งหมด" : getMonthName(month);
-            document.getElementById("yearName").textContent = year;
-            document.getElementById("totalRevenue").textContent = 
-                data.totalRevenue?.toLocaleString() || "0";
-            document.getElementById("totalOrders").textContent = 
-                data.totalOrders || "0";
-            document.getElementById("topMenu").textContent = 
-                data.topMenu || "-";
-            document.getElementById("topCount").textContent = 
-                data.topCount || "0";
+            const monthNameEl = document.getElementById('monthName');
+            const yearNameEl = document.getElementById('yearName');
+            if (monthNameEl) monthNameEl.textContent = month === 'all' ? 'ทั้งหมด' : getMonthName(month);
+            if (yearNameEl) yearNameEl.textContent = year;
 
-            // ✅ วาดกราฟยอดขายรายเดือน
+            const totalRevenueEl = document.getElementById('totalRevenue');
+            const totalOrdersEl = document.getElementById('totalOrders');
+            const topMenuEl = document.getElementById('topMenu');
+            const topCountEl = document.getElementById('topCount');
+            const topRevenueEl = document.getElementById('topRevenue');
+
+            if (totalRevenueEl) totalRevenueEl.textContent = (data.totalRevenue ?? 0).toLocaleString();
+            if (totalOrdersEl) totalOrdersEl.textContent = data.totalOrders ?? '0';
+            if (topMenuEl) topMenuEl.textContent = data.topMenu ?? '-';
+            if (topCountEl) topCountEl.textContent = data.topCount ?? '0';
+            if (topRevenueEl) topRevenueEl.textContent = (data.topRevenue ?? 0).toLocaleString();
+
             if (data.monthlySales) renderChart(data.monthlySales);
-
         } catch (err) {
-            alert("❌ เกิดข้อผิดพลาดในการโหลดรายงาน");
-            console.error(err);
+            showErrorModal('เกิดข้อผิดพลาดในการโหลดรายงาน:\n' + (err.message || String(err)));
+            console.error('Monthly report error:', err);
         }
     });
 });
@@ -179,7 +205,25 @@ function getMonthName(month) {
 }
 
 function renderChart(monthlySales) {
-    const ctx = document.getElementById("monthlySalesChart").getContext("2d");
+    // Guard: ensure Chart.js is loaded
+    if (typeof Chart === 'undefined') {
+        console.error('Chart.js is not loaded. Please include Chart.js before manager.js');
+        showErrorModal('ไม่สามารถแสดงกราฟ: Chart.js ยังไม่ได้โหลด');
+        return;
+    }
+
+    const canvas = document.getElementById("monthlySalesChart");
+    if (!canvas) {
+        console.warn('monthlySalesChart canvas not found');
+        return;
+    }
+    const ctx = canvas.getContext("2d");
+
+    // Validate monthlySales array
+    if (!Array.isArray(monthlySales)) {
+        console.warn('monthlySales is not an array:', monthlySales);
+        return;
+    }
 
     // ถ้ามีกราฟอยู่แล้ว ลบก่อน
     if (salesChart) salesChart.destroy();
@@ -208,49 +252,51 @@ function renderChart(monthlySales) {
     });
 }
 
-/*
 async function updateManagerStats() {
     try {
         // Fetch sales report
-        const resp = await fetch('/api/reports/sales');
+        const resp = await fetchWithTimeout('/api/reports/sales', {}, 8000);
         if (!resp.ok) {
-            throw new Error('ไม่สามารถโหลดรายงานยอดขาย');
+            throw new Error('ไม่สามารถโหลดรายงานยอดขาย: ' + resp.status + ' ' + resp.statusText);
         }
-        const report = await resp.json();
+        const report = await parseJsonSafe(resp);
+        console.log('sales report:', report);
+
         const ordersEl = document.getElementById('todayOrders');
         const revenueEl = document.getElementById('todayRevenue');
         if (ordersEl) {
             ordersEl.textContent = report.orderCount ?? 0;
         }
         if (revenueEl) {
-            const revenueValue = typeof report.revenue === 'number' ? report.revenue.toFixed(2) : '0.00';
-            revenueEl.textContent = `฿${revenueValue}`;
+            const revenueValue = typeof report.revenue === 'number' ? report.revenue.toFixed(2) : (report.revenue ?? 0);
+            revenueEl.textContent = `฿${Number(revenueValue).toLocaleString()}`;
         }
 
-        // Fetch order statistics
-        try {
-            const orderStatsResp = await fetch('/api/managers/order-stats');
-            if (orderStatsResp.ok) {
-                const orderStats = await orderStatsResp.json();
+        // Fetch order statistics (counts by status)
+            try {
+                const orderStatsResp = await fetchWithTimeout('/api/managers/order-stats', {}, 8000);
+                if (orderStatsResp.ok) {
+                    const orderStats = await parseJsonSafe(orderStatsResp);
+                console.log('order stats:', orderStats);
                 const pendingEl = document.getElementById('pendingOrders');
                 const completedEl = document.getElementById('completedOrders');
-                
+
                 if (pendingEl) {
                     pendingEl.textContent = orderStats.pendingOrders ?? 0;
                 }
                 if (completedEl) {
                     completedEl.textContent = orderStats.completedOrders ?? 0;
                 }
+            } else {
+                console.warn('order-stats responded with', orderStatsResp.status);
             }
         } catch (orderErr) {
             console.error('Failed to load order statistics:', orderErr);
-            // Don't throw, just log the error
         }
     } catch (err) {
-        console.error(err);
+        console.error('updateManagerStats error:', err);
     }
 }
-*/
 
 // Function to load menu items and apply filter
 async function loadMenuItems() {
@@ -263,7 +309,7 @@ async function loadMenuItems() {
     try {
         const resp = await fetch('/api/manager/menu-items');
         if (resp.ok) {
-            menuItems = await resp.json();
+            menuItems = await parseJsonSafe(resp);
         }
     } catch (e) {
         alert('โหลดเมนูไม่สำเร็จ');
@@ -361,17 +407,17 @@ async function showEditMenuModal(menuItemId) {
     try {
         // Fetch menu item data
         const resp = await fetchWithTimeout(`/api/manager/menu-items/${menuItemId}`);
-        
+
         if (resp.status === 404) {
-            alert('ไม่พบเมนูที่ต้องการแก้ไข');
+            showErrorModal('ไม่พบเมนูที่ต้องการแก้ไข');
             return;
         }
-        
+
         if (!resp.ok) {
-            throw new Error('Failed to fetch menu item');
+            throw new Error('Failed to fetch menu item: ' + resp.status + ' ' + resp.statusText);
         }
-        
-        const menuItem = await resp.json();
+
+        const menuItem = await parseJsonSafe(resp);
         
         // Get form and modal elements
         const form = document.getElementById('addMenuForm');
@@ -511,12 +557,19 @@ async function handleAddMenu(event) {
             showErrorModal('ไม่พบเมนูที่ต้องการแก้ไข');
         } else if (resp.status === 400) {
             // Validation error from backend
-            const errorData = await resp.json();
+            let errorData = null;
+            try {
+                errorData = await parseJsonSafe(resp);
+            } catch (parseErr) {
+                console.warn('Failed to parse validation error JSON:', parseErr);
+            }
             let errorMessage = 'ข้อมูลไม่ถูกต้อง:\n';
-            if (errorData.message) {
+            if (errorData && errorData.message) {
                 errorMessage += errorData.message;
-            } else if (errorData.errors) {
+            } else if (errorData && errorData.errors) {
                 errorMessage += Object.values(errorData.errors).join('\n');
+            } else {
+                errorMessage += 'Server returned validation error.';
             }
             showErrorModal(errorMessage);
         } else if (resp.status === 403) {
@@ -570,7 +623,7 @@ async function loadEmployeeManagement() {
     try {
         const resp = await fetch('/api/employees');
         if (resp.ok) {
-            employees = await resp.json();
+                employees = await parseJsonSafe(resp);
         }
     } catch (err) {
         console.error('โหลดข้อมูลพนักงานไม่สำเร็จ', err);
@@ -744,20 +797,30 @@ async function handleEmployeeSubmit(event) {
         }
 
         if (!resp.ok) {
-            const errorData = await resp.json().catch(() => null);
+            let errorData = null;
+            try {
+                errorData = await parseJsonSafe(resp);
+            } catch (parseErr) {
+                // ignore parse error, we'll show a generic message
+            }
             let errorMessage = 'บันทึกข้อมูลพนักงานไม่สำเร็จ';
-            
+
             if (resp.status === 409 || (errorData && errorData.message && errorData.message.includes('duplicate'))) {
                 errorMessage = 'ชื่อผู้ใช้นี้มีอยู่ในระบบแล้ว กรุณาเลือกชื่อผู้ใช้อื่น';
             } else if (errorData && errorData.message) {
                 errorMessage = errorData.message;
             }
-            
+
             showErrorModal(errorMessage);
             return;
         }
 
-        const result = await resp.json();
+        let result = null;
+        try {
+            result = await parseJsonSafe(resp);
+        } catch (parseErr) {
+            result = null;
+        }
         await loadEmployeeManagement();
         hideEmployeeModal();
         showSuccessModal('เพิ่มพนักงานสำเร็จ!\n\nชื่อผู้ใช้: ' + username + '\nรหัสผ่าน: ' + password + '\n\nกรุณาบันทึกข้อมูลนี้');
@@ -780,7 +843,6 @@ function showSuccessModal(message) {
 function hideSuccessModal() {
     const modal = document.getElementById('successModal');
     if (modal) {
-        modal.classList.add('hidden');
     }
 }
 
@@ -805,7 +867,11 @@ export async function fetchCartForUser(userId) {
     if (!resp.ok) {
         throw new Error('ไม่พบตะกร้าของผู้ใช้');
     }
-    return resp.json();
+    try {
+        return await parseJsonSafe(resp);
+    } catch (err) {
+        throw new Error('ไม่สามารถอ่านข้อมูลตะกร้า: ' + (err.message || err));
+    }
 }
 
 // Expose fetchCartForUser globally for other scripts to use
