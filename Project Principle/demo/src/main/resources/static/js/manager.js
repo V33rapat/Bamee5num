@@ -843,6 +843,7 @@ function showSuccessModal(message) {
 function hideSuccessModal() {
     const modal = document.getElementById('successModal');
     if (modal) {
+        modal.classList.add('hidden');
     }
 }
 
