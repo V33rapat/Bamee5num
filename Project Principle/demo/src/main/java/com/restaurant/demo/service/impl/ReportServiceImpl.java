@@ -33,7 +33,8 @@ public class ReportServiceImpl implements ReportService {
         String totalRevenueSql = """
             SELECT COALESCE(SUM(o.total_amount), 0)
             FROM orders o
-            WHERE YEAR(o.created_at) = :year
+            WHERE o.status = 'FINISH'
+            AND YEAR(o.created_at) = :year
             """ + (isWholeYear ? "" : " AND MONTH(o.created_at) = :month");
 
         var totalRevenueQuery = entityManager.createNativeQuery(totalRevenueSql)
@@ -45,7 +46,8 @@ public class ReportServiceImpl implements ReportService {
         String totalOrdersSql = """
             SELECT COUNT(*)
             FROM orders o
-            WHERE YEAR(o.created_at) = :year
+            WHERE o.status = 'FINISH'
+            AND YEAR(o.created_at) = :year
             """ + (isWholeYear ? "" : " AND MONTH(o.created_at) = :month");
 
         var totalOrdersQuery = entityManager.createNativeQuery(totalOrdersSql)
@@ -58,7 +60,8 @@ public class ReportServiceImpl implements ReportService {
             SELECT oi.item_name, SUM(oi.quantity) AS total_sold
             FROM order_items oi
             JOIN orders o ON oi.order_id = o.id
-            WHERE YEAR(o.created_at) = :year
+            WHERE o.status = 'FINISH'
+            AND YEAR(o.created_at) = :year
             """ + (isWholeYear ? "" : " AND MONTH(o.created_at) = :month") + """
             GROUP BY oi.item_name
             ORDER BY total_sold DESC
@@ -82,7 +85,8 @@ public class ReportServiceImpl implements ReportService {
         String monthlySalesSql = """
             SELECT MONTH(o.created_at), COALESCE(SUM(o.total_amount), 0)
             FROM orders o
-            WHERE YEAR(o.created_at) = :year
+            WHERE o.status = 'FINISH'
+            AND YEAR(o.created_at) = :year
             GROUP BY MONTH(o.created_at)
             ORDER BY MONTH(o.created_at)
         """;

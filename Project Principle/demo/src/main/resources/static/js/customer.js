@@ -14,7 +14,6 @@ async function fetchMenuItems() {
         if (!response.ok) {
             throw new Error("ไม่สามารถโหลดเมนูอาหารจากเซิร์ฟเวอร์ได้");
         }
-
         return await response.json();
     } catch (error) {
         console.error("Error fetching menu items:", error);
@@ -58,6 +57,7 @@ export async function setupCustomerDashboard() {
     }
 
     menuItems.forEach(item => {
+        if (!item.active) return; // ข้ามรายการที่ไม่ active
         const div = document.createElement("div");
         div.className = "bg-white p-6 rounded-xl shadow-lg";
         div.innerHTML = `
